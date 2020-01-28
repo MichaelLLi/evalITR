@@ -1,18 +1,20 @@
-#' Estimation of the Population Average Prescription Difference in Completely Randomized Experiments
-#' 
+#' Estimation of the Population Average Prescription Difference in Randomized Experiments
+#'
 #' This function estimates the Population Average Prescription Difference with a budget
 #' constraint. The details of the methods for this design are given in Imai and Li (2019).
-#' 
-#' 
-#' 
+#'
+#'
+#'
 #' @param T The unit-level binary treatment receipt variable.
-#' @param Thatfp The unit-level binary treatment that would have been assigned by the 
+#' @param Thatfp The unit-level binary treatment that would have been assigned by the
 #' first individualized treatment rule.
-#' @param Thatgp The unit-level binary treatment that would have been assigned by the 
+#' @param Thatgp The unit-level binary treatment that would have been assigned by the
 #' second individualized treatment rule.
 #' @param Y The outcome variable of interest.
 #' @param plim The maximum percentage of population that can be treated under the
-#' budget constraint. Should be a decimal between 0 and 1. 
+#' budget constraint. Should be a decimal between 0 and 1.
+#' @param centered If \code{TRUE}, the outcome variables would be centered before processing. This minimizes
+#' the variance of the estimator. Default is \code{TRUE}.
 #' @return A list that contains the following items: \item{papd}{The estimated
 #' Population Average Prescription Difference} \item{sd}{The estimated standard deviation
 #' of PAPD.}
@@ -21,7 +23,7 @@
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
 #' @export PAPD
-PAPD <- function (T, Thatfp,Thatgp , Y, plim) {
+PAPD <- function (T, Thatfp,Thatgp , Y, plim, centered = TRUE) {
   if (!(identical(as.numeric(T),as.numeric(as.logical(T))))) {
     stop("T should be binary.")
   }
@@ -34,10 +36,25 @@ PAPD <- function (T, Thatfp,Thatgp , Y, plim) {
   if ((plim<0) | (plim>1)) {
     stop("Budget constraint should be between 0 and 1")
   }
+  if (length(T)!=length(Thatfp) | length(Thatfp)!=length(Thatgp) | length(Thatgp)!=length(Y)) {
+    stop("All the data should have the same length.")
+  }
+  if (length(T)==0) {
+    stop("The data should have positive length.")
+  }
+  if (sum(Thatfp)>=floor(length(T)*plim)+1 | sum(Thatgp)>=floor(length(T)*plim)+1) {
+    stop("The number of treated units in That does not match the budget constraint.")
+  }
+  if (!is.logical(centered)) {
+    stop("The centered parameter should be TRUE or FALSE.")
+  }
   T=as.numeric(T)
   Thatfp=as.numeric(Thatfp)
   Thatgp=as.numeric(Thatgp)
   Y=as.numeric(Y)
+  if (centered) {
+    Y = Y - mean(Y)
+  }
   n=length(Y)
   n1=sum(T)
   n0=n-n1

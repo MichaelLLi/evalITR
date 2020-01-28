@@ -1,9 +1,15 @@
 Package: evalITR
-Title: What the Package Does (one line, title case)
-Version: 0.0.0.9000
-Authors@R: person("First", "Last", email = "first.last@example.com", role = c("aut", "cre"))
-Description: What the package does (one paragraph).
+Version: 0.1.0
+Date: 2020-01-28
+Title: R Package for Evaluating Individualized Treatment Rules
+Authors@R: c(
+  person("Michael Lingzhi", "Li", , "mlli@mit.edu", c("aut", "cre")),
+  person("Kosuke", "Imai", , "imai@harvard.edu", c("aut"))
+  )
+Maintainer: Michael Lingzhi Li <mlli@mit.edu>
 Depends: R (>= 3.4.1)
-License: What license is it under?
-Encoding: UTF-8
-LazyData: true
+Description: 
+License: GPL (>=2)
+URL: https://github.com/MichaelLLi/evalITR
+BugReports: https://github.com/MichaelLLi/evalITR/issues
+RoxygenNote: 6.1.1
