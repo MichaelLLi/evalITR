@@ -7,15 +7,15 @@
 PAPD(T, Thatfp, Thatgp, Y, plim, centered = TRUE)
 }
 \arguments{
-\item{T}{The unit-level binary treatment receipt variable.}
+\item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
 
-\item{Thatfp}{The unit-level binary treatment that would have been assigned by the
-first individualized treatment rule.}
+\item{Thatfp}{A vector of the unit-level binary treatment that would have been assigned by the
+first individualized treatment rule. Please ensure that the percentage of treatment units of That is lower than the budget constraint.}
 
-\item{Thatgp}{The unit-level binary treatment that would have been assigned by the
-second individualized treatment rule.}
+\item{Thatgp}{A vector of the unit-level binary treatment that would have been assigned by the
+second individualized treatment rule. Please ensure that the percentage of treatment units of That is lower than the budget constraint.}
 
-\item{Y}{The outcome variable of interest.}
+\item{Y}{A vector of the outcome variable of interest for each sample.}
 
 \item{plim}{The maximum percentage of population that can be treated under the
 budget constraint. Should be a decimal between 0 and 1.}

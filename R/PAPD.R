@@ -5,12 +5,12 @@
 #'
 #'
 #'
-#' @param T The unit-level binary treatment receipt variable.
-#' @param Thatfp The unit-level binary treatment that would have been assigned by the
-#' first individualized treatment rule.
-#' @param Thatgp The unit-level binary treatment that would have been assigned by the
-#' second individualized treatment rule.
-#' @param Y The outcome variable of interest.
+#' @param T A vector of the unit-level binary treatment receipt variable for each sample.
+#' @param Thatfp A vector of the unit-level binary treatment that would have been assigned by the
+#' first individualized treatment rule. Please ensure that the percentage of treatment units of That is lower than the budget constraint.
+#' @param Thatgp A vector of the unit-level binary treatment that would have been assigned by the
+#' second individualized treatment rule. Please ensure that the percentage of treatment units of That is lower than the budget constraint.
+#' @param Y A vector of the outcome variable of interest for each sample.
 #' @param plim The maximum percentage of population that can be treated under the
 #' budget constraint. Should be a decimal between 0 and 1.
 #' @param centered If \code{TRUE}, the outcome variables would be centered before processing. This minimizes
@@ -36,14 +36,14 @@ PAPD <- function (T, Thatfp,Thatgp , Y, plim, centered = TRUE) {
   if ((plim<0) | (plim>1)) {
     stop("Budget constraint should be between 0 and 1")
   }
-  if (length(T)!=length(Thatfp) | length(Thatfp)!=length(Thatgp) | length(Thatgp)!=length(Y)) {
+  if ((length(T)!=length(Thatfp)) | (length(Thatfp)!=length(Thatgp)) | (length(Thatgp)!=length(Y))) {
     stop("All the data should have the same length.")
   }
   if (length(T)==0) {
     stop("The data should have positive length.")
   }
-  if (sum(Thatfp)>=floor(length(T)*plim)+1 | sum(Thatgp)>=floor(length(T)*plim)+1) {
-    stop("The number of treated units in That does not match the budget constraint.")
+  if ((sum(Thatfp)>=floor(length(T)*plim)+1) | (sum(Thatgp)>=floor(length(T)*plim)+1)) {
+    stop("The number of treated units in Thatfp or Thatgp does not match the budget constraint.")
   }
   if (!is.logical(centered)) {
     stop("The centered parameter should be TRUE or FALSE.")

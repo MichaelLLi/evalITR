@@ -4,10 +4,10 @@
 #'
 #'
 #'
-#' @param T The unit-level binary treatment receipt variable.
-#' @param tau The unit-level continuous score for treatment assignment. We assume those that have tau<0 should
+#' @param T A vector of the unit-level binary treatment receipt variable for each sample.
+#' @param tau A vector of the unit-level continuous score for treatment assignment. We assume those that have tau<0 should
 #' not have treatment. Conditional Average Treatment Effect is one possible measure.
-#' @param Y The outcome variable of interest.
+#' @param Y A vector of the outcome variable of interest for each sample.
 #' @param centered If \code{TRUE}, the outcome variables would be centered before processing. This minimizes
 #' the variance of the estimator. Default is \code{TRUE}.
 #' @return A list that contains the following items: \item{aupec}{The estimated
@@ -22,7 +22,7 @@ AUPEC <- function (T, tau, Y, centered = TRUE) {
   if (!(identical(as.numeric(T),as.numeric(as.logical(T))))) {
     stop("T should be binary.")
   }
-  if (length(T)!=length(tau) | length(tau)!=length(Y)) {
+  if ((length(T)!=length(tau)) | (length(tau)!=length(Y))) {
     stop("All the data should have the same length.")
   }
   if (length(T)==0) {

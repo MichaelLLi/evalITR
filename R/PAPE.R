@@ -5,11 +5,11 @@
 #'
 #'
 #'
-#' @param T The unit-level binary treatment receipt variable.
-#' @param That The unit-level binary treatment that would have been assigned by the
+#' @param T A vector of the unit-level binary treatment receipt variable for each sample.
+#' @param That A vector of the unit-level binary treatment that would have been assigned by the
 #' individualized treatment rule. If \code{plim} is specified, please ensure
 #' that the percentage of treatment units of That is lower than the budget constraint.
-#' @param Y The outcome variable of interest.
+#' @param Y A vector of the outcome variable of interest for each sample.
 #' @param plim The maximum percentage of population that can be treated under the
 #' budget constraint. Should be a decimal between 0 and 1. Default is NA which assumes
 #' no budget constraint.
@@ -30,7 +30,7 @@ PAPE <- function (T, That, Y, plim = NA, centered = TRUE) {
   if (!(identical(as.numeric(That),as.numeric(as.logical(That))))) {
     stop("That should be binary.")
   }
-  if (length(T)!=length(That) | length(That)!=length(Y)) {
+  if ((length(T)!=length(That)) | (length(That)!=length(Y))) {
     stop("All the data should have the same length.")
   }
   if (length(T)==0) {
@@ -64,7 +64,7 @@ PAPE <- function (T, That, Y, plim = NA, centered = TRUE) {
     SATE=1/n1*sum(T*Y)-1/n0*(sum((1-T)*Y))
     covarterm=1/n^2*(SAPE^2+2*(n-1)*SAPE*SATE*(2*probs-1)-(1-probs)*probs*n*SATE^2)
     varexp=(n/(n-1))^2*(Sf1/n1+Sf0/n0+covarterm)
-    return(list(pape=SAPE,sd=sqrt(varexp)))
+    return(list(pape=SAPE,sd=sqrt(max(varexp,0))))
   } else {
     n=length(Y)
     n1=sum(T)
@@ -77,6 +77,6 @@ PAPE <- function (T, That, Y, plim = NA, centered = TRUE) {
     kf1=mean(Y[T==1 & That==1])-mean(Y[T==0 & That==1])
     kf0=mean(Y[T==1 & That==0])-mean(Y[T==0 & That==0])
     varfp=Sfp1/n1+Sfp0/n0+floor(n*plim)*(n-floor(n*plim))/(n^2*(n-1))*((2*plim-1)*kf1^2-2*plim*kf1*kf0)
-    return(list(pape=SAPEfp,sd=sqrt(varfp)))
+    return(list(pape=SAPEfp,sd=sqrt(max(varfp,0))))
   }
 }
