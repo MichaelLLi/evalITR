@@ -63,7 +63,7 @@ PAPDcv <- function (T, Thatfp, Thatgp, Y, ind, plim, centered = TRUE) {
   n = length(Y)
   n1 = sum(T)
   n0 = n - n1
-  papepfold = c()
+  papdfold = c()
   Sfgp1 = 0
   Sfgp0 = 0
   kf1 = c()
@@ -78,10 +78,10 @@ PAPDcv <- function (T, Thatfp, Thatgp, Y, ind, plim, centered = TRUE) {
     probs=sum(That[ind==i,i])/m
     Sfgp1=Sfgp1 + var(((Thatfp[,i]-Thatgp[,i])*Y)[T==1 & ind==i])/(m1*nfolds)
     Sfgp0=Sfgp0 + var(((Thatfp[,i]-Thatgp[,i])*Y)[T==0 & ind==i])/(m0*nfolds)
-    tempf1 = mean(Y[T==1 & Thatfp[,i]==1 & ind ==i])-mean(Y[T==0 & Thatfp[,i]==1] & ind ==i)
-    tempf0 = mean(Y[T==1 & Thatfp[,i]==0 & ind ==i])-mean(Y[T==0 & Thatfp[,i]==0] & ind ==i)
-    tempg1 = mean(Y[T==1 & Thatgp[,i]==1 & ind ==i])-mean(Y[T==0 & Thatgp[,i]==1] & ind ==i)
-    tempg0 = mean(Y[T==1 & Thatgp[,i]==0 & ind ==i])-mean(Y[T==0 & Thatgp[,i]==0] & ind ==i)
+    tempf1 = mean(Y[T==1 & Thatfp[,i]==1 & ind ==i])-mean(Y[T==0 & Thatfp[,i]==1 & ind ==i])
+    tempf0 = mean(Y[T==1 & Thatfp[,i]==0 & ind ==i])-mean(Y[T==0 & Thatfp[,i]==0 & ind ==i])
+    tempg1 = mean(Y[T==1 & Thatgp[,i]==1 & ind ==i])-mean(Y[T==0 & Thatgp[,i]==1 & ind ==i])
+    tempg0 = mean(Y[T==1 & Thatgp[,i]==0 & ind ==i])-mean(Y[T==0 & Thatgp[,i]==0 & ind ==i])
     if (!is.nan(tempf1)) {
       kf1 = c(kf1, tempf1)
     }
