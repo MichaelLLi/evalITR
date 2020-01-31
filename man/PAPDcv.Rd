@@ -29,11 +29,21 @@ the variance of the estimator. Default is \code{TRUE}.}
 }
 \value{
 A list that contains the following items: \item{papd}{The estimated
-Population Average Prescription Effect.} \item{sd}{The estimated standard deviation
-of PAPE.}
+Population Average Prescription Difference.} \item{sd}{The estimated standard deviation
+of PAPD.}
 }
 \description{
 This function estimates the Population Average Prescription Difference The details of the methods for this design are given in Imai and Li (2019).
+}
+\examples{
+T = c(1,0,1,0,1,0,1,0)
+That = matrix(c(0,1,1,0,0,1,1,0,1,0,0,1,1,0,0,1), nrow = 8, ncol = 2)
+That2 = matrix(c(0,0,1,1,0,0,1,1,1,1,0,0,1,1,0,0), nrow = 8, ncol = 2)
+Y = c(4,5,0,2,4,1,-4,3)
+ind = c(rep(1,4),rep(2,4))
+papdlist <- PAPDcv(T, That, That2, Y, ind, plim = 0.5)
+papdlist$papd
+papdlist$sd
 }
 \references{
 Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},

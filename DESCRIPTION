@@ -13,3 +13,5 @@ License: GPL (>=2)
 URL: https://github.com/MichaelLLi/evalITR
 BugReports: https://github.com/MichaelLLi/evalITR/issues
 RoxygenNote: 7.0.2
+Suggests: 
+    testthat

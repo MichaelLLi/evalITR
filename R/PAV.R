@@ -13,7 +13,14 @@
 #' the variance of the estimator. Default is \code{TRUE}.
 #' @return A list that contains the following items: \item{pav}{The estimated
 #' Population Average Value.} \item{sd}{The estimated standard deviation
-#' of PAPE.}
+#' of PAV.}
+#' @examples
+#' T = c(1,0,1,0,1,0,1,0)
+#' That = c(0,1,1,0,0,1,1,0)
+#' Y = c(4,5,0,2,4,1,-4,3)
+#' pavlist <- PAV(T,That,Y)
+#' pavlist$pav
+#' pavlist$sd
 #' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
 #' \email{mlli@mit.edu}, \url{http://mlli.mit.edu};
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},

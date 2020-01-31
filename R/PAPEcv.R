@@ -19,6 +19,14 @@
 #' @return A list that contains the following items: \item{pape}{The estimated
 #' Population Average Prescription Effect.} \item{sd}{The estimated standard deviation
 #' of PAPE.}
+#' @examples
+#' T = c(1,0,1,0,1,0,1,0)
+#' That = matrix(c(0,1,1,0,0,1,1,0,1,0,0,1,1,0,0,1), nrow = 8, ncol = 2)
+#' Y = c(4,5,0,2,4,1,-4,3)
+#' ind = c(rep(1,4),rep(2,4))
+#' papelist <- PAPEcv(T, That, Y, ind)
+#' papelist$pape
+#' papelist$sd
 #' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
 #' \email{mlli@mit.edu}, \url{http://mlli.mit.edu};
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},

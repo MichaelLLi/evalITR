@@ -18,8 +18,17 @@
 #' @param centered If \code{TRUE}, the outcome variables would be centered before processing. This minimizes
 #' the variance of the estimator. Default is \code{TRUE}.
 #' @return A list that contains the following items: \item{papd}{The estimated
-#' Population Average Prescription Effect.} \item{sd}{The estimated standard deviation
-#' of PAPE.}
+#' Population Average Prescription Difference.} \item{sd}{The estimated standard deviation
+#' of PAPD.}
+#' @examples
+#' T = c(1,0,1,0,1,0,1,0)
+#' That = matrix(c(0,1,1,0,0,1,1,0,1,0,0,1,1,0,0,1), nrow = 8, ncol = 2)
+#' That2 = matrix(c(0,0,1,1,0,0,1,1,1,1,0,0,1,1,0,0), nrow = 8, ncol = 2)
+#' Y = c(4,5,0,2,4,1,-4,3)
+#' ind = c(rep(1,4),rep(2,4))
+#' papdlist <- PAPDcv(T, That, That2, Y, ind, plim = 0.5)
+#' papdlist$papd
+#' papdlist$sd
 #' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
 #' \email{mlli@mit.edu}, \url{http://mlli.mit.edu};
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
@@ -54,7 +63,8 @@ PAPDcv <- function (T, Thatfp, Thatgp, Y, ind, plim, centered = TRUE) {
     stop("The data should have positive length.")
   }
   T=as.numeric(T)
-  That=as.matrix(That)
+  Thatfp=as.matrix(Thatfp)
+  Thatgp=as.matrix(Thatgp)
   Y=as.numeric(Y)
   if (centered) {
     Y = Y - mean(Y)
@@ -75,7 +85,6 @@ PAPDcv <- function (T, Thatfp, Thatgp, Y, ind, plim, centered = TRUE) {
     m = length(T[ind==i])
     m1 = sum(T[ind==i])
     m0 = m - m1
-    probs=sum(That[ind==i,i])/m
     Sfgp1=Sfgp1 + var(((Thatfp[,i]-Thatgp[,i])*Y)[T==1 & ind==i])/(m1*nfolds)
     Sfgp0=Sfgp0 + var(((Thatfp[,i]-Thatgp[,i])*Y)[T==0 & ind==i])/(m0*nfolds)
     tempf1 = mean(Y[T==1 & Thatfp[,i]==1 & ind ==i])-mean(Y[T==0 & Thatfp[,i]==1 & ind ==i])

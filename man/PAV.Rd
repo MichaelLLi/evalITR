@@ -21,10 +21,18 @@ the variance of the estimator. Default is \code{TRUE}.}
 \value{
 A list that contains the following items: \item{pav}{The estimated
 Population Average Value.} \item{sd}{The estimated standard deviation
-of PAPE.}
+of PAV.}
 }
 \description{
 This function estimates the Population Average Value. The details of the methods for this design are given in Imai and Li (2019).
+}
+\examples{
+T = c(1,0,1,0,1,0,1,0)
+That = c(0,1,1,0,0,1,1,0)
+Y = c(4,5,0,2,4,1,-4,3)
+pavlist <- PAV(T,That,Y)
+pavlist$pav
+pavlist$sd
 }
 \references{
 Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},

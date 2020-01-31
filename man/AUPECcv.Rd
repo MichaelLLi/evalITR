@@ -20,11 +20,20 @@ the variance of the estimator. Default is \code{TRUE}.}
 }
 \value{
 A list that contains the following items: \item{aupec}{The estimated
-Population Average Prescription Effect.} \item{sd}{The estimated standard deviation
-of PAPE.}
+AUPEC.} \item{sd}{The estimated standard deviation
+of AUPEC.}
 }
 \description{
 This function estimates AUPEC. The details of the methods for this design are given in Imai and Li (2019).
+}
+\examples{
+T = c(1,0,1,0,1,0,1,0)
+tau = matrix(c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,-0.5,-0.3,-0.1,0.1,0.3,0.5,0.7,0.9),nrow = 8, ncol = 2)
+Y = c(4,5,0,2,4,1,-4,3)
+ind = c(rep(1,4),rep(2,4))
+aupeclist <- AUPECcv(T, tau, Y, ind)
+aupeclist$aupec
+aupeclist$sd
 }
 \references{
 Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},

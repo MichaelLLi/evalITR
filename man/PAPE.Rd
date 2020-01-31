@@ -31,6 +31,14 @@ of PAPE.}
 This function estimates the Population Average Prescription Effect with and without a budget
 constraint. The details of the methods for this design are given in Imai and Li (2019).
 }
+\examples{
+T = c(1,0,1,0,1,0,1,0)
+That = c(0,1,1,0,0,1,1,0)
+Y = c(4,5,0,2,4,1,-4,3)
+papelist <- PAPE(T,That,Y)
+papelist$pape
+papelist$sd
+}
 \references{
 Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 }

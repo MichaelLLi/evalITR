@@ -25,6 +25,14 @@ of AUPEC.}
 \description{
 This function estimates AUPEC. The details of the methods for this design are given in Imai and Li (2019).
 }
+\examples{
+T = c(1,0,1,0,1,0,1,0)
+tau = c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7)
+Y = c(4,5,0,2,4,1,-4,3)
+aupeclist <- AUPEC(T,tau,Y)
+aupeclist$aupec
+aupeclist$sd
+}
 \references{
 Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 }

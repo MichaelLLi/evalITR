@@ -18,6 +18,14 @@
 #' @return A list that contains the following items: \item{papd}{The estimated
 #' Population Average Prescription Difference} \item{sd}{The estimated standard deviation
 #' of PAPD.}
+#' @examples
+#' T = c(1,0,1,0,1,0,1,0)
+#' That = c(0,1,1,0,0,1,1,0)
+#' That2 = c(1,0,0,1,1,0,0,1)
+#' Y = c(4,5,0,2,4,1,-4,3)
+#' papdlist <- PAPD(T,That,That2,Y,plim = 0.5)
+#' papdlist$papd
+#' papdlist$sd
 #' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
 #' \email{mlli@mit.edu}, \url{http://mlli.mit.edu};
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
