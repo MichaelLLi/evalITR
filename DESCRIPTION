@@ -7,9 +7,9 @@ Authors@R: c(
   person("Kosuke", "Imai", , "imai@harvard.edu", c("aut"))
   )
 Maintainer: Michael Lingzhi Li <mlli@mit.edu>
-Depends: stats, R (>= 3.4.1)
+Depends: stats, R (>= 3.5.0)
 Description: R package evalITR provides various statistical methods for evaluating Individualized Treatment Rules under randomized data. The provided metrics include Population Average Value (PAV), Population Average Prescription Effect (PAPE), Area Under Prescription Effect Curve (AUPEC). It also provides the tools to analyze Individualized Treatment Rules under budget constraints.
 License: GPL (>=2)
 URL: https://github.com/MichaelLLi/evalITR
 BugReports: https://github.com/MichaelLLi/evalITR/issues
-RoxygenNote: 6.1.1
+RoxygenNote: 7.0.2
