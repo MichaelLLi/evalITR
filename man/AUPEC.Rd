@@ -20,7 +20,8 @@ the variance of the estimator. Default is \code{TRUE}.}
 \value{
 A list that contains the following items: \item{aupec}{The estimated
 Area Under Prescription Evaluation Curve} \item{sd}{The estimated standard deviation
-of AUPEC.}
+of AUPEC.}\item{vec}{A vector of points outlining the AUPEC curve across each possible budget point for the dataset.
+Each step increases the budget by 1/n where n is the number of data points. }
 }
 \description{
 This function estimates AUPEC. The details of the methods for this design are given in Imai and Li (2019).
@@ -32,6 +33,7 @@ Y = c(4,5,0,2,4,1,-4,3)
 aupeclist <- AUPEC(T,tau,Y)
 aupeclist$aupec
 aupeclist$sd
+aupeclist$vec
 }
 \references{
 Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},

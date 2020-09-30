@@ -12,7 +12,8 @@
 #' the variance of the estimator. Default is \code{TRUE}.
 #' @return A list that contains the following items: \item{aupec}{The estimated
 #' Area Under Prescription Evaluation Curve} \item{sd}{The estimated standard deviation
-#' of AUPEC.}
+#' of AUPEC.}\item{vec}{A vector of points outlining the AUPEC curve across each possible budget point for the dataset.
+#' Each step increases the budget by 1/n where n is the number of data points. }
 #' @examples
 #' T = c(1,0,1,0,1,0,1,0)
 #' tau = c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7)
@@ -20,6 +21,7 @@
 #' aupeclist <- AUPEC(T,tau,Y)
 #' aupeclist$aupec
 #' aupeclist$sd
+#' aupeclist$vec
 #' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
 #' \email{mlli@mit.edu}, \url{http://mlli.mit.edu};
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
@@ -58,11 +60,13 @@ AUPEC <- function (T, tau, Y, centered = TRUE) {
     kAf1B=numeric(n)
     kAf0A=numeric(n)
     kAf0B=numeric(n)
+    AUPECvec=numeric(n)
     covarsum=0
     for (i in 1:n) {
       cutofftemp=quantile(tau,1-i/n)
       Thatftemp=as.numeric(tau>cutofftemp)
       ThatftempA=as.numeric(tau>max(cutofftemp,0))
+      AUPECvec[i]=1/n1*sum(T*ThatftempA*Y)+1/n0*sum(Y*(1-T)*(1-ThatftempA))
       ThatfA=ThatfA+1/n*ThatftempA
       cutofftemp2=quantile(tau,(i-1)/n)
       Thatftemp2=as.numeric(tau>cutofftemp2)
@@ -97,10 +101,12 @@ AUPEC <- function (T, tau, Y, centered = TRUE) {
     SfA0=var((ThatfA2*Y)[T==0])
     varfA=SfA1/n1+SfA0/n0+covarsum1+covarsum2
     AUPEC=1/n1*sum(T*ThatfA*Y)+1/n0*sum(Y*(1-T)*(1-ThatfA))-0.5/n1*sum(T*Y)-0.5/n0*sum((1-T)*Y)
-    return(list(aupec=AUPEC,sd=sqrt(max(varfA,0))))
+    return(list(aupec=AUPEC,sd=sqrt(max(varfA,0)),vec=AUPECvec))
   } else {
     AUPEC=1/n0*sum(Y*(1-T))-0.5/n1*sum(T*Y)-0.5/n0*sum((1-T)*Y)
-    return(list(aupec=AUPEC,sd=0))
+    AUPECvec=numeric(n)
+    AUPECvec[]=1/n0*sum(Y*(1-T))
+    return(list(aupec=AUPEC,sd=0,vec=AUPECvec))
   }
 }
 

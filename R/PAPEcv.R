@@ -46,7 +46,7 @@ PAPEcv <- function (T, That, Y, ind, plim = NA, centered = TRUE) {
   if ((length(T)!=dim(That)[1]) | (dim(That)[1]!=length(Y))) {
     stop("All the data should have the same length.")
   }
-  if (!is.na(plim) & (max(apply(That,2,sum))>=floor(length(T)*plim)+1)) {
+  if (!is.na(plim) & (max(apply(That,2,sum))>floor(length(T)*plim)+1)) {
     stop("The number of treated units in That does not match the budget constraint.")
   }
   if (!is.na(plim) & ((plim<0) | (plim>1))) {

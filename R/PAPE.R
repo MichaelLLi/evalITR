@@ -43,7 +43,7 @@ PAPE <- function (T, That, Y, plim = NA, centered = TRUE) {
   if (length(T)==0) {
     stop("The data should have positive length.")
   }
-  if (!is.na(plim) & (sum(That)>=floor(length(T)*plim)+1)) {
+  if (!is.na(plim) & (sum(That)>floor(length(T)*plim)+1)) {
     stop("The number of treated units in That does not match the budget constraint.")
   }
   if (!is.logical(centered)) {

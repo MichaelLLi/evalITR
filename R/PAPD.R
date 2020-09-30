@@ -50,7 +50,7 @@ PAPD <- function (T, Thatfp,Thatgp , Y, plim, centered = TRUE) {
   if (length(T)==0) {
     stop("The data should have positive length.")
   }
-  if ((sum(Thatfp)>=floor(length(T)*plim)+1) | (sum(Thatgp)>=floor(length(T)*plim)+1)) {
+  if ((sum(Thatfp)>floor(length(T)*plim)+1) | (sum(Thatgp)>floor(length(T)*plim)+1)) {
     stop("The number of treated units in Thatfp or Thatgp does not match the budget constraint.")
   }
   if (!is.logical(centered)) {
@@ -79,5 +79,5 @@ PAPD <- function (T, Thatfp,Thatgp , Y, plim, centered = TRUE) {
   kg0=mean(Y[T==1 & Thatgp==0])-mean(Y[T==0 & Thatgp==0])
   varfgp=Sfgp1/n1+Sfgp0/n0-floor(n*plim)*(n-floor(n*plim))/(n^2*(n-1))*(kf1^2+kg1^2)+
     2*floor(n*plim)*max(floor(n*plim),n-floor(n*plim))/(n^2*(n-1))*abs(kf1*kg1)
-  return(list(papd=PAPD,sd=max(sqrt(varfgp),0)))
+  return(list(papd=PAPD,sd=sqrt(max(varfgp,0))))
 }

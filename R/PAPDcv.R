@@ -50,10 +50,10 @@ PAPDcv <- function (T, Thatfp, Thatgp, Y, ind, plim, centered = TRUE) {
   if ((length(T)!=dim(Thatfp)[1]) | (dim(Thatfp)[1]!=dim(Thatgp)[1]) | (dim(Thatgp)[1]!=length(Y))) {
     stop("All the data should have the same length.")
   }
-  if ((max(apply(Thatfp,2,sum))>=floor(length(T)*plim)+1)) {
+  if ((max(apply(Thatfp,2,sum))>floor(length(T)*plim)+1)) {
     stop("The number of treated units in Thatfp does not match the budget constraint.")
   }
-  if ((max(apply(Thatgp,2,sum))>=floor(length(T)*plim)+1)) {
+  if ((max(apply(Thatgp,2,sum))>floor(length(T)*plim)+1)) {
     stop("The number of treated units in Thatgp does not match the budget constraint.")
   }
   if (((plim<0) | (plim>1))) {

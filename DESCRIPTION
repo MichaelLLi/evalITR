@@ -1,6 +1,6 @@
 Package: evalITR
-Version: 0.1.0
-Date: 2020-01-28
+Version: 0.2.0
+Date: 2020-09-30
 Title: R Package for Evaluating Individualized Treatment Rules
 Authors@R: c(
   person("Michael Lingzhi", "Li", , "mlli@mit.edu", c("aut", "cre")),
@@ -12,6 +12,6 @@ Description: R package evalITR provides various statistical methods for evaluati
 License: GPL (>=2)
 URL: https://github.com/MichaelLLi/evalITR
 BugReports: https://github.com/MichaelLLi/evalITR/issues
-RoxygenNote: 7.0.2
+RoxygenNote: 7.1.1
 Suggests: 
     testthat
