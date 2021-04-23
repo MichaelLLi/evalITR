@@ -51,7 +51,7 @@ PAPD <- function (T, Thatfp,Thatgp , Y, plim, centered = TRUE) {
     stop("The data should have positive length.")
   }
   if ((sum(Thatfp)>floor(length(T)*plim)+1) | (sum(Thatgp)>floor(length(T)*plim)+1)) {
-    stop("The number of treated units in Thatfp or Thatgp does not match the budget constraint.")
+    stop("The proportion of treated units in Thatfp or Thatgp should be below or equal to plim.")
   }
   if (!is.logical(centered)) {
     stop("The centered parameter should be TRUE or FALSE.")

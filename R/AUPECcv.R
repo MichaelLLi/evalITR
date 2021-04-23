@@ -45,7 +45,6 @@ AUPECcv <- function (T, tau, Y, ind, centered = TRUE) {
   if (centered) {
     Y = Y - mean(Y)
   }
-
   nfolds = max(ind)
   aupecfold = c()
   SfA1 = 0
@@ -70,11 +69,14 @@ AUPECcv <- function (T, tau, Y, ind, centered = TRUE) {
       kAf1B=numeric(n)
       kAf0A=numeric(n)
       kAf0B=numeric(n)
+      AUPECvec=numeric(n)
+
       covarsum=0
       for (i in 1:n) {
         cutofftemp=quantile(tauind,1-i/n)
         Thatftemp=as.numeric(tauind>cutofftemp)
         ThatftempA=as.numeric(tauind>max(cutofftemp,0))
+        AUPECvec[i]=1/n1*sum(Tind*ThatftempA*Yind)+1/n0*sum(Yind*(1-Tind)*(1-ThatftempA))
         ThatfA=ThatfA+1/n*ThatftempA
         cutofftemp2=quantile(tauind,(i-1)/n)
         Thatftemp2=as.numeric(tauind>cutofftemp2)
@@ -103,13 +105,16 @@ AUPECcv <- function (T, tau, Y, ind, centered = TRUE) {
       tempMsum=cumsum(colSums(tempM))
       covarsum1 = covarsum1 + mean(-1/(n^3*(n-1))*sumtemp1[Z]-Z*(n-Z)^2/(n^3*(n-1))*kAf1[Z]*kAf0[Z]-2/(n^4*(n-1))*tempMsum[Z]-Z^2*(n-Z)^2/(n^4*(n-1))*kAf1[Z]^2
                                    -2*(n-Z)^2/(n^4*(n-1))*kAf1[Z]*sumtemp2[Z]+1/n^4*sumtemp3[Z]) / nfolds
-      covarsum2 = c(covarsum2, 1/n*(sumtemp2[Z[1]]/n+(n-Z[1])*Z[1]/n*kAf1[Z[1]]))
+      covarsum2 = c(covarsum2, 1/n*(sumtemp2[Z]/n+(n-Z)*Z/n*kAf1[Z]))
       ThatfA2=ThatfA-1/2
       SfA1=SfA1 + var((ThatfA2*Yind)[Tind==1]) / (n1 * nfolds)
       SfA0=SfA0 + var((ThatfA2*Yind)[Tind==0]) / (n0 * nfolds)
       aupecfold = c(aupecfold, 1/n1*sum(Tind*ThatfA*Yind)+1/n0*sum(Yind*(1-Tind)*(1-ThatfA))-0.5/n1*sum(Tind*Yind)-0.5/n0*sum((1-Tind)*Yind))
     } else {
       aupecfold = c(aupecfold, 1/n0*sum(Yind*(1-Tind))-0.5/n1*sum(Tind*Yind)-0.5/n0*sum((1-Tind)*Yind))
+      AUPECvec=numeric(n)
+      AUPECvec[]=1/n0*sum(Yind*(1-Tind))
+
     }
   }
   SF2 = var(aupecfold)
@@ -117,3 +122,4 @@ AUPECcv <- function (T, tau, Y, ind, centered = TRUE) {
   vartotal = varexp - (nfolds - 1) / nfolds * min(varexp, SF2)
   return(list(aupec=mean(aupecfold),sd=sqrt(max(vartotal,0))))
 }
+

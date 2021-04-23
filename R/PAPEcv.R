@@ -46,8 +46,8 @@ PAPEcv <- function (T, That, Y, ind, plim = NA, centered = TRUE) {
   if ((length(T)!=dim(That)[1]) | (dim(That)[1]!=length(Y))) {
     stop("All the data should have the same length.")
   }
-  if (!is.na(plim) & (max(apply(That,2,sum))>floor(length(T)*plim)+1)) {
-    stop("The number of treated units in That does not match the budget constraint.")
+  if (!is.na(plim) & (max(sapply(1:max(ind),function(i) sum(That[ind==i, i])))>floor(length(T)*plim)+1)) {
+    stop("The number of treated units in That should be below or equal to plim.")
   }
   if (!is.na(plim) & ((plim<0) | (plim>1))) {
     stop("Budget constraint should be between 0 and 1")
@@ -112,11 +112,11 @@ PAPEcv <- function (T, That, Y, ind, plim = NA, centered = TRUE) {
     n = length(Y)
     n1 = sum(T)
     n0 = n - n1
-    papepfold = c()
+    papepfold = numeric(nfolds)
     Sfp1 = 0
     Sfp0 = 0
-    kf1 = c()
-    kf0 = c()
+    kf1 = numeric(nfolds)
+    kf0 = numeric(nfolds)
     for (i in 1:nfolds) {
       output = PAPE(T[ind==i],That[ind==i,i],Y[ind==i],plim)
       m = length(T[ind==i])
@@ -128,12 +128,12 @@ PAPEcv <- function (T, That, Y, ind, plim = NA, centered = TRUE) {
       temp1 = mean(Y[T==1 & That[,i]==1 & ind==i])-mean(Y[T==0 & That[,i]==1 & ind==i])
       temp0 = mean(Y[T==1 & That[,i]==0 & ind==i])-mean(Y[T==0 & That[,i]==0 & ind==i])
       if (!is.nan(temp1)) {
-        kf1 = c(kf1, temp1)
+        kf1[i] = temp1
       }
       if (!is.nan(temp0)) {
-        kf0 = c(kf0, temp0)
+        kf0[i] =temp0
       }
-      papepfold = c(papepfold, output$papep)
+      papepfold[i] = output$pape
     }
     mF = n / nfolds
     SF2 = var(papepfold)
