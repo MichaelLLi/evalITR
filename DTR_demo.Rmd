@@ -1,0 +1,551 @@
+---
+title: "DTR demo"
+author: "Jiongyi Cao"
+date: "2/8/2021"
+output: html_document
+---
+
+```{r setup, include=FALSE}
+knitr::opts_chunk$set(echo = TRUE)
+```
+
+
+
+```{r}
+## simulate DTR from qlaci dat3
+library(qlaci)
+data(dat3)
+attach(dat3)
+## construct covariates used in the first-stage and the second-stage ##regression
+H10 <- cbind(1, O11);
+colnames(H10) <-c("int","O11");
+H11<- cbind(1,O11); #O11 is a candidate tailoring variable for stage 1 colnames(H11)<-c("A1","A1O11");
+Y1<- rep(0,200); # there is no Y1 in this simulated data
+H20<- cbind(1,O11,O21,O22);
+colnames(H20)<-c("int","O11","O21","O22");
+H21 <- cbind(1,O21); #O21 is a candidate tailoring variable for stage 2 colnames(H21)<-c("A2","A2O21");
+Y2 <- dat3$Y;
+S <- rep(1,200); # everyone is randomized at stage 2
+## Construct contrast matrices
+c1<-diag(4); #number of rows must be equal to the number of parameters
+##in the stage 1 model
+c2<-diag(6); #number of rows must be equal to the number of parameters
+##in the stage 2 model
+## Run qlaci function to get estimates and confidence intervals for ##the contrasts
+set.seed(300);
+result <-qlaci(H10, H11, A1, Y1, H20, H21, A2, Y2, S,c1=t(c1),c2=t(c2),nb=1000)
+result
+```
+
+```{r}
+D2 = sign(t(result$stg2coeff[5:6])%*% t(H21)) %>% as.vector()
+D2 <- ifelse(D2 < 0,0,1)
+D1 = sign(t(result$stg1coeff[3:4])%*% t(H11)) %>% as.vector()
+D1 <- ifelse(D1 < 0,0,1)
+D = cbind(D1,D2)
+A = cbind(A1 = ifelse(A1<0,0,1),A2 = ifelse(A2<0,0,1))
+head(cbind(A,D),10)
+```
+
+```{r}
+#input
+# A: matrix of actual treatment
+# D:  matrix of DTR
+# Y : vector of outcome
+
+# construct matrix     
+#for each Yi
+# [(1,1),(1,0),(0,1),(0,0)] @ Yi
+# trtMatrix <- function(A_i,D_i){
+#   t = length(A_i)
+#   M_i = c(1)
+#   for (i in 0:(t-1)){
+#     for(j in (2^i):(2^(i+1)-1)){
+#       M_i[2*j] = M_i[j]*A_i[i+1]*D_i[i+1]
+#       M_i[2*j+1] = M_i[j]*(1-A_i[i+1])*(1-D_i[i+1]) 
+#     }
+#   }
+#   return(M_i[2^t:(2^(t+1)-1)])
+# }
+# 
+# trtMatrix2 <- function(A_i){
+#   t = length(A_i)
+#   M_i = c(1)
+#   for (i in 0:(t-1)){
+#     for(j in (2^i):(2^(i+1)-1)){
+#       M_i[2*j] = M_i[j]*A_i[i+1]
+#       M_i[2*j+1] = M_i[j]*(1-A_i[i+1])
+#     }
+#   }
+#   ret
+
+
+
+```
+
+
+```{r}
+#contructing time variant trt matrix
+#input
+# A: matrix of actual treatment
+# D:  matrix of DTR
+# Y : vector of outcome
+trtMatrix <- function(A_i,D_i, s = NULL){
+  # s (stage) define when to start randomization -> when not to consider D
+  # eg: null -> A follow dtr all through; s = 1 follow random from start; s = 2 A follow dtr at 1st then random at second....
+  # s -> consistent with i (depth of the tree/time)
+  t = length(A_i)
+  if(is.null(s)) s = t + 1
+  M_i = c(1)
+  for (i in 0:(t-1)){
+    for(j in (2^i):(2^(i+1)-1)){
+      if(i < (s-1)){
+      M_i[2*j] = M_i[j]*A_i[i+1]*D_i[i+1]
+      M_i[2*j+1] = M_i[j]*(1-A_i[i+1])*(1-D_i[i+1])  
+      }
+      else{
+      M_i[2*j] = M_i[j]*A_i[i+1]
+      M_i[2*j+1] = M_i[j]*(1-A_i[i+1])
+      }
+    }
+  }
+  return(M_i[2^t:(2^(t+1)-1)])
+}
+#indicator of dtr/only D
+dtrMatrix <- function(D_i,s){
+  #s (stage), define returning stage of p_d
+  s = s
+  t = length(D_i)
+  M_i = c(1)
+   for (i in 0:(t-1)){
+    for(j in (2^i):(2^(i+1)-1)){
+      M_i[2*j] = M_i[j]*D_i[i+1]
+      M_i[2*j+1] = M_i[j]*(1-D_i[i+1])
+    }
+  }
+  return(M_i[(2^s):(2^(s+1)-1)])
+}
+
+```
+
+
+
+```{r}
+colSums(M) # no dtr for (1,0)/(1,1)
+```
+
+```{r}
+#smart randomized P
+p = as.data.frame(A) %>% group_by(A1,A2) %>%  summarise(n = n()) %>% as.data.frame %>% select(n)/nrow(dat3)
+p = p[4:1,]
+p
+```
+
+```{r}
+#weight for PAV
+W = t((1/p)%*% t(M))
+head(W,10)
+#PAV
+pav = sum(W*dat3$Y)/n
+```
+
+
+```{r}
+# dtr randomized p_d
+p_d = as.data.frame(D) %>% group_by(D1,D2)%>% summarise(n = n()) %>% as.data.frame() %>% select(n)/nrow(dat3)  
+p_d = p_d[4:1,]
+p_d
+#deal with NA
+p_d[is.na(p_d)]= 0
+p_d
+```
+
+
+```{r}
+# Matrix 
+M2 <- matrix(nrow = n,ncol = 2^t)
+for(i in 1:n) M2[i,] = trtMatrix(A[i,],D[i,],s=1)
+head(cbind(M2,A),10) # check if matrix indicates correctly
+```
+
+```{r}
+# Weight for random dtr
+W_d = t((p_d/p)%*% t(M2))
+# PAPE
+(sum(W*dat3$Y)-sum(W_d*dat3$Y))/(n-1)
+```
+
+
+## PAPE fixed DTR 
+```{r}
+PAPE_dtr <- function(A,D,y){
+t = ncol(A)
+n = nrow(A)
+
+# probability #not generic
+# p = as.data.frame(A) %>% group_by(V1,V2,V3) %>%  summarise(n = n()) %>% as.data.frame %>% select(n)/nrow(A)
+# p = p[(2^t):1,]
+# # dtr randomized p_d
+# p_d = as.data.frame(D_opt) %>% group_by(V1,V2,V3)%>% summarise(n = n()) %>% as.data.frame() %>% select(n)/nrow(D_opt)  
+# p_d = p_d[(2^t):1,]
+#deal with NA
+# p_d[is.na(p_d)]= 0
+  
+M = matrix(nrow = n,ncol = 2^t)
+M_A = matrix(nrow = n,ncol = 2^t)
+M_D <- matrix(nrow = n,ncol = 2^t)
+for(i in 1:n) {
+    M[i,] = trtMatrix(A[i,],D[i,]) #follow dtr
+    M_A[i,] = trtMatrix(A[i,],D[i,],s=1)#follow randomization
+    M_D[i,] = dtrMatrix(D[i,],s=t)#dtr metrix
+}
+p = colSums(M_A)/n #randomized prob p(A1A2A3）
+p_d = colSums(M_D)/n
+
+
+#covariance matrix 
+# trtmatrix(s=1) * dtrmatrix
+M_cov <- matrix(nrow =2^t, ncol = 2^t)
+for(i in 1:(2^t)){
+  for(j in 1:(2^t)){
+  M_cov[i,j] = sum((M_A[,i]*M_D[,j]-M_A[,i]*p_d[j])/p[i]*y)/(n-1) 
+  }
+}
+#SATE Y(a1a2a3...)
+sate = colSums(sweep(M_A, MARGIN=2,1/p, `*`) * y)/n
+#SAPE (covariance term) d(a1a2a3) - p_d)*y(a1a2a3)
+sape = diag(M_cov)
+
+# S_t var(sape)
+# t1 =  sweep(d,MARGIN=2,p_d, `-`)*dataframe$y
+# t2 = t1*m2
+# t_bar = colSums(t2)/colSums(m2)
+# apply(t2,2,function(x) mean(x[which(x!= 0)]))
+# colSums(sweep(t1,MARGIN=2,t_bar, `-`)^2*m2)/(colSums(m2)-1)
+# s_dtr = apply(t2,2,function(x) var(x[which(x!= 0)]))
+
+S_t = apply((M-sweep(M_A,MARGIN=2,p_d, `*`))*y,2,function(x) var(x[which(x!= 0)]))
+S_t = ifelse(is.na(S_t),0,S_t)
+
+cov1 <-c()
+for(i in 1:2^t){
+  cov1 <- c(cov1,(sape[i]^2+2*(n-1)*(2*p_d[i]-1)*sape[i]*sate[i]-n*p_d[i]*(1-p_d[i])*sate[i]^2)/n^2)
+}
+cov2 <- c()
+for(i in 1:(2^t-1)){
+  for(j in (i+1):(2^t)){
+cov2 <- c(cov2,(sape[i]*sape[j]+n*p_d[i]*p_d[j]*sate[i]*sate[j]+(n-1)*(p_d[i]*M_cov[i,j]*sate[j]+p_d[j]*M_cov[j,i]*sate[i]))/n^2)
+  }
+}
+cov = sum(cov1)+2*sum(cov2)
+varexp = (n/(n-1))^2*sum(S_t/(p*n)+cov)
+dtr_list <- list("sate" = sate, "sape" = sape, "pape" = sum(sape), "sd"=sqrt(max(varexp,0)))
+return(dtr_list)
+}
+
+
+
+```
+
+## Simulations (PAPE)
+```{r}
+#true pd/E[Y(a1,a2,a3)]
+library(cubature)
+s1 <- function(x) {1/(0.04*sqrt(2*pi))*exp(-((x-0.55)/0.04)^2/2)}
+pd1 = hcubature(s1,5/9,Inf)$integral #pd(a1 = 1)
+
+s2_1 <- function(x){
+  1/(2*pi*0.04^2)*exp(-1/2*((x[2]-(0.5+0.2*x[1]-0.07))/0.04)^2)*exp(-1/2*((x[1]-0.55)/0.04)^2)
+} #f(s2,s1|a1 = 1)
+pd1_1 = hcubature(s2_1,rep(5/9,2),rep(Inf,2),tol=1e-4)$integral/pd1  #p(d2=1|d1 =1) = p(s2>5/9|s1>5/9,A1=1)
+
+s2_0 <- function(x){
+  1/(2*pi*0.04^2)*exp(-1/2*((x[2]-(0.5+0.2*x[1]))/0.04)^2)*exp(-1/2*((x[1]-0.55)/0.04)^2)
+}#f(s2,s1|a1 = 0)
+pd1_0 = hcubature(s2_0,c(-Inf,5/9),c(5/9,Inf),tol=1e-4)$integral/(1-pd1) #pd(d2=1|d1 = 0) = p(s2>5/9|s1<5/9,A1=0)
+
+s3_1_1 <- function(x){
+  1/((sqrt(2*pi)*0.04)^3)*exp(-1/2*((x[3]-(0.5+0.2*x[2]-0.07))/0.04)^2)*exp(-1/2*((x[2]-(0.5+0.2*x[1]-0.07))/0.04)^2)*exp(-1/2*((x[1]-0.55)/0.04)^2)
+} # f(s1,s2,s3|a1a2= (1,1))
+pd1_1_1 = hcubature(s3_1_1,rep(5/9,3),rep(Inf,3),tol=1e-4)$integral #p(d3=(1,1,1))
+pd1_1_0 = hcubature(s3_1_1,c(5/9,5/9,-Inf),c(Inf,Inf,5/9),tol=1e-4)$integral #p(d3=(1,1,0))
+E1_1_1 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+02*x[2]-0.07)
+  u = c(1-(x[1]>5/9),1-(x[2]>5/9),1-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_1_1(x)
+} 
+y1_1_1 = hcubature(E1_1_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral#true Y(1,1,1)
+
+#d111 = hcubature(E1_1_1,rep(5/9,3),rep(Inf,3),tol=1e-4)$integral
+
+E1_1_0 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+02*x[2]-0.07)
+  u = c(1-(x[1]>5/9),1-(x[2]>5/9),-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_1_1(x)
+} 
+y1_1_0 = hcubature(E1_1_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(1,1,0)
+d110 = hcubature(E1_1_0,c(5/9,5/9,-Inf), c(Inf,Inf,5/9),tol=1e-4)$integral
+
+s3_1_0 <- function(x){
+  1/((sqrt(2*pi)*0.04)^3)*exp(-1/2*((x[3]-(0.5+0.2*x[2]))/0.04)^2)*exp(-1/2*((x[2]-(0.5+0.2*x[1]-0.07))/0.04)^2)*exp(-1/2*((x[1]-0.55)/0.04)^2)
+} # f(s1,s2,s3|a1a2= (1,0))
+pd1_0_1 = hcubature(s3_1_0,c(5/9,-Inf,5/9),c(Inf,5/9,Inf),tol=1e-4)$integral#p(d3=(1,0,1))
+pd1_0_0 = hcubature(s3_1_0,c(5/9,-Inf,-Inf),c(Inf,5/9,5/9),tol=1e-4)$integral#p(d3=(1,0,0))
+E1_0_1 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+02*x[2])
+  u = c(1-(x[1]>5/9),-(x[2]>5/9),1-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_1_0(x)
+} 
+y1_0_1 = hcubature(E1_0_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(1,0,1)
+E1_0_0 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+02*x[2])
+  u = c(1-(x[1]>5/9),-(x[2]>5/9),-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_1_0(x)
+} 
+y1_0_0 = hcubature(E1_0_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(1,0,0)
+
+
+s3_0_1 <- function(x){
+  1/((sqrt(2*pi)*0.04)^3)*exp(-1/2*((x[3]-(0.5+0.2*x[2]-0.07))/0.04)^2)*exp(-1/2*((x[2]-(0.5+0.2*x[1]))/0.04)^2)*exp(-1/2*((x[1]-0.55)/0.04)^2)
+} # f(s1,s2,s3|a1a2= (0,1))
+pd0_1_1 = hcubature(s3_0_1,c(-Inf,5/9,5/9),c(5/9,Inf,Inf),tol=1e-4)$integral#p(d3=(0,1,1))
+pd0_1_0 = hcubature(s3_0_1,c(-Inf,5/9,-Inf),c(5/9,Inf,5/9),tol=1e-4)$integral#p(d3=(0,1,0))
+E0_1_1 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1],0.5+02*x[2]-0.07)
+  u = c(-(x[1]>5/9),1-(x[2]>5/9),1-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_1(x)
+} 
+y0_1_1 = hcubature(E0_1_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(0,1,1)
+E0_1_0 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1],0.5+02*x[2]-0.07)
+  u = c(-(x[1]>5/9),1-(x[2]>5/9),-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_1(x)
+} 
+y0_1_0 = hcubature(E0_1_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(0,1,0)
+
+s3_0_0 <- function(x){
+  1/((sqrt(2*pi)*0.04)^3)*exp(-1/2*((x[3]-(0.5+0.2*x[2]))/0.04)^2)*exp(-1/2*((x[2]-(0.5+0.2*x[1]))/0.04)^2)*exp(-1/2*((x[1]-0.55)/0.04)^2)
+}
+pd0_0_1 = hcubature(s3_0_0,c(-Inf,-Inf,5/9),c(5/9,5/9,Inf),tol=1e-4)$integral #p(d3=(0,0,1))
+pd0_0_0 = hcubature(s3_0_0,c(-Inf,-Inf,-Inf),c(5/9,5/9,5/9),tol=1e-4)$integral #p(d3=(0,0,0))
+E0_0_1 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1],0.5+02*x[2])
+  u = c(-(x[1]>5/9),-(x[2]>5/9),1-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_1(x)
+} 
+y0_0_1 = hcubature(E0_0_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true E[Y(0,0,1)]
+E0_0_0 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1],0.5+02*x[2])
+  u = c(-(x[1]>5/9),-(x[2]>5/9),-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_1(x)
+} 
+y0_0_0 = hcubature(E0_0_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true E[Y(0,0,0)]
+
+#true PAPE
+pd_true = c(pd1_1_1,pd1_1_0,pd1_0_1,pd1_0_0,pd0_1_1,pd0_1_0,pd0_0_1,pd0_0_0)
+y_true = c(y1_1_1,y1_1_0,y1_0_1,y1_0_0,y0_1_1,y0_1_0,y0_0_1,y0_0_0)
+pape_true = 30 - sum(pd_true*y_true)
+```
+
+
+
+```{r}
+library(dplyr)
+gen_dt <- function(n,k){
+#set.seed(i)
+gen_A <- matrix(nrow = n,ncol= k)
+A <- t(sapply(1:n,function(x) gen_A[x,] = rbinom(k,1,0.5)))
+S <- matrix(nrow = n,ncol=k)
+S_opt <- matrix(nrow = n,ncol=k)
+D_opt <- matrix(nrow = n,ncol=k)
+for(i in 1:n){
+ for(j in 1:k){
+  if(j == 1){
+    S[i,j] = rnorm(1,0.55,0.04)
+    S_opt[i,j] = S[i,j]
+    D_opt[i,j] = if_else(S_opt[i,j] > 5/9,1,0)
+  } 
+  else {
+    mean_j = 0.5 + 0.2*S[i,j-1]-0.07*A[i,j-1]
+    mean_j_opt = 0.5 + 0.2*S_opt[i,j-1]-0.07*D_opt[i,j-1]
+    S[i,j] = rnorm(1,mean_j,0.04)
+    S_opt[i,j] = rnorm(1,mean_j_opt,0.04)
+    D_opt[i,j] = if_else(S_opt[i,j] > 5/9,1,0)
+    }
+ } 
+}
+D <- apply(S,2,function(x)if_else(x > 5/9,1,0)) %>% as.data.frame()
+
+Fi <- matrix(nrow = n,ncol=k) # k = 3
+for(i in 1:n){
+  for(j in 1:k){
+  if(j == 1) Fi[i,j] = -5*(S[i,j] - 0.55)  
+  else Fi[i,j] = -5*(S[i,j] - (0.5 + 0.2*S[i,j-1]-0.07*A[i,j-1]))  
+  }
+}
+sigma_y = 0.02 ## error term
+y <- 30 + rowSums(Fi) - rowSums(6*(A-D)^2) +  sigma_y*rnorm(n)  
+
+
+#dataframe = cbind.data.frame(A,D_opt,y)  
+dt_list <- list("A"=A,"D_opt"=D_opt,"y"=y)
+return(dt_list)  
+}
+```
+
+
+
+```{r}
+#if all follow optimal dtr
+S <- matrix(nrow = n,ncol=k)
+D_opt <- matrix(nrow = n,ncol=k)
+for(i in 1:n){
+ for(j in 1:k){
+  if(j == 1){
+    S[i,j] = rnorm(1,0.55,0.04)
+    D_opt[i,j] = if_else(S[i,j] > 5/9,1,0)
+  } 
+  else {
+    mean_j = 0.5 + 0.2*S[i,j-1]-0.07*D_opt[i,j-1]
+    S[i,j] = rnorm(1,mean_j,0.04)
+    D_opt[i,j] = if_else(S[i,j] > 5/9,1,0)
+    }
+ } 
+}
+D <- apply(S,2,function(x)if_else(x > 5/9,1,0)) %>% as.data.frame()
+
+Fi <- matrix(nrow = n,ncol=k) # k = 3
+for(i in 1:n){
+  for(j in 1:k){
+  if(j == 1) Fi[i,j] = -5*(S_opt[i,j] - 0.55)  
+  else Fi[i,j] = -5*(S[i,j] - (0.5 + 0.2*S[i,j-1]-0.07*D_opt[i,j-1]))  
+  }
+}
+sigma_y = 0.02 ## error term
+y <- 30 + rowSums(Fi) - rowSums(6*(D_opt-D)^2) +  sigma_y*rnorm(n)  
+mean(y)
+```
+
+
+
+
+```{r}
+n_round = 1000
+n = 5000
+k = 3
+pape_est = c()
+sd_est = c()
+coverage = c()
+for(i in 1:n_round){
+dt = gen_dt(n,k)
+est = PAPE_dtr(dt$A,dt$D_opt,dt$y)
+pape_est = c(pape_est,est$pape)
+sd_est = c(sd_est,est$sd)
+coverage = c(coverage,between(pape_true,est$pape-1.96*est$sd,pape+1.96*est$sd))
+}
+
+bias = sum(pape_est-pape_true)/n_round
+sd = sum(sd_est)/n_round
+coverage = sum(coverage)/n_round
+```
+
+
+
+
+```{r}
+n=5000
+k =3
+dt = gen_dt(n,k)
+m = matrix(nrow = nrow(dt$A),ncol = 2^ncol(dt$A))
+m2 =  matrix(nrow = nrow(dt$A),ncol = 2^ncol(dt$A))
+d = matrix(nrow = nrow(dt$A),ncol = 2^ncol(dt$A))
+for(i in 1:n) {
+    m[i,] = trtMatrix(dt$A[i,],dt$D_opt[i,]) #follow dtr
+    m2[i,] = trtMatrix(dt$A[i,],dt$D_opt[i,],s=1)#follow randomization
+    d[i,] = dtrMatrix(dt$D_opt[i,],s=3)# dtr metrix
+}
+# weight for PAV
+p = colSums(m2)/n #randomized prob p(A1A2A3）
+w = t((1/p)%*% t(m))
+# Weight for random dtr
+p_d = colSums(d)/n # dtr prob p(d1d2d3)
+w_d = t((p_d/p)%*% t(m2))
+#PAV
+pav = sum(w*dt$y)/n #estimation is off (small)
+#PAPE
+pape = (sum(w*dt$y)-sum(w_d*dt$y))/(n-1)
+
+dtr(dt$A,dt$D_opt,dt$y)
+# E[Y(a1,a2,a3)]
+y_true
+```
+
+
+```{r}
+
+```
+
+
+
+### local esitmator
+```{r}
+M_s = matrix(nrow = n,ncol = 2^t)
+for(i in 1:n) { M_s[i,] = trtMatrix(A[i,],D[i,],s=2)}
+head(cbind(M_s,A,D),10)
+```
+
+```{r}
+M_D1 <- matrix(nrow = n,ncol = 2^1) #p_d1 matrix for leave-one-out estimation
+M_D2 <- matrix(nrow = n,ncol = 2^2) #p_d2 matrix for leave-one-out estimation
+for(i in 1:n) {
+    M_D1[i,] = dtrMatrix(D[i,],s=1) 
+    M_D2[i,] = dtrMatrix(D[i,],s=2)
+}
+
+```
+
+```{r}
+# not genaric -> only for stage 2
+M_pd1 = t(apply(M_D1,1,function(x){
+  M <- c()
+  for(i in 1:length(x)){
+    M <- c(M,rep(x[i],2))
+  }
+  return(M)
+}))
+M_pd2 = M_D2
+```
+
+```{r}
+M_L = matrix(nrow = n,ncol = 2^2)
+for(i in 1:length(dat3$Y)){
+p_llo_1 <- ifelse(is.na(colSums(M_pd2[-i,])/colSums(M_pd1[-i,])),0,colSums(M_pd2[-i,])/colSums(M_pd1[-i,]))
+M_L[i,] = M_s[i,]*dat3$Y[i]*p_llo_1/p 
+}
+#local pav
+sum(colSums(M_L)/n)
+#local pape
+#lpape <- sum(colSums(M_L)/n) - sum(colSums(sweep(M_A, MARGIN=2,p_d/p, `*`)*dat3$Y)/n) <- biased need to use llo on second term
+M_L2 = matrix(nrow = n,ncol = 2^2)
+for(i in 1:length(dat3$Y)){
+p_llo_2 <- colSums(M_pd2[-i,])/(n-1)
+M_L2[i,] = M_A[i,]*dat3$Y[i]*p_llo_2/p
+}
+sum(colSums(M_L)/n) - sum(colSums(M_L2)/n)
+
+```
+
+
+```{r}
+#plot
+library(ggplot2)
+dt <- cbind.data.frame(stage = c(0,1,2),pape = c(pape,lpape,0),sd = c(sqrt(varexp),0,0))
+ggplot(dt, aes(x=stage, y=pape)) + 
+  geom_line() +
+  geom_point()+ 
+  geom_errorbar(aes(ymin=pape-1.96*sd, ymax=pape+1.96*sd),width=.05,
+                 position=position_dodge(0.05), linetype = "dashed") +scale_x_continuous(breaks = dt$stage)+ 
+       geom_hline(yintercept=0, color = "red")
+
+```
+
