@@ -270,7 +270,7 @@ s3_1_1 <- function(x){
 pd1_1_1 = hcubature(s3_1_1,rep(5/9,3),rep(Inf,3),tol=1e-4)$integral #p(d3=(1,1,1))
 pd1_1_0 = hcubature(s3_1_1,c(5/9,5/9,-Inf),c(Inf,Inf,5/9),tol=1e-4)$integral #p(d3=(1,1,0))
 E1_1_1 <- function(x){
-  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+02*x[2]-0.07)
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2]-0.07)
   u = c(1-(x[1]>5/9),1-(x[2]>5/9),1-(x[3]>5/9))
 (30-5*sum(x-mu) - 6*sum(u^2))*s3_1_1(x)
 } 
@@ -279,7 +279,7 @@ y1_1_1 = hcubature(E1_1_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral#true Y(1,1,1
 #d111 = hcubature(E1_1_1,rep(5/9,3),rep(Inf,3),tol=1e-4)$integral
 
 E1_1_0 <- function(x){
-  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+02*x[2]-0.07)
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2]-0.07)
   u = c(1-(x[1]>5/9),1-(x[2]>5/9),-(x[3]>5/9))
 (30-5*sum(x-mu) - 6*sum(u^2))*s3_1_1(x)
 } 
@@ -292,13 +292,13 @@ s3_1_0 <- function(x){
 pd1_0_1 = hcubature(s3_1_0,c(5/9,-Inf,5/9),c(Inf,5/9,Inf),tol=1e-4)$integral#p(d3=(1,0,1))
 pd1_0_0 = hcubature(s3_1_0,c(5/9,-Inf,-Inf),c(Inf,5/9,5/9),tol=1e-4)$integral#p(d3=(1,0,0))
 E1_0_1 <- function(x){
-  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+02*x[2])
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2])
   u = c(1-(x[1]>5/9),-(x[2]>5/9),1-(x[3]>5/9))
 (30-5*sum(x-mu) - 6*sum(u^2))*s3_1_0(x)
 } 
 y1_0_1 = hcubature(E1_0_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(1,0,1)
 E1_0_0 <- function(x){
-  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+02*x[2])
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2])
   u = c(1-(x[1]>5/9),-(x[2]>5/9),-(x[3]>5/9))
 (30-5*sum(x-mu) - 6*sum(u^2))*s3_1_0(x)
 } 
@@ -311,13 +311,13 @@ s3_0_1 <- function(x){
 pd0_1_1 = hcubature(s3_0_1,c(-Inf,5/9,5/9),c(5/9,Inf,Inf),tol=1e-4)$integral#p(d3=(0,1,1))
 pd0_1_0 = hcubature(s3_0_1,c(-Inf,5/9,-Inf),c(5/9,Inf,5/9),tol=1e-4)$integral#p(d3=(0,1,0))
 E0_1_1 <- function(x){
-  mu = c(0.55,0.5+0.2*x[1],0.5+02*x[2]-0.07)
+  mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2]-0.07)
   u = c(-(x[1]>5/9),1-(x[2]>5/9),1-(x[3]>5/9))
 (30-5*sum(x-mu) - 6*sum(u^2))*s3_0_1(x)
 } 
 y0_1_1 = hcubature(E0_1_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(0,1,1)
 E0_1_0 <- function(x){
-  mu = c(0.55,0.5+0.2*x[1],0.5+02*x[2]-0.07)
+  mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2]-0.07)
   u = c(-(x[1]>5/9),1-(x[2]>5/9),-(x[3]>5/9))
 (30-5*sum(x-mu) - 6*sum(u^2))*s3_0_1(x)
 } 
@@ -329,15 +329,15 @@ s3_0_0 <- function(x){
 pd0_0_1 = hcubature(s3_0_0,c(-Inf,-Inf,5/9),c(5/9,5/9,Inf),tol=1e-4)$integral #p(d3=(0,0,1))
 pd0_0_0 = hcubature(s3_0_0,c(-Inf,-Inf,-Inf),c(5/9,5/9,5/9),tol=1e-4)$integral #p(d3=(0,0,0))
 E0_0_1 <- function(x){
-  mu = c(0.55,0.5+0.2*x[1],0.5+02*x[2])
+  mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2])
   u = c(-(x[1]>5/9),-(x[2]>5/9),1-(x[3]>5/9))
-(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_1(x)
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_0(x)
 } 
 y0_0_1 = hcubature(E0_0_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true E[Y(0,0,1)]
 E0_0_0 <- function(x){
-  mu = c(0.55,0.5+0.2*x[1],0.5+02*x[2])
+  mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2])
   u = c(-(x[1]>5/9),-(x[2]>5/9),-(x[3]>5/9))
-(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_1(x)
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_0(x)
 } 
 y0_0_0 = hcubature(E0_0_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true E[Y(0,0,0)]
 
@@ -369,7 +369,8 @@ for(i in 1:n){
     mean_j = 0.5 + 0.2*S[i,j-1]-0.07*A[i,j-1]
     mean_j_opt = 0.5 + 0.2*S_opt[i,j-1]-0.07*D_opt[i,j-1]
     S[i,j] = rnorm(1,mean_j,0.04)
-    S_opt[i,j] = rnorm(1,mean_j_opt,0.04)
+    if(mean_j == mean_j_opt) S_opt[i,j] = S[i,j]
+    else S_opt[i,j] = rnorm(1,mean_j_opt,0.04)
     D_opt[i,j] = if_else(S_opt[i,j] > 5/9,1,0)
     }
  } 
@@ -417,7 +418,7 @@ D <- apply(S,2,function(x)if_else(x > 5/9,1,0)) %>% as.data.frame()
 Fi <- matrix(nrow = n,ncol=k) # k = 3
 for(i in 1:n){
   for(j in 1:k){
-  if(j == 1) Fi[i,j] = -5*(S_opt[i,j] - 0.55)  
+  if(j == 1) Fi[i,j] = -5*(S[i,j] - 0.55)  
   else Fi[i,j] = -5*(S[i,j] - (0.5 + 0.2*S[i,j-1]-0.07*D_opt[i,j-1]))  
   }
 }
@@ -430,7 +431,7 @@ mean(y)
 
 
 ```{r}
-n_round = 1000
+n_round = 100
 n = 5000
 k = 3
 pape_est = c()
@@ -446,7 +447,7 @@ coverage = c(coverage,between(pape_true,est$pape-1.96*est$sd,pape+1.96*est$sd))
 
 bias = sum(pape_est-pape_true)/n_round
 sd = sum(sd_est)/n_round
-coverage = sum(coverage)/n_round
+coverage_rate = sum(coverage)/n_round
 ```
 
 
@@ -475,7 +476,7 @@ pav = sum(w*dt$y)/n #estimation is off (small)
 #PAPE
 pape = (sum(w*dt$y)-sum(w_d*dt$y))/(n-1)
 
-dtr(dt$A,dt$D_opt,dt$y)
+PAPE_dtr(dt$A,dt$D_opt,dt$y)
 # E[Y(a1,a2,a3)]
 y_true
 ```
