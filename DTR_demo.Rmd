@@ -24,7 +24,7 @@ Y1<- rep(0,200); # there is no Y1 in this simulated data
 H20<- cbind(1,O11,O21,O22);
 colnames(H20)<-c("int","O11","O21","O22");
 H21 <- cbind(1,O21); #O21 is a candidate tailoring variable for stage 2 colnames(H21)<-c("A2","A2O21");
-Y2 <- dat3$Y;
+Y2 <- Y;
 S <- rep(1,200); # everyone is randomized at stage 2
 ## Construct contrast matrices
 c1<-diag(4); #number of rows must be equal to the number of parameters
@@ -234,10 +234,10 @@ for(i in 1:2^t){
 cov2 <- c()
 for(i in 1:(2^t-1)){
   for(j in (i+1):(2^t)){
-cov2 <- c(cov2,(sape[i]*sape[j]+n*p_d[i]*p_d[j]*sate[i]*sate[j]+(n-1)*(p_d[i]*M_cov[i,j]*sate[j]+p_d[j]*M_cov[j,i]*sate[i]))/n^2)
+cov2 <- c(cov2,(M_cov[i,j]*M_cov[j,i]+n*p_d[i]*p_d[j]*sate[i]*sate[j]+(n-1)*(p_d[i]*M_cov[i,j]*sate[j]+p_d[j]*M_cov[j,i]*sate[i]+p_d[i]*sate[i]*sape[j]+p_d[j]*sate[j]*sape[i]))/n^2)
   }
 }
-cov = sum(cov1)+2*sum(cov2)
+cov = sum(cov1)+ 2*sum(cov2)
 varexp = (n/(n-1))^2*sum(S_t/(p*n)+cov)
 dtr_list <- list("sate" = sate, "sape" = sape, "pape" = sum(sape), "sd"=sqrt(max(varexp,0)))
 return(dtr_list)
@@ -345,6 +345,9 @@ y0_0_0 = hcubature(E0_0_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true E[Y(0,
 pd_true = c(pd1_1_1,pd1_1_0,pd1_0_1,pd1_0_0,pd0_1_1,pd0_1_0,pd0_0_1,pd0_0_0)
 y_true = c(y1_1_1,y1_1_0,y1_0_1,y1_0_0,y0_1_1,y0_1_0,y0_0_1,y0_0_0)
 pape_true = 30 - sum(pd_true*y_true)
+
+
+
 ```
 
 
@@ -431,7 +434,7 @@ mean(y)
 
 
 ```{r}
-n_round = 100
+n_round = 1000
 n = 5000
 k = 3
 pape_est = c()
@@ -448,6 +451,14 @@ coverage = c(coverage,between(pape_true,est$pape-1.96*est$sd,pape+1.96*est$sd))
 bias = sum(pape_est-pape_true)/n_round
 sd = sum(sd_est)/n_round
 coverage_rate = sum(coverage)/n_round
+```
+
+
+```{r}
+hist(pape_est,breaks = 50)
+abline(v = c(pape_true,pape_true+1.96*sd,pape_true-1.96*sd),col = c("red","blue","blue"), lty = c(1, 2,2), lwd = c(3, 1,1))
+sd(pape_est)
+sd
 ```
 
 
@@ -477,62 +488,108 @@ pav = sum(w*dt$y)/n #estimation is off (small)
 pape = (sum(w*dt$y)-sum(w_d*dt$y))/(n-1)
 
 PAPE_dtr(dt$A,dt$D_opt,dt$y)
+
 # E[Y(a1,a2,a3)]
 y_true
+pape_true
 ```
-
-
-```{r}
-
-```
-
 
 
 ### local esitmator
+
+
+```{r}
+A = dt$A
+D = dt$D_opt
+Y = dt$y
+n = nrow(A);t =ncol(A) 
+```
+
+
+
 ```{r}
 M_s = matrix(nrow = n,ncol = 2^t)
-for(i in 1:n) { M_s[i,] = trtMatrix(A[i,],D[i,],s=2)}
+for(i in 1:n) { M_s[i,] = trtMatrix(A[i,],D[i,],s=2)} #start randomization at t = 2
 head(cbind(M_s,A,D),10)
+colSums(M_s)
+
+M_s_2 = matrix(nrow = n,ncol = 2^t)
+for(i in 1:n) { M_s_2[i,] = trtMatrix(A[i,],D[i,],s=3)} #start randomization at t = 3
+head(cbind(M_s_2,A,D),10)
+colSums(M_s_2)
 ```
+
+
+
 
 ```{r}
 M_D1 <- matrix(nrow = n,ncol = 2^1) #p_d1 matrix for leave-one-out estimation
 M_D2 <- matrix(nrow = n,ncol = 2^2) #p_d2 matrix for leave-one-out estimation
+M_D3 <- matrix(nrow = n,ncol = 2^3)
 for(i in 1:n) {
     M_D1[i,] = dtrMatrix(D[i,],s=1) 
     M_D2[i,] = dtrMatrix(D[i,],s=2)
+    M_D3[i,] = dtrMatrix(D[i,],s=3)
 }
-
 ```
 
+
+
+
+
 ```{r}
-# not genaric -> only for stage 2
+# not genaric -
 M_pd1 = t(apply(M_D1,1,function(x){
+  M <- c()
+  for(i in 1:length(x)){
+    M <- c(M,rep(x[i],4))
+  }
+  return(M)
+}))
+M_pd2 = t(apply(M_D2,1,function(x){
   M <- c()
   for(i in 1:length(x)){
     M <- c(M,rep(x[i],2))
   }
   return(M)
 }))
-M_pd2 = M_D2
+M_pd3 = M_D3
 ```
 
+
+
+
+
 ```{r}
-M_L = matrix(nrow = n,ncol = 2^2)
-for(i in 1:length(dat3$Y)){
-p_llo_1 <- ifelse(is.na(colSums(M_pd2[-i,])/colSums(M_pd1[-i,])),0,colSums(M_pd2[-i,])/colSums(M_pd1[-i,]))
-M_L[i,] = M_s[i,]*dat3$Y[i]*p_llo_1/p 
+M_L = matrix(nrow = n,ncol = 2^3)
+for(i in 1:length(Y)){
+p_llo_1 <- ifelse(is.na(colSums(M_pd3[-i,])/colSums(M_pd1[-i,])),0,colSums(M_pd3[-i,])/colSums(M_pd1[-i,]))
+M_L[i,] = M_s[i,]*Y[i]*p_llo_1/p 
 }
 #local pav
 sum(colSums(M_L)/n)
-#local pape
-#lpape <- sum(colSums(M_L)/n) - sum(colSums(sweep(M_A, MARGIN=2,p_d/p, `*`)*dat3$Y)/n) <- biased need to use llo on second term
-M_L2 = matrix(nrow = n,ncol = 2^2)
-for(i in 1:length(dat3$Y)){
-p_llo_2 <- colSums(M_pd2[-i,])/(n-1)
-M_L2[i,] = M_A[i,]*dat3$Y[i]*p_llo_2/p
+#local pape stage 2
+#lpape <- sum(colSums(M_L)/n) - sum(colSums(sweep(M_A, MARGIN=2,p_d/p, `*`)*Y)/n) <- biased need to use llo on second term
+M_L2 = matrix(nrow = n,ncol = 2^3)
+for(i in 1:length(Y)){
+p_llo_2 <- colSums(M_pd3[-i,])/(n-1)
+M_L2[i,] = m2[i,]*Y[i]*p_llo_2/p
 }
-sum(colSums(M_L)/n) - sum(colSums(M_L2)/n)
+
+lpape2 = sum(colSums(M_L)/n) - sum(colSums(M_L2)/n)
+
+```
+
+```{r}
+M_L3 = matrix(nrow = n,ncol = 2^3) # randomize at t = 3
+for(i in 1:length(Y)){
+p_llo_3 <- ifelse(is.na(colSums(M_pd3[-i,])/colSums(M_pd2[-i,])),0,colSums(M_pd3[-i,])/colSums(M_pd2[-i,]))
+M_L3[i,] = M_s_2[i,]*Y[i]*p_llo_3/p 
+}
+#local pav
+sum(colSums(M_L3)/n)
+#local pape stage 3
+lpape1 = sum(colSums(M_L3)/n) - sum(colSums(M_L2)/n)
 
 ```
 
@@ -540,13 +597,13 @@ sum(colSums(M_L)/n) - sum(colSums(M_L2)/n)
 ```{r}
 #plot
 library(ggplot2)
-dt <- cbind.data.frame(stage = c(0,1,2),pape = c(pape,lpape,0),sd = c(sqrt(varexp),0,0))
-ggplot(dt, aes(x=stage, y=pape)) + 
+ggdt <- cbind.data.frame(stage = c(0,1,2,3),pape = c(pape,lpape1,lpape2,0),sd = c(sd,0,0,0))
+ggplot(ggdt, aes(x=stage, y=pape)) + 
   geom_line() +
   geom_point()+ 
   geom_errorbar(aes(ymin=pape-1.96*sd, ymax=pape+1.96*sd),width=.05,
-                 position=position_dodge(0.05), linetype = "dashed") +scale_x_continuous(breaks = dt$stage)+ 
-       geom_hline(yintercept=0, color = "red")
+                 position=position_dodge(0.05)) +scale_x_continuous(breaks = dt$stage)+ 
+       geom_hline(yintercept=0, color = "red",linetype = "dashed")
 
 ```
 
