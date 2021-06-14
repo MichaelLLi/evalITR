@@ -401,6 +401,8 @@ return(dt_list)
 
 ```{r}
 #if all follow optimal dtr
+k=3
+n=5000
 S <- matrix(nrow = n,ncol=k)
 D_opt <- matrix(nrow = n,ncol=k)
 for(i in 1:n){
@@ -434,7 +436,7 @@ mean(y)
 
 
 ```{r}
-n_round = 1000
+n_round = 20
 n = 5000
 k = 3
 pape_est = c()
@@ -445,7 +447,7 @@ dt = gen_dt(n,k)
 est = PAPE_dtr(dt$A,dt$D_opt,dt$y)
 pape_est = c(pape_est,est$pape)
 sd_est = c(sd_est,est$sd)
-coverage = c(coverage,between(pape_true,est$pape-1.96*est$sd,pape+1.96*est$sd))
+coverage = c(coverage,between(pape_true,est$pape-1.96*est$sd,est$pape+1.96*est$sd))
 }
 
 bias = sum(pape_est-pape_true)/n_round
@@ -460,8 +462,6 @@ abline(v = c(pape_true,pape_true+1.96*sd,pape_true-1.96*sd),col = c("red","blue"
 sd(pape_est)
 sd
 ```
-
-
 
 
 ```{r}
@@ -497,15 +497,12 @@ pape_true
 
 ### local esitmator
 
-
 ```{r}
 A = dt$A
 D = dt$D_opt
 Y = dt$y
 n = nrow(A);t =ncol(A) 
 ```
-
-
 
 ```{r}
 M_s = matrix(nrow = n,ncol = 2^t)
@@ -520,25 +517,19 @@ colSums(M_s_2)
 ```
 
 
-
-
 ```{r}
-M_D1 <- matrix(nrow = n,ncol = 2^1) #p_d1 matrix for leave-one-out estimation
-M_D2 <- matrix(nrow = n,ncol = 2^2) #p_d2 matrix for leave-one-out estimation
-M_D3 <- matrix(nrow = n,ncol = 2^3)
-for(i in 1:n) {
-    M_D1[i,] = dtrMatrix(D[i,],s=1) 
-    M_D2[i,] = dtrMatrix(D[i,],s=2)
-    M_D3[i,] = dtrMatrix(D[i,],s=3)
-}
+# M_D1 <- matrix(nrow = n,ncol = 2^1) #p_d1 matrix for leave-one-out estimation
+# M_D2 <- matrix(nrow = n,ncol = 2^2) #p_d2 matrix for leave-one-out estimation
+# M_D3 <- matrix(nrow = n,ncol = 2^3)
+# for(i in 1:n) {
+#     M_D1[i,] = dtrMatrix(D[i,],s=1) 
+#     M_D2[i,] = dtrMatrix(D[i,],s=2)
+#     M_D3[i,] = dtrMatrix(D[i,],s=3)
+# }
 ```
 
-
-
-
-
 ```{r}
-# not genaric -
+#not genaric
 M_pd1 = t(apply(M_D1,1,function(x){
   M <- c()
   for(i in 1:length(x)){
