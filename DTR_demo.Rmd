@@ -257,12 +257,16 @@ pd1 = hcubature(s1,5/9,Inf)$integral #pd(a1 = 1)
 s2_1 <- function(x){
   1/(2*pi*0.04^2)*exp(-1/2*((x[2]-(0.5+0.2*x[1]-0.07))/0.04)^2)*exp(-1/2*((x[1]-0.55)/0.04)^2)
 } #f(s2,s1|a1 = 1)
-pd1_1 = hcubature(s2_1,rep(5/9,2),rep(Inf,2),tol=1e-4)$integral/pd1  #p(d2=1|d1 =1) = p(s2>5/9|s1>5/9,A1=1)
+pd1_d1 = hcubature(s2_1,rep(5/9,2),rep(Inf,2),tol=1e-4)$integral #p(d2=(1,1))
+pd1_d0 = hcubature(s2_1,c(5/9,-Inf),c(Inf,5/9),tol=1e-4)$integral #p(d2=(1,0))
 
 s2_0 <- function(x){
   1/(2*pi*0.04^2)*exp(-1/2*((x[2]-(0.5+0.2*x[1]))/0.04)^2)*exp(-1/2*((x[1]-0.55)/0.04)^2)
 }#f(s2,s1|a1 = 0)
-pd1_0 = hcubature(s2_0,c(-Inf,5/9),c(5/9,Inf),tol=1e-4)$integral/(1-pd1) #pd(d2=1|d1 = 0) = p(s2>5/9|s1<5/9,A1=0)
+pd0_d1 = hcubature(s2_0,c(-Inf,5/9),c(5/9,Inf),tol=1e-4)$integral #p(d2=(0,1))
+pd0_d0 = hcubature(s2_0,c(-Inf,-Inf),c(5/9,5/9),tol=1e-4)$integral #p(d2=(0,0))
+
+
 
 s3_1_1 <- function(x){
   1/((sqrt(2*pi)*0.04)^3)*exp(-1/2*((x[3]-(0.5+0.2*x[2]-0.07))/0.04)^2)*exp(-1/2*((x[2]-(0.5+0.2*x[1]-0.07))/0.04)^2)*exp(-1/2*((x[1]-0.55)/0.04)^2)
@@ -273,18 +277,39 @@ E1_1_1 <- function(x){
   mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2]-0.07)
   u = c(1-(x[1]>5/9),1-(x[2]>5/9),1-(x[3]>5/9))
 (30-5*sum(x-mu) - 6*sum(u^2))*s3_1_1(x)
+}
+Ed1_1_1 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2]-0.07)
+  u = c(0,1-(x[2]>5/9),1-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_1_1(x)
+} 
+Ed1_d1_1 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2]-0.07)
+  u = c(0,0,1-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_1_1(x)
 } 
 y1_1_1 = hcubature(E1_1_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral#true Y(1,1,1)
-
-#d111 = hcubature(E1_1_1,rep(5/9,3),rep(Inf,3),tol=1e-4)$integral
+yd1_1_1 = hcubature(Ed1_1_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral#true Y(d1,1,1)
+yd1_d1_1 = hcubature(Ed1_d1_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral#true Y(d1,d1,1)
 
 E1_1_0 <- function(x){
   mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2]-0.07)
   u = c(1-(x[1]>5/9),1-(x[2]>5/9),-(x[3]>5/9))
 (30-5*sum(x-mu) - 6*sum(u^2))*s3_1_1(x)
 } 
+Ed1_1_0 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2]-0.07)
+  u = c(0,1-(x[2]>5/9),-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_1_1(x)
+} 
+Ed1_d1_0 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2]-0.07)
+  u = c(0,0,-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_1_1(x)
+} 
 y1_1_0 = hcubature(E1_1_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(1,1,0)
-d110 = hcubature(E1_1_0,c(5/9,5/9,-Inf), c(Inf,Inf,5/9),tol=1e-4)$integral
+yd1_1_0 = hcubature(Ed1_1_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(d1,1,0)
+yd1_d1_0 = hcubature(Ed1_d1_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(d1,d1,0)
 
 s3_1_0 <- function(x){
   1/((sqrt(2*pi)*0.04)^3)*exp(-1/2*((x[3]-(0.5+0.2*x[2]))/0.04)^2)*exp(-1/2*((x[2]-(0.5+0.2*x[1]-0.07))/0.04)^2)*exp(-1/2*((x[1]-0.55)/0.04)^2)
@@ -295,64 +320,155 @@ E1_0_1 <- function(x){
   mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2])
   u = c(1-(x[1]>5/9),-(x[2]>5/9),1-(x[3]>5/9))
 (30-5*sum(x-mu) - 6*sum(u^2))*s3_1_0(x)
+}
+Ed1_0_1 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2])
+  u = c(0,-(x[2]>5/9),1-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_1_0(x)
+} 
+Ed1_d0_1 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2])
+  u = c(0,0,1-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_1_0(x)
 } 
 y1_0_1 = hcubature(E1_0_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(1,0,1)
+yd1_0_1 = hcubature(Ed1_0_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(d1,0,1)
+yd1_d0_1 = hcubature(Ed1_d0_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(d1,d0,1)
+
 E1_0_0 <- function(x){
   mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2])
   u = c(1-(x[1]>5/9),-(x[2]>5/9),-(x[3]>5/9))
 (30-5*sum(x-mu) - 6*sum(u^2))*s3_1_0(x)
 } 
+Ed1_0_0 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2])
+  u = c(0,-(x[2]>5/9),-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_1_0(x)
+} 
+Ed1_d0_0 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1]-0.07,0.5+0.2*x[2])
+  u = c(0,0,-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_1_0(x)
+} 
 y1_0_0 = hcubature(E1_0_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(1,0,0)
-
+yd1_0_0 = hcubature(Ed1_0_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(d1,0,0)
+yd1_d0_0 = hcubature(Ed1_d0_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(d1,d0,0)
 
 s3_0_1 <- function(x){
   1/((sqrt(2*pi)*0.04)^3)*exp(-1/2*((x[3]-(0.5+0.2*x[2]-0.07))/0.04)^2)*exp(-1/2*((x[2]-(0.5+0.2*x[1]))/0.04)^2)*exp(-1/2*((x[1]-0.55)/0.04)^2)
 } # f(s1,s2,s3|a1a2= (0,1))
 pd0_1_1 = hcubature(s3_0_1,c(-Inf,5/9,5/9),c(5/9,Inf,Inf),tol=1e-4)$integral#p(d3=(0,1,1))
 pd0_1_0 = hcubature(s3_0_1,c(-Inf,5/9,-Inf),c(5/9,Inf,5/9),tol=1e-4)$integral#p(d3=(0,1,0))
+
 E0_1_1 <- function(x){
   mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2]-0.07)
   u = c(-(x[1]>5/9),1-(x[2]>5/9),1-(x[3]>5/9))
 (30-5*sum(x-mu) - 6*sum(u^2))*s3_0_1(x)
 } 
+Ed0_1_1 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2]-0.07)
+  u = c(0,1-(x[2]>5/9),1-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_1(x)
+} 
+Ed0_d1_1 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2]-0.07)
+  u = c(0,0,1-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_1(x)
+} 
 y0_1_1 = hcubature(E0_1_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(0,1,1)
+yd0_1_1 = hcubature(Ed0_1_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(d0,1,1)
+yd0_d1_1 = hcubature(Ed0_d1_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(d0,d1,1)
+
 E0_1_0 <- function(x){
   mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2]-0.07)
   u = c(-(x[1]>5/9),1-(x[2]>5/9),-(x[3]>5/9))
 (30-5*sum(x-mu) - 6*sum(u^2))*s3_0_1(x)
 } 
+Ed0_1_0 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2]-0.07)
+  u = c(0,1-(x[2]>5/9),-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_1(x)
+} 
+Ed0_d1_0 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2]-0.07)
+  u = c(0,0,-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_1(x)
+} 
 y0_1_0 = hcubature(E0_1_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(0,1,0)
+yd0_1_0 = hcubature(Ed0_1_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(d0,1,0)
+yd0_d1_0 = hcubature(Ed0_d1_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true Y(d0,d1,0)
 
 s3_0_0 <- function(x){
   1/((sqrt(2*pi)*0.04)^3)*exp(-1/2*((x[3]-(0.5+0.2*x[2]))/0.04)^2)*exp(-1/2*((x[2]-(0.5+0.2*x[1]))/0.04)^2)*exp(-1/2*((x[1]-0.55)/0.04)^2)
 }
 pd0_0_1 = hcubature(s3_0_0,c(-Inf,-Inf,5/9),c(5/9,5/9,Inf),tol=1e-4)$integral #p(d3=(0,0,1))
 pd0_0_0 = hcubature(s3_0_0,c(-Inf,-Inf,-Inf),c(5/9,5/9,5/9),tol=1e-4)$integral #p(d3=(0,0,0))
+
 E0_0_1 <- function(x){
   mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2])
   u = c(-(x[1]>5/9),-(x[2]>5/9),1-(x[3]>5/9))
 (30-5*sum(x-mu) - 6*sum(u^2))*s3_0_0(x)
 } 
+Ed0_0_1 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2])
+  u = c(0,-(x[2]>5/9),1-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_0(x)
+} 
+Ed0_d0_1 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2])
+  u = c(0,0,1-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_0(x)
+} 
 y0_0_1 = hcubature(E0_0_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true E[Y(0,0,1)]
+yd0_0_1 = hcubature(Ed0_0_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true E[Y(d0,0,1)]
+yd0_d0_1 = hcubature(Ed0_d0_1,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true E[Y(d0,d0,1)]
+
 E0_0_0 <- function(x){
   mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2])
   u = c(-(x[1]>5/9),-(x[2]>5/9),-(x[3]>5/9))
 (30-5*sum(x-mu) - 6*sum(u^2))*s3_0_0(x)
+}
+Ed0_0_0 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2])
+  u = c(0,-(x[2]>5/9),-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_0(x)
+} 
+Ed0_d0_0 <- function(x){
+  mu = c(0.55,0.5+0.2*x[1],0.5+0.2*x[2])
+  u = c(0,0,-(x[3]>5/9))
+(30-5*sum(x-mu) - 6*sum(u^2))*s3_0_0(x)
 } 
 y0_0_0 = hcubature(E0_0_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true E[Y(0,0,0)]
+yd0_0_0 = hcubature(Ed0_0_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true E[Y(d0,0,0)]
+yd0_d0_0 = hcubature(Ed0_d0_0,rep(-Inf,3),rep(Inf,3),tol=1e-4)$integral #true E[Y(d0,d0,0)]
+```
 
+```{r}
 #true PAPE
 pd_true = c(pd1_1_1,pd1_1_0,pd1_0_1,pd1_0_0,pd0_1_1,pd0_1_0,pd0_0_1,pd0_0_0)
 y_true = c(y1_1_1,y1_1_0,y1_0_1,y1_0_0,y0_1_1,y0_1_0,y0_0_1,y0_0_0)
 pape_true = 30 - sum(pd_true*y_true)
 
+#true local PAPE
+#s=3 start randomization at stage3
+pd3_true = c(pd1_1_1/pd1_d1,pd1_1_0/pd1_d1,pd1_0_1/pd1_d0,pd1_0_0/pd1_d0,pd0_1_1/pd0_d1,pd0_1_0/pd0_d1,pd0_0_1/pd0_d0,pd0_0_0/pd0_d0)
+yd3_true = c(yd1_d1_1,yd1_d1_0,yd1_d0_1,yd1_d0_0,yd0_d1_1,yd0_d1_0,yd0_d0_1,yd0_d0_0)
+wt3 = c(pd1_d1,pd1_d0,pd0_d1,pd0_d0)
+wt3 = unlist(lapply(wt3,function(x) rep(x,2)))
+lpape3_true = sum(pd3_true*yd3_true*wt3)- sum(pd_true*y_true) #inverse weight?
 
 
+#s=2 start randomization at stage3
+pd2_true = c(pd1_1_1/pd1,pd1_1_0/pd1,pd1_0_1/pd1,pd1_0_0/pd1,pd0_1_1/(1-pd1),pd0_1_0/(1-pd1),pd0_0_1/(1-pd1),pd0_0_0/(1-pd1))
+yd2_true = c(yd1_1_1,yd1_1_0,yd1_0_1,yd1_0_0,yd0_1_1,yd0_1_0,yd0_0_1,yd0_0_0)
+wt2 = c(pd1,1-pd1)
+wt2 = unlist(lapply(wt2,function(x) rep(x,4)))
+lpape2_true = sum(pd2_true*yd2_true*wt2) - sum(pd_true*y_true)
 ```
 
 
-
 ```{r}
+#data generation process
 library(dplyr)
 gen_dt <- function(n,k){
 #set.seed(i)
@@ -389,8 +505,6 @@ for(i in 1:n){
 }
 sigma_y = 0.02 ## error term
 y <- 30 + rowSums(Fi) - rowSums(6*(A-D)^2) +  sigma_y*rnorm(n)  
-
-
 #dataframe = cbind.data.frame(A,D_opt,y)  
 dt_list <- list("A"=A,"D_opt"=D_opt,"y"=y)
 return(dt_list)  
@@ -436,7 +550,8 @@ mean(y)
 
 
 ```{r}
-n_round = 20
+# PAPE MC Simulation 
+n_round = 1000
 n = 5000
 k = 3
 pape_est = c()
@@ -449,7 +564,6 @@ pape_est = c(pape_est,est$pape)
 sd_est = c(sd_est,est$sd)
 coverage = c(coverage,between(pape_true,est$pape-1.96*est$sd,est$pape+1.96*est$sd))
 }
-
 bias = sum(pape_est-pape_true)/n_round
 sd = sum(sd_est)/n_round
 coverage_rate = sum(coverage)/n_round
@@ -465,6 +579,7 @@ sd
 
 
 ```{r}
+#simulation single round
 n=5000
 k =3
 dt = gen_dt(n,k)
@@ -495,94 +610,92 @@ pape_true
 ```
 
 
-### local esitmator
-
-```{r}
-A = dt$A
-D = dt$D_opt
-Y = dt$y
-n = nrow(A);t =ncol(A) 
-```
-
-```{r}
-M_s = matrix(nrow = n,ncol = 2^t)
-for(i in 1:n) { M_s[i,] = trtMatrix(A[i,],D[i,],s=2)} #start randomization at t = 2
-head(cbind(M_s,A,D),10)
-colSums(M_s)
-
-M_s_2 = matrix(nrow = n,ncol = 2^t)
-for(i in 1:n) { M_s_2[i,] = trtMatrix(A[i,],D[i,],s=3)} #start randomization at t = 3
-head(cbind(M_s_2,A,D),10)
-colSums(M_s_2)
-```
+### local estimator
 
 
 ```{r}
-# M_D1 <- matrix(nrow = n,ncol = 2^1) #p_d1 matrix for leave-one-out estimation
-# M_D2 <- matrix(nrow = n,ncol = 2^2) #p_d2 matrix for leave-one-out estimation
-# M_D3 <- matrix(nrow = n,ncol = 2^3)
-# for(i in 1:n) {
-#     M_D1[i,] = dtrMatrix(D[i,],s=1) 
-#     M_D2[i,] = dtrMatrix(D[i,],s=2)
-#     M_D3[i,] = dtrMatrix(D[i,],s=3)
-# }
-```
+Local_PAPE_dtr <- function(A,D,y,s){
+#s: time to start randomization
+t = ncol(A)
+n = nrow(A)  
 
-```{r}
-#not genaric
-M_pd1 = t(apply(M_D1,1,function(x){
+M_A = matrix(nrow = n,ncol = 2^t) #follow randomization
+M_D <- matrix(nrow = n,ncol = 2^t) #dtr metrix
+M_s = matrix(nrow = n,ncol = 2^t) #local randomization
+M_D_s <- matrix(nrow = n,ncol = 2^(s-1)) #construct matrix for loo esitmation p(d_T|d_s)
+
+for(i in 1:n) {
+    M_A[i,] = trtMatrix(A[i,],D[i,],s=1)
+    M_D[i,] = dtrMatrix(D[i,],s=t)
+    M_s[i,] = trtMatrix(A[i,],D[i,],s=s)
+    M_D_s[i,] = dtrMatrix(D[i,],s=(s-1))
+}
+
+p = colSums(M_A)/n #randomized prob p(A1A2A3）
+#p_d = colSums(M_D)/n  
+M_pd_s = t(apply(M_D_s,1,function(x){
   M <- c()
   for(i in 1:length(x)){
-    M <- c(M,rep(x[i],4))
+    M <- c(M,rep(x[i],2^(t-s+1)))
   }
   return(M)
 }))
-M_pd2 = t(apply(M_D2,1,function(x){
-  M <- c()
-  for(i in 1:length(x)){
-    M <- c(M,rep(x[i],2))
-  }
-  return(M)
-}))
-M_pd3 = M_D3
+
+M_L = matrix(nrow = n,ncol = 2^t)
+M_L2 = matrix(nrow = n,ncol = 2^t)
+for(i in 1:n){ #takes long here (~ 4sec/round)
+p_loo_1 <- colSums(M_D[-i,])/colSums(M_pd_s[-i,])
+M_L[i,] = M_s[i,]*Y[i]*p_loo_1/p 
+p_loo_2 <- colSums(M_D[-i,])/(n-1)
+M_L2[i,] = M_A[i,]*Y[i]*p_loo_2/p
+}
+#local pav
+#sum(colSums(M_L)/n)
+
+lpape = sum(colSums(M_L)/n) - sum(colSums(M_L2)/n)
+return(lpape)
+}
 ```
-
-
-
 
 
 ```{r}
-M_L = matrix(nrow = n,ncol = 2^3)
-for(i in 1:length(Y)){
-p_llo_1 <- ifelse(is.na(colSums(M_pd3[-i,])/colSums(M_pd1[-i,])),0,colSums(M_pd3[-i,])/colSums(M_pd1[-i,]))
-M_L[i,] = M_s[i,]*Y[i]*p_llo_1/p 
-}
-#local pav
-sum(colSums(M_L)/n)
-#local pape stage 2
-#lpape <- sum(colSums(M_L)/n) - sum(colSums(sweep(M_A, MARGIN=2,p_d/p, `*`)*Y)/n) <- biased need to use llo on second term
-M_L2 = matrix(nrow = n,ncol = 2^3)
-for(i in 1:length(Y)){
-p_llo_2 <- colSums(M_pd3[-i,])/(n-1)
-M_L2[i,] = m2[i,]*Y[i]*p_llo_2/p
+n_round =  100
+n = 5000
+k = 3
+lpape_est2 = c()
+lpape_est3 = c()
+# sd_est = c()
+# coverage = c()
+for(i in 1:n_round){
+dt = gen_dt(n,k)
+A = dt$A;D = dt$D_opt;Y = dt$y
+est_s2 = Local_PAPE_dtr(A,D,Y,2)
+lpape_est2 = c(lpape_est2,est_s2)
+est_s3 = Local_PAPE_dtr(A,D,Y,3)
+lpape_est3 = c(lpape_est3,est_s3)
+# sd_est = c(sd_est,est$sd)
+# coverage = c(coverage,between(pape_true,est$pape-1.96*est$sd,est$pape+1.96*est$sd))
 }
 
-lpape2 = sum(colSums(M_L)/n) - sum(colSums(M_L2)/n)
-
+local_bias1 = sum(lpape_est2-lpape2_true)/n_round
+local_bias2 = sum(lpape_est3-lpape3_true)/n_round 
 ```
 
 ```{r}
-M_L3 = matrix(nrow = n,ncol = 2^3) # randomize at t = 3
-for(i in 1:length(Y)){
-p_llo_3 <- ifelse(is.na(colSums(M_pd3[-i,])/colSums(M_pd2[-i,])),0,colSums(M_pd3[-i,])/colSums(M_pd2[-i,]))
-M_L3[i,] = M_s_2[i,]*Y[i]*p_llo_3/p 
-}
-#local pav
-sum(colSums(M_L3)/n)
-#local pape stage 3
-lpape1 = sum(colSums(M_L3)/n) - sum(colSums(M_L2)/n)
-
+local_bias1 
+sd(lpape_est2)
+local_bias2
+sd(lpape_est3)
+hist(lpape_est2,breaks = 50)
+abline(v = lpape2_true,col = "red", lty = 1, lwd = 3)
+hist(lpape_est3,breaks = 50)
+abline(v = lpape3_true,col = "red", lty = 1, lwd = 3) 
 ```
+
+
+
+
+
 
 
 ```{r}
