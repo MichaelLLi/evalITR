@@ -31,7 +31,7 @@ test_that("Cross-Validated Functions Work", {
   tau = matrix(c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7,-0.5,-0.3,-0.1,0.1,0.3,0.5,0.7,0.9),nrow = 8, ncol = 2)
   Y = c(4,5,0,2,4,1,-4,3)
   ind = c(rep(1,4),rep(2,4))
-  papelist <- PAPEcv(T,That,Y,ind)
+  papelist <- PAPEcv(T,That,Y,ind,plim = 0.5)
   pavlist <- PAVcv(T,That,Y,ind)
   papdlist <- PAPDcv(T,That,That2,Y,ind,plim = 0.5)
   aupeclist <- AUPECcv(T,tau,Y,ind)

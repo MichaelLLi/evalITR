@@ -50,10 +50,10 @@ PAPDcv <- function (T, Thatfp, Thatgp, Y, ind, plim, centered = TRUE) {
   if ((length(T)!=dim(Thatfp)[1]) | (dim(Thatfp)[1]!=dim(Thatgp)[1]) | (dim(Thatgp)[1]!=length(Y))) {
     stop("All the data should have the same length.")
   }
-  if (!is.na(plim) & (max(sapply(1:max(ind),function(i) sum(Thatfp[ind==i, i])))>floor(length(T[ind==i])*plim)+1)) {
+  if (!is.na(plim) & !(sum(sapply(1:max(ind),function(i) sum(Thatfp[ind==i, i])>=floor(length(T[ind==i])*plim)))==max(ind))) {
     stop("The number of treated units in Thatfp should be below or equal to plim.")
   }
-  if (!is.na(plim) & (max(sapply(1:max(ind),function(i) sum(Thatgp[ind==i, i])))>floor(length(T[ind==i])*plim)+1)) {
+  if (!is.na(plim) & !(sum(sapply(1:max(ind),function(i) sum(Thatgp[ind==i, i])>=floor(length(T[ind==i])*plim)))==max(ind))) {
     stop("The number of treated units in Thatgp should be below or equal to plim.")
   }
   if (((plim<0) | (plim>1))) {
