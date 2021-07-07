@@ -1,3 +1,7 @@
+# v0.2.1 - Release Notes
+
+- Fixing bugs when using budget condition on PAPD/PAPE
+
 # v0.2 - Release Notes
 
 - Added Curve Output for AUPEC
