@@ -6,7 +6,7 @@
 * Ubuntu 16.04 (on travis-ci), R-release
 
 ## R CMD check results
-There were no ERRORs or WARNINGs. The only note relates to "unable to verify current time", which is caused by the external API that base R calls to verify system time, and not an error that exists in this package. 
+There were no ERRORs or WARNINGs.
 
 
 ## Downstream dependencies

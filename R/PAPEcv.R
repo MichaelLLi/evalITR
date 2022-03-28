@@ -31,7 +31,11 @@
 #' \email{mlli@mit.edu}, \url{http://mlli.mit.edu};
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
-#' @importFrom stats var quantile rbinom
+#' @importFrom stats var quantile rbinom cov pchisq
+#' @importFrom dplyr ntile
+#' @importFrom MASS ginv mvrnorm
+#' @importFrom quadprog solve.QP
+#' @importFrom Matrix nearPD
 #' @export PAPEcv
 PAPEcv <- function (T, That, Y, ind, plim = NA, centered = TRUE) {
   if (!(identical(as.numeric(T),as.numeric(as.logical(T))))) {

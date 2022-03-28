@@ -1,3 +1,8 @@
+# v0.3.0 - Release Notes
+
+- Add GATE/GATEcv Evaluation Functions
+- Add Functions for testing statistics het.test, hetcv.test, consist.test, consistcv.test
+
 # v0.2.2 - Release Notes
 
 - Fixing further bugs when using budget condition on PAPD/PAPE
