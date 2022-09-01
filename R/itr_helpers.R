@@ -25,7 +25,8 @@ pacman::p_load(tidyverse, hash, haven, ggplot2, ggthemes, Cairo,
                labelled,
                here,
                rminer,
-               forcats)
+               forcats,
+               Hmisc)
 
 
 
@@ -53,8 +54,6 @@ create_ml_arguments = function(outcome_var, treatment_var, data){
   
   X = data %>%
     dplyr::select(-c(all_of(outcome_var), all_of(treatment_var))) %>%
-    #mutate(sex_female = as.factor(sex_female)) %>%
-    #mutate(time_quartile = as.factor(time_quartile)) %>%
     as.data.frame()
   
   Treat = data %>%
@@ -70,11 +69,11 @@ create_ml_arguments = function(outcome_var, treatment_var, data){
 
 # Create arguments for causal forest ------------------------------------------
 
-create_ml_args_causalforest = function(create_ml_arguments_outputs){
+create_ml_args_causalforest = function(data){
   
-  Y = create_ml_arguments_outputs[["Y"]]
-  X = create_ml_arguments_outputs[["X"]]
-  Treat = create_ml_arguments_outputs[["Treat"]]
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat = data[["Treat"]]
   
   X_expand = model.matrix(~. -1, data = X)
   
@@ -83,11 +82,11 @@ create_ml_args_causalforest = function(create_ml_arguments_outputs){
 
 # Create arguments for BART ---------------------------------------------------
 
-create_ml_args_bart = function(create_ml_arguments_outputs){
+create_ml_args_bart = function(data){
   
-  Y = create_ml_arguments_outputs[["Y"]]
-  X = create_ml_arguments_outputs[["X"]]
-  Treat =create_ml_arguments_outputs[["Treat"]]
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat =data[["Treat"]]
   
   X_and_Treat = cbind(X, Treat)
   
@@ -100,11 +99,11 @@ create_ml_args_bart = function(create_ml_arguments_outputs){
 
 # Create arguments for bartCause ----------------------------------------------
 
-create_ml_args_bartc = function(create_ml_arguments_outputs){
+create_ml_args_bartc = function(data){
   
-  Y = create_ml_arguments_outputs[["Y"]]
-  X = create_ml_arguments_outputs[["X"]]
-  Treat =create_ml_arguments_outputs[["Treat"]]
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat =data[["Treat"]]
   
   # also needed for testing:
   X0t = cbind(X, z = 0)
@@ -115,11 +114,11 @@ create_ml_args_bartc = function(create_ml_arguments_outputs){
 
 # Create arguments for LASSO --------------------------------------------------
 
-create_ml_args_lasso = function(create_ml_arguments_outputs){
+create_ml_args_lasso = function(data){
   
-  Y = create_ml_arguments_outputs[["Y"]]
-  X = create_ml_arguments_outputs[["X"]]
-  Treat =create_ml_arguments_outputs[["Treat"]]
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat =data[["Treat"]]
   
   X_and_Treat = cbind(X, Treat)
   X_expand = model.matrix(~.*Treat, data = X_and_Treat)
@@ -135,13 +134,13 @@ create_ml_args_lasso = function(create_ml_arguments_outputs){
 
 # Create arguments for SVM ----------------------------------------------------
 
-create_ml_args_svm = function(create_ml_arguments_outputs){
+create_ml_args_svm = function(data){
   
   
-  formula = create_ml_arguments_outputs[["formula"]]
-  Y = create_ml_arguments_outputs[["Y"]] %>% scale()
-  X = create_ml_arguments_outputs[["X"]] %>% mutate_all(., scale)
-  Treat = create_ml_arguments_outputs[["Treat"]]  %>% scale()
+  formula = data[["formula"]]
+  Y = data[["Y"]] %>% scale()
+  X = data[["X"]] %>% mutate_all(., scale)
+  Treat = data[["Treat"]]  %>% scale()
   
   data = cbind(Y, X, Treat)
   
@@ -155,12 +154,12 @@ create_ml_args_svm = function(create_ml_arguments_outputs){
 
 # Create arguments for SVM classification -------------------------------------
 
-create_ml_args_svm_cls = function(create_ml_arguments_outputs){
+create_ml_args_svm_cls = function(data){
   
   
-  Y = create_ml_arguments_outputs[["Y"]] 
-  X = create_ml_arguments_outputs[["X"]] 
-  Treat = create_ml_arguments_outputs[["Treat"]]  
+  Y = data[["Y"]] 
+  X = data[["X"]] 
+  Treat = data[["Treat"]]  
   
   formula = as.formula(paste(as.factor("Y"), "~", paste(c("Treat", names(X)), collapse = "+")))
   
@@ -176,12 +175,12 @@ create_ml_args_svm_cls = function(create_ml_arguments_outputs){
 
 # Create arguments for LDA ----------------------------------------------------
 
-create_ml_args_lda = function(create_ml_arguments_outputs){
+create_ml_args_lda = function(data){
   
-  formula = create_ml_arguments_outputs[["formula"]]
-  Y = create_ml_arguments_outputs[["Y"]]
-  X = create_ml_arguments_outputs[["X"]]
-  Treat = create_ml_arguments_outputs[["Treat"]]
+  formula = data[["formula"]]
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat = data[["Treat"]]
   
   data = cbind(Y, X, Treat)
   
@@ -196,12 +195,12 @@ create_ml_args_lda = function(create_ml_arguments_outputs){
 
 # Create arguments for boosted trees ------------------------------------------
 
-create_ml_args_boosted = function(create_ml_arguments_outputs){
+create_ml_args_boosted = function(data){
   
-  formula = create_ml_arguments_outputs[["formula"]]
-  Y = create_ml_arguments_outputs[["Y"]]
-  X = create_ml_arguments_outputs[["X"]]
-  Treat = create_ml_arguments_outputs[["Treat"]]
+  formula = data[["formula"]]
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat = data[["Treat"]]
   
   data = cbind(Y, X, Treat)
   
@@ -215,12 +214,12 @@ create_ml_args_boosted = function(create_ml_arguments_outputs){
 
 # Create arguments for random forest ------------------------------------------
 
-create_ml_args_rf = function(create_ml_arguments_outputs){
+create_ml_args_rf = function(data){
   
-  formula = create_ml_arguments_outputs[["formula"]]
-  Y = create_ml_arguments_outputs[["Y"]]
-  X = create_ml_arguments_outputs[["X"]]
-  Treat = create_ml_arguments_outputs[["Treat"]]
+  formula = data[["formula"]]
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat = data[["Treat"]]
   
   data = cbind(Y, X, Treat)
   
@@ -233,11 +232,11 @@ create_ml_args_rf = function(create_ml_arguments_outputs){
 
 # Create argments for random forest for classification ------------------------
 
-create_ml_args_rf_cls = function(create_ml_arguments_outputs){
+create_ml_args_rf_cls = function(data){
   
-  Y = create_ml_arguments_outputs[["Y"]]
-  X = create_ml_arguments_outputs[["X"]]
-  Treat = create_ml_arguments_outputs[["Treat"]]
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat = data[["Treat"]]
   
   formula = as.formula(paste(as.factor("Y"), "~", paste(c("Treat", names(X)), collapse = "+")))
   
@@ -253,12 +252,12 @@ create_ml_args_rf_cls = function(create_ml_arguments_outputs){
 
 # Create arguments for bagging ------------------------------------------
 
-create_ml_args_bagging = function(create_ml_arguments_outputs){
+create_ml_args_bagging = function(data){
   
-  formula = create_ml_arguments_outputs[["formula"]]
-  Y = create_ml_arguments_outputs[["Y"]]
-  X = create_ml_arguments_outputs[["X"]]
-  Treat = create_ml_arguments_outputs[["Treat"]]
+  formula = data[["formula"]]
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat = data[["Treat"]]
   
   data = cbind(Y, X, Treat)
   
@@ -272,12 +271,12 @@ create_ml_args_bagging = function(create_ml_arguments_outputs){
 
 # Create arguments for CART ------------------------------------------
 
-create_ml_args_cart = function(create_ml_arguments_outputs){
+create_ml_args_cart = function(data){
   
-  formula = create_ml_arguments_outputs[["formula"]]
-  Y = create_ml_arguments_outputs[["Y"]]
-  X = create_ml_arguments_outputs[["X"]]
-  Treat = create_ml_arguments_outputs[["Treat"]]
+  formula = data[["formula"]]
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat = data[["Treat"]]
   
   data = cbind(Y, X, Treat)
   
@@ -336,31 +335,31 @@ create_ml_args_knn = function(create_ml_arguments_outputs){
 
 # Re-organize cross-validation output to plot the AUPEC curve ---------------------------------------------------- 
 
-getAupecOutput = function(tauML, taucvML, ThatpcvML, MLname, Ycv = Ycv, Tcv = Tcv, indcv = indcv){
-  aupec_grid = list()
-  for (j in 1:NFOLDS){
-    tau = tauML[,j][!is.na(tauML[,j])]
-    aupec_grid[[j]] = AUPEC(Tcv[indcv==j], tau,Ycv[indcv==j])
-  }
+# getAupecOutput = function(tauML, taucvML, ThatpcvML, MLname, Ycv = Ycv, Tcv = Tcv, indcv = indcv){
+#   aupec_grid = list()
+#   for (j in 1:NFOLDS){
+#     tau = tauML[,j][!is.na(tauML[,j])]
+#     aupec_grid[[j]] = AUPEC(Tcv[indcv==j], tau,Ycv[indcv==j])
+#   }
     
-  aupec_cv = AUPECcv(Tcv, ThatpcvML, Ycv, indcv)
+#   aupec_cv = AUPECcv(Tcv, ThatpcvML, Ycv, indcv)
   
-  aupec_vec = data.frame(matrix(NA, ncol = NFOLDS, nrow = max(table(indcv))))
-  for (j in 1:NFOLDS){
-    aupec_vec[,j] = c(aupec_grid[[j]]$vec, rep(NA, nrow(aupec_vec) - length(aupec_grid[[j]]$vec)))
-  }
+#   aupec_vec = data.frame(matrix(NA, ncol = NFOLDS, nrow = max(table(indcv))))
+#   for (j in 1:NFOLDS){
+#     aupec_vec[,j] = c(aupec_grid[[j]]$vec, rep(NA, nrow(aupec_vec) - length(aupec_grid[[j]]$vec)))
+#   }
   
-  aupec_vec = rowMeans(aupec_vec, na.rm = T)
-  outputdf = data.frame(type = rep(MLname,length(aupec_vec)), fraction = seq(1,length(aupec_vec))/length(aupec_vec), aupec = aupec_vec + mean(Ycv))
+#   aupec_vec = rowMeans(aupec_vec, na.rm = T)
+#   outputdf = data.frame(type = rep(MLname,length(aupec_vec)), fraction = seq(1,length(aupec_vec))/length(aupec_vec), aupec = aupec_vec + mean(Ycv))
   
-  return(list(aupec_cv = aupec_cv,
-              aupec_vec = aupec_vec,
-              outputdf = outputdf))
-}
+#   return(list(aupec_cv = aupec_cv,
+#               aupec_vec = aupec_vec,
+#               outputdf = outputdf))
+# }
 
 
 
-getAupecOutput2 = function(
+getAupecOutput = function(
   tauML, taucvML, That_pcv_mat, MLname,
   NFOLDS, Ycv, Tcv, indcv
 ){
@@ -422,9 +421,8 @@ bind_rows(map(fit[[1]]$AUPEC, ~.x$aupec_cv)) %>%
   geom_text(data = graphLabels, aes(x = 0.57, y = max(temp$AUPECmax, na.rm = TRUE)+0.35, label = Pval),size=3) +
   theme(text = element_text(size=13.5),
         axis.text = element_text(size=10),
-        strip.text = element_text(size = 13.5)) 
+        strip.text = element_text(size = 13.5)) -> out
 
-ggsave(here("plot", paste0(plot_name, ".png")))
-
+return(out)
 }
 
