@@ -44,7 +44,7 @@ train_random_forest <- function(dat_train) {
   formula_rf = training_data_elements_rf[["formula"]] 
 
   ## fit
-  fit <- randomForest(formula_rf, data = training_data_elements_rf[["data"]], ntree = 500)
+  fit <- randomForest::randomForest(formula_rf, data = training_data_elements_rf[["data"]], ntree = 500)
 
   return(fit)
 }

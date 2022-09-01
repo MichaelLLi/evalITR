@@ -4,15 +4,15 @@
 
 # setwd("/n/home04/jialuli/fasrc/data/sys/dashboard/itr")
 
-source("r/itr_helpers.R")
-source("r/itr_qoi.R")
+# source("r/itr_helpers.R")
+# source("r/itr_qoi.R")
 
 
 ## read in ml algorithms
-file.sources = list.files(path = "r/", pattern="itr_run*")
-file.sources = paste0("r/",file.sources) 
+# file.sources = list.files(path = "r/", pattern="itr_run*")
+# file.sources = paste0("r/",file.sources) 
 
-sapply(file.sources,source,.GlobalEnv)
+# sapply(file.sources,source,.GlobalEnv)
 
 
 
@@ -28,8 +28,8 @@ sapply(file.sources,source,.GlobalEnv)
 
 #' Evaluate ITR
 #' 
-#' @param var_outcome 
-#' @param var_treatment
+#' @param var_outcome XXX
+#' @param var_treatment YYY
 #' @param data 
 #'   A data frame that contains \code{var_outcome} and \code{var_treatment}.
 #' @param algorithms 
@@ -40,11 +40,10 @@ sapply(file.sources,source,.GlobalEnv)
 #'   Number of cross-validation folds.
 #' @param options  
 #'   List of options.
-#'   
-#' @importFrom dplyr %>% select
+#'  
+#' @import dplyr
 #' @importFrom rlang !! sym
-#' 
-
+#' @export
 run_itr <- function(
   var_outcome,
   var_treatment, 
@@ -81,8 +80,8 @@ run_itr <- function(
       select(Y = !!sym(var_outcome[m]), Treat = !!sym(var_treatment), all_of(var_covariates))
     
     ## create folds 
-    treatment_vec <- data_filtered %>% pull(Treat)
-    folds <- createFolds(treatment_vec, k = NFOLDS)
+    treatment_vec <- data_filtered %>% dplyr::pull(Treat)
+    folds <- caret::createFolds(treatment_vec, k = NFOLDS)
 
 
     ## run 
@@ -111,7 +110,7 @@ run_itr <- function(
 #' Evaluate ITR for Single Outcome
 #' 
 #' @importFrom purrr map
-#' @importFrom dpylr pull
+#' @importFrom dplyr pull
 itr_single_outcome <- function(
   data, 
   algorithms,

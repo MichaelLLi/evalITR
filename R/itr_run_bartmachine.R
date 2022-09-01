@@ -1,6 +1,4 @@
-
-## bartMachine
-
+#' @export
 run_bartmachine <- function(
   dat_train, 
   dat_test, 
@@ -41,7 +39,7 @@ train_bart <- function(dat_train) {
   training_data_elements_bart = create_ml_args_bart(dat_train)
 
   ## fit
-  fit <- bartMachine(
+  fit <- bartMachine::bartMachine(
             X=training_data_elements_bart[["X_and_Treat"]],
             y=training_data_elements_bart[["Y"]],
             num_trees = 30, 

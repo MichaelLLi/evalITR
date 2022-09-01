@@ -1,32 +1,32 @@
 # This file creates helper functions to run itr
 
-options(java.parameters = "-Xmx5g")
+# options(java.parameters = "-Xmx5g")
 
-if (!require("pacman")) install.packages("pacman")
-pacman::p_load(tidyverse, hash, haven, ggplot2, ggthemes, Cairo,
-               evalITR, 
-               grf,         
-               glmnet,      
-               bartMachine, 
-               bartCause,
-               e1071,
-               #MASS, 
-               gbm, 
-               SuperLearner,
-               neuralnet,
-               caret, 
-               rpart, 
-               randomForest,
-               class,
-               parallel,
-               furrr,
-               future.apply,
-               haven,
-               labelled,
-               here,
-               rminer,
-               forcats,
-               Hmisc)
+# if (!require("pacman")) install.packages("pacman")
+# pacman::p_load(tidyverse, hash, haven, ggplot2, ggthemes, Cairo,
+#                evalITR, 
+#                grf,         
+#                glmnet,      
+#                bartMachine, 
+#                bartCause,
+#                e1071,
+#                #MASS, 
+#                gbm, 
+#                SuperLearner,
+#                neuralnet,
+#                caret, 
+#                rpart, 
+#                randomForest,
+#                class,
+#                parallel,
+#                furrr,
+#                future.apply,
+#                haven,
+#                labelled,
+#                here,
+#                rminer,
+#                forcats,
+#                Hmisc)
 
 
 
@@ -391,6 +391,8 @@ getAupecOutput = function(
 }
 
 # Plot the AUPEC curve ---------------------------------------------------- 
+#' @import ggplot2
+#' @import ggthemes
 plot_aupec <- function(fit, data, plot_name, algorithms){
 
 graphLabels <- data.frame(type = algorithms,
@@ -410,7 +412,8 @@ bind_rows(map(fit[[1]]$AUPEC, ~.x$aupec_cv)) %>%
   ) %>%
   mutate(AUPECmin = aupec.y - 1.96*sd,
          AUPECmax = aupec.y + 1.96*sd) %>% {{temp <<-.}} %>% 
-  ggplot(aes(x=fraction,y=aupec.y,group=type)) + geom_line(alpha=0.5,colour="red") + scale_colour_few("Dark")+
+  ggplot(aes(x=fraction,y=aupec.y,group=type)) + geom_line(alpha=0.5,colour="red") + 
+  scale_colour_few("Dark")+
   xlab("Maximum Proportion Treated")+
   ylab("AUPEC")+
   facet_wrap(~type)+scale_x_continuous(labels=scales::percent)+

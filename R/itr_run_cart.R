@@ -35,7 +35,7 @@ run_cart <- function(
 }
 
 
-
+#' @import rpart
 train_cart <- function(dat_train) {
   
   ## format training data 

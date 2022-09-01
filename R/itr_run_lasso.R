@@ -41,7 +41,7 @@ train_lasso <- function(dat_train) {
   training_data_elements_lasso <- create_ml_args_lasso(dat_train)
   
   ## fit
-  fit <- glmnet(training_data_elements_lasso[["X_expand"]],
+  fit <- glmnet::glmnet(training_data_elements_lasso[["X_expand"]],
                 training_data_elements_lasso[["Y"]],
                 alpha = 1,
                 lambda = 0.05)

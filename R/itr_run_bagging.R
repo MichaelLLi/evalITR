@@ -34,7 +34,6 @@ run_bagging <- function(
 }
 
 
-
 train_bagging <- function(dat_train) {
   
   ## format training data 
@@ -47,7 +46,7 @@ train_bagging <- function(dat_train) {
   tune_parameter = ncol(training_data_elements_bagging[["data"]]) -1
 
   ## fit
-  fit <- randomForest(formula_bagging, 
+  fit <- randomForest::randomForest(formula_bagging, 
                       data = training_data_elements_bagging[["data"]],
                       mtry=tune_parameter, ntree = 500)
   

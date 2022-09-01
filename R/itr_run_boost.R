@@ -44,7 +44,7 @@ train_boost <- function(dat_train) {
   formula_boosted = training_data_elements_boosted[["formula"]] 
 
   ## fit
-  fit <- gbm(formula_boosted, data = training_data_elements_boosted[["data"]],
+  fit <- gbm::gbm(formula_boosted, data = training_data_elements_boosted[["data"]],
                     distribution = "gaussian",
                     n.trees = 5000,
                     interaction.depth = 4)

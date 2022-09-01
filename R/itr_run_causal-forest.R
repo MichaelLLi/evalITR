@@ -41,7 +41,7 @@ train_causal_forest <- function(dat_train) {
   training_data_elements_cf <- create_ml_args_causalforest(dat_train)
   
   ## fit
-  fit <- causal_forest(
+  fit <- grf::causal_forest(
     training_data_elements_cf[["X_expand"]],
     training_data_elements_cf[["Y"]],
     training_data_elements_cf[["Treat"]],
