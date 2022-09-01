@@ -4,16 +4,16 @@
 
 # setwd("/n/home04/jialuli/fasrc/data/sys/dashboard/itr")
 
-source("itr_helpers.R")
-source("itr_qoi.R")
+source("r/itr_helpers.R")
+source("r/itr_qoi.R")
 
 
 ## read in ml algorithms
-file.sources = list.files(pattern="itr_run*")
+file.sources = list.files(path = "r/", pattern="itr_run*")
+file.sources = paste0("r/",file.sources) 
+
 sapply(file.sources,source,.GlobalEnv)
 
-## relative location
-here::i_am("itr_qoi.R")
 
 
 # source("itr_run_causal-forest.R")
@@ -24,7 +24,6 @@ here::i_am("itr_qoi.R")
 # source("itr_run_random-forest.R")
 # source("itr_run_bagging.R")
 # source("itr_run_cart.R")
-
 
 
 #' Evaluate ITR
@@ -45,6 +44,7 @@ here::i_am("itr_qoi.R")
 #' @importFrom dplyr %>% select
 #' @importFrom rlang !! sym
 #' 
+
 run_itr <- function(
   var_outcome,
   var_treatment, 

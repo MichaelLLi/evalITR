@@ -8,7 +8,8 @@ run_bart <- function(
   params, 
   indcv, 
   iter,
-  plim
+  plim,
+  plot = FALSE
 ) {
   
   ## train 

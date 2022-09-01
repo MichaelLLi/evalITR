@@ -70,7 +70,7 @@ compute_qoi <- function(fit_obj, algorithms) {
     tau_cv <- furrr::future_map(fit_ml[[i]], ~.x$tau_cv) %>% do.call(cbind, .)
     That_pcv_mat <- furrr::future_map(fit_ml[[i]], ~.x$That_pcv) %>% do.call(cbind, .)
     
-    aupec[[i]] <- getAupecOutput2(
+    aupec[[i]] <- getAupecOutput(
       tau, tau_cv, That_pcv_mat, algorithms[i],
       NFOLDS = params$n_folds, Ycv = Ycv, Tcv = Tcv, indcv = indcv
       
