@@ -47,19 +47,19 @@ split_samples = function(seed, data, train_prop, replace = FALSE){
 
 # Create arguments for ML algorithms ------------------------------------------
 
-create_ml_arguments = function(outcome_var, treatment_var, data){
+create_ml_arguments = function(outcome, treatment, data){
   
   Y = data %>% 
-    dplyr::select(all_of(outcome_var)) %>% unlist() %>% as.numeric()
+    dplyr::select(all_of(outcome)) %>% unlist() %>% as.numeric()
   
   X = data %>%
-    dplyr::select(-c(all_of(outcome_var), all_of(treatment_var))) %>%
+    dplyr::select(-c(all_of(outcome), all_of(treatment))) %>%
     as.data.frame()
   
   Treat = data %>%
-    dplyr::select(all_of(treatment_var)) %>% unlist() %>% as.numeric()
+    dplyr::select(all_of(treatment)) %>% unlist() %>% as.numeric()
   
-  formula = as.formula(paste(outcome_var, "~", paste(c(treatment_var, names(X)), collapse = "+")))
+  formula = as.formula(paste(outcome, "~", paste(c(treatment, names(X)), collapse = "+")))
   
   return(list(Y = Y, X = X, Treat = Treat, formula = formula))
 }
@@ -393,7 +393,8 @@ getAupecOutput = function(
 # Plot the AUPEC curve ---------------------------------------------------- 
 #' @import ggplot2
 #' @import ggthemes
-plot_aupec <- function(fit, data, plot_name, algorithms){
+#' @export plot_aupec
+plot_aupec <- function(fit, data, treatment, outcome, algorithms){
 
 graphLabels <- data.frame(type = algorithms,
                           Pval = bind_rows(map(fit[[1]]$AUPEC, ~.x$aupec_cv)) %>% 
@@ -401,8 +402,8 @@ graphLabels <- data.frame(type = algorithms,
                                                  " (s.e. = ", round(sd, 2), ")")) %>% 
                             pull(Pval))
 
-Tcv = data$Treat
-Ycv = data$Y
+Tcv = data %>% pull(treatment) %>% as.numeric()
+Ycv = data %>% pull(outcome) %>% as.numeric()
 
 bind_rows(map(fit[[1]]$AUPEC, ~.x$aupec_cv)) %>% 
   mutate(type = algorithms) %>%

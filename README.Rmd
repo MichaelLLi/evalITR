@@ -1,26 +1,39 @@
+---
+output: github_document
+---
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "man/figures/README-",
+  out.width = "100%"
+)
+```
 
 # evalITR
 
 <!-- badges: start -->
 <!-- badges: end -->
 
+
 ## Installation
 
-You can install the development version of evalITR from
-[GitHub](https://github.com/) with:
+You can install the development version of evalITR from [GitHub](https://github.com/) with:
 
 ``` r
 # install.packages("devtools")
 devtools::install_github("MichaelLLi/evalITR")
+
 ```
 
 ## Example
 
 This is an example using the STAT dataset
 
-``` r
+```{r example, message=FALSE}
 library(tidyverse)
 library(evalITR)
 
@@ -52,7 +65,8 @@ fit <- run_itr(outcome = outcomes,
                n_folds = 3)
 ```
 
-``` r
+
+```{r pressure, message=FALSE}
 # plot the AUPEC with different ML algorithms
 plot_aupec(fit = fit$qoi[1], 
           outcome = outcomes[1],
@@ -67,5 +81,3 @@ plot_aupec(fit = fit$qoi[1],
                   "bagging", 
                   "cart"))
 ```
-
-<img src="man/figures/README-pressure-1.png" width="100%" />

@@ -5,9 +5,9 @@
 \title{Evaluate ITR}
 \usage{
 run_itr(
-  var_outcome,
-  var_treatment,
-  var_covariates,
+  outcome,
+  treatment,
+  covariates,
   data,
   algorithms,
   plim,
@@ -16,11 +16,11 @@ run_itr(
 )
 }
 \arguments{
-\item{var_outcome}{XXX}
+\item{outcome}{XXX}
 
-\item{var_treatment}{YYY}
+\item{treatment}{YYY}
 
-\item{data}{A data frame that contains \code{var_outcome} and \code{var_treatment}.}
+\item{data}{A data frame that contains \code{outcome} and \code{treatment}.}
 
 \item{algorithms}{Machine learning algorithms.}
 

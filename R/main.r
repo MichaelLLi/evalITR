@@ -1,37 +1,9 @@
-##
-##
-##
-
-# setwd("/n/home04/jialuli/fasrc/data/sys/dashboard/itr")
-
-# source("r/itr_helpers.R")
-# source("r/itr_qoi.R")
-
-
-## read in ml algorithms
-# file.sources = list.files(path = "r/", pattern="itr_run*")
-# file.sources = paste0("r/",file.sources) 
-
-# sapply(file.sources,source,.GlobalEnv)
-
-
-
-# source("itr_run_causal-forest.R")
-# source("itr_run_svm.R")
-# source("itr_run_lasso.R")
-# source("itr_run_bart.R")
-# source("itr_run_boost.R")
-# source("itr_run_random-forest.R")
-# source("itr_run_bagging.R")
-# source("itr_run_cart.R")
-
-
 #' Evaluate ITR
 #' 
-#' @param var_outcome XXX
-#' @param var_treatment YYY
+#' @param outcome XXX
+#' @param treatment YYY
 #' @param data 
-#'   A data frame that contains \code{var_outcome} and \code{var_treatment}.
+#'   A data frame that contains \code{outcome} and \code{treatment}.
 #' @param algorithms 
 #'   Machine learning algorithms.  
 #' @param plim 
@@ -45,9 +17,9 @@
 #' @importFrom rlang !! sym
 #' @export
 run_itr <- function(
-  var_outcome,
-  var_treatment, 
-  var_covariates,
+  outcome,
+  treatment, 
+  covariates,
   data, 
   algorithms,
   plim,
@@ -71,13 +43,13 @@ run_itr <- function(
 
 
   ## loop over all outcomes
-  estimates <- qoi <- vector("list", length = length(var_outcome))
-  for (m in 1:length(var_outcome)) {
+  estimates <- qoi <- vector("list", length = length(outcome))
+  for (m in 1:length(outcome)) {
 
     ## data to use 
     ## rename outcome and treatment variable 
     data_filtered <- data %>% 
-      select(Y = !!sym(var_outcome[m]), Treat = !!sym(var_treatment), all_of(var_covariates))
+      select(Y = !!sym(outcome[m]), Treat = !!sym(treatment), all_of(covariates))
     
     ## create folds 
     treatment_vec <- data_filtered %>% dplyr::pull(Treat)
@@ -150,15 +122,15 @@ itr_single_outcome <- function(
 
     ## prepare data 
     training_data_elements <- create_ml_arguments(
-      outcome_var = "Y", treatment_var = "Treat", data = trainset
+      outcome = "Y", treatment = "Treat", data = trainset
     )
 
     testing_data_elements <- create_ml_arguments(
-      outcome_var = "Y", treatment_var = "Treat", data = testset
+      outcome = "Y", treatment = "Treat", data = testset
     )
     
     total_data_elements <- create_ml_arguments(
-      outcome_var = "Y", treatment_var = "Treat", data = data
+      outcome = "Y", treatment = "Treat", data = data
     )
     
 
