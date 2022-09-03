@@ -16,13 +16,13 @@ run_itr(
 )
 }
 \arguments{
-\item{outcome}{XXX}
+\item{outcome}{Outcome variable (or a list of outcome variables)}
 
-\item{treatment}{YYY}
+\item{treatment}{Treatment variable}
 
 \item{data}{A data frame that contains \code{outcome} and \code{treatment}.}
 
-\item{algorithms}{Machine learning algorithms.}
+\item{algorithms}{List of machine learning algorithms.}
 
 \item{plim}{Proportion of treated units.}
 

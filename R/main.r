@@ -1,11 +1,11 @@
 #' Evaluate ITR
 #' 
-#' @param outcome XXX
-#' @param treatment YYY
+#' @param outcome Outcome variable (or a list of outcome variables)
+#' @param treatment Treatment variable 
 #' @param data 
 #'   A data frame that contains \code{outcome} and \code{treatment}.
 #' @param algorithms 
-#'   Machine learning algorithms.  
+#'   List of machine learning algorithms.  
 #' @param plim 
 #'   Proportion of treated units.
 #' @param n_folds 
