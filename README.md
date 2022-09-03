@@ -68,4 +68,4 @@ plot_aupec(fit = fit$qoi[1],
                   "cart"))
 ```
 
-<img src="man/figures/README-pressure-1.png" width="100%" />
+<img src="man/figures/README-pressure-1.png" width="80%" />
