@@ -16,11 +16,22 @@ You can install the development version of evalITR from
 devtools::install_github("MichaelLLi/evalITR")
 ```
 
+(Optional) if you have multiple cores, we recommendate using multisession futures and processing in parallel. This would increase computation efficiency and reduce the time to fit the model. 
+
+```r
+library(furrr)
+library(future.apply)
+
+nworkers <- 4
+plan(multisession, workers =nworkers)
+```
+
 ## Example
 
-This is an example using the STAT dataset. We first load the `star`
-dataset and specify outcome variables (reading, math, and writing) and
-covariates we want to include in the model. Then we use machine learning
+This is an example using the `star` dataset (for more information about the dataset, please use `?star`). 
+
+We first load the dataset and specify outcome variables (reading, math, and writing scores) and
+covariates we want to include in the model. Then we use a series of machine learning
 algorithms to estimate the heterogeneous effects of small classes on
 educational attainment. We use 20% as a budget constraint and tuned the
 model through through the 3-fold cross validation.
@@ -58,8 +69,7 @@ fit <- run_itr(outcome = outcomes,
 ```
 
 We plot the estimated Area Under the Prescriptive Effect Curve (AUPEC)
-for the writing score across a range of budget constraints for different
-machine learning algorithms.
+for the writing score across a range of budget constraints for different algorithms.
 
 ``` r
 # plot the AUPEC with different ML algorithms
@@ -77,4 +87,4 @@ plot_aupec(fit = fit$qoi[1],
                   "cart"))
 ```
 
-![](man/figures/README-unnamed-chunk-3-1.png)<!-- -->
+![](man/figures/README-plot-1.png)<!-- -->
