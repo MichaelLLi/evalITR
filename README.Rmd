@@ -64,7 +64,7 @@ fit <- run_itr(outcome = outcomes,
 We plot the estimated Area Under the Prescriptive Effect Curve (AUPEC) for the writing score across a range of
 budget constraints for different machine learning algorithms. 
 
-```{r}
+```{r plot}
 # plot the AUPEC with different ML algorithms
 plot_aupec(fit = fit$qoi[1], 
           outcome = outcomes[1],
@@ -78,5 +78,5 @@ plot_aupec(fit = fit$qoi[1],
                   "random_forest",
                   "bagging", 
                   "cart"))
-                  
+
 ```

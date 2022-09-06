@@ -84,7 +84,7 @@ plot_aupec(fit = fit$qoi[1],
                   "boost", 
                   "random_forest",
                   "bagging", 
-                  "cart"))
+                  "cart")) 
 ```
 
 ![](man/figures/README-plot-1.png)<!-- -->

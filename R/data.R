@@ -2,6 +2,7 @@
 #'
 #' A longitudinal study experimentally evaluating the impacts of class size in early education on various outcomes (Mosteller, 1995)
 #'
+#' @name star
 #' @format A data frame with 1911 observations and 14 variables:
 #' \describe{
 #'   \item{treatment}{A binary treatment indicating whether a student is assigned to small class and regular class without an aid}
