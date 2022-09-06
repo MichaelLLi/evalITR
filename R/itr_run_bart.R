@@ -41,6 +41,7 @@ train_bart <- function(dat_train) {
   return(fit)
 }
 
+#'@importFrom stats predict runif
 test_bart <- function(
   fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, plim
 ) {

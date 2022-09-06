@@ -22,11 +22,11 @@ run_lasso <- function(
   )
   
   # plot
-  if(plot == TRUE){
-    plot <- plot_var_importance_lasso(fit_train, "Lasso", iter)
-  }else {
-     plot <- NULL
-  }
+  # if(plot == TRUE){
+  #   plot <- plot_var_importance_lasso(fit_train, "Lasso", iter)
+  # }else {
+  #    plot <- NULL
+  # }
   
 
   
@@ -49,6 +49,7 @@ train_lasso <- function(dat_train) {
   return(fit)
 }
 
+#'@importFrom stats predict runif
 test_lasso <- function(
   fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, plim
 ) {
@@ -86,26 +87,26 @@ test_lasso <- function(
 
 ## plot varaible importance
 
-plot_var_importance_lasso <- function(fit_train, method, fold){
+# plot_var_importance_lasso <- function(fit_train, method, fold){
 
-  df <- coefficients(fit_train) %>% as.matrix() %>% as.data.frame() %>%
-   {{temp <<-.}} %>%
-  dplyr::mutate(variable = rownames(temp)) %>%
-    rename(value = "s0")
+#   df <- coefficients(fit_train) %>% as.matrix() %>% as.data.frame() %>%
+#    {{temp <<-.}} %>%
+#   dplyr::mutate(variable = rownames(temp)) %>%
+#     rename(value = "s0")
 
-  highlight_df <- df[c("pseudo"),]
+#   highlight_df <- df[c("pseudo"),]
 
-  df  %>% 
-    ggplot(., aes(x = reorder(variable,value), y = value)) + 
-    geom_bar(stat="identity", fill= rainbow(1), alpha=.4) +
-    geom_bar(data = highlight_df, stat="identity", fill= rainbow(1), alpha=.8) +
-    theme_bw()  +
-    coord_flip() +
-    ggtitle(method) +
-    labs(y = "Coefficient",
-       x = "Variable") 
+#   df  %>% 
+#     ggplot(., aes(x = reorder(variable,value), y = value)) + 
+#     geom_bar(stat="identity", fill= rainbow(1), alpha=.4) +
+#     geom_bar(data = highlight_df, stat="identity", fill= rainbow(1), alpha=.8) +
+#     theme_bw()  +
+#     coord_flip() +
+#     ggtitle(method) +
+#     labs(y = "Coefficient",
+#        x = "Variable") 
 
-  ggsave(here("plot", paste0("lasso_var_importance", fold, ".png")), width = 6, height = 4.5, dpi = 300)
+#   ggsave(here("plot", paste0("lasso_var_importance", fold, ".png")), width = 6, height = 4.5, dpi = 300)
 
-}
+# }
 

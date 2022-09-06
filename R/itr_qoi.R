@@ -7,7 +7,8 @@
 
 #' Compute Quantities of Interest
 #' @param fit_obj An output object from \code{itr_single_outcome} function.
-
+#' @param algorithms Machine learning algorithms
+#' @importFrom rlang .data
 compute_qoi <- function(fit_obj, algorithms) {
   
   ## extract objects

@@ -8,6 +8,8 @@ compute_qoi(fit_obj, algorithms)
 }
 \arguments{
 \item{fit_obj}{An output object from \code{itr_single_outcome} function.}
+
+\item{algorithms}{Machine learning algorithms}
 }
 \description{
 Compute Quantities of Interest

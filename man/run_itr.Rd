@@ -20,6 +20,8 @@ run_itr(
 
 \item{treatment}{Treatment variable}
 
+\item{covariates}{Covariates included in the model.}
+
 \item{data}{A data frame that contains \code{outcome} and \code{treatment}.}
 
 \item{algorithms}{List of machine learning algorithms.}
@@ -28,7 +30,7 @@ run_itr(
 
 \item{n_folds}{Number of cross-validation folds.}
 
-\item{options}{List of options.}
+\item{plot}{Variable importance plot.}
 }
 \description{
 Evaluate ITR

@@ -10,9 +10,10 @@
 #'   Proportion of treated units.
 #' @param n_folds 
 #'   Number of cross-validation folds.
-#' @param options  
-#'   List of options.
-#'  
+#' @param covariates
+#'   Covariates included in the model.
+#' @param plot
+#'   Variable importance plot.
 #' @import dplyr
 #' @importFrom rlang !! sym
 #' @export
@@ -83,6 +84,12 @@ run_itr <- function(
 #' 
 #' @importFrom purrr map
 #' @importFrom dplyr pull
+#' @param data A dataset
+#' @param algorithms Machine learning algorithms
+#' @param params A list of parameters
+#' @param folds Number of folds
+#' @param plim The maximum percentage of population that can be treated under the budget constraint
+#' @param plot Variable importance plot
 itr_single_outcome <- function(
   data, 
   algorithms,
@@ -253,14 +260,7 @@ itr_single_outcome <- function(
         plim      = plim,
         plot      = plot  
       )
-    }
-    
-    if("lm" %in% algorithms){
-      fit_ml[["lm"]][[j]] <- run_lm(
-        dat_train = training_data_elements
-      )
-    }
-    
+    }    
 
   } ## end of fold 
 
@@ -270,5 +270,4 @@ itr_single_outcome <- function(
   ))
 }
 
-
-
+utils::globalVariables(c("Treat","aupec", "sd", "Pval", "aupec.y", "fraction", "type", "AUPECmin", "AUPECmax", "."))

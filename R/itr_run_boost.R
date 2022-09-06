@@ -23,11 +23,11 @@ run_boost <- function(
   )
   
   # plot
-  if(plot == TRUE){
-    plot <- plot_var_importance_boost(fit_train, "Boosting", iter)
-  }else {
-     plot <- NULL
-  }
+  # if(plot == TRUE){
+  #   plot <- plot_var_importance_boost(fit_train, "Boosting", iter)
+  # }else {
+  #    plot <- NULL
+  # }
 
   
   return(fit_test)
@@ -53,6 +53,7 @@ train_boost <- function(dat_train) {
 
 }
 
+#'@importFrom stats predict runif
 test_boost <- function(
   fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, plim
 ) {
@@ -90,40 +91,40 @@ test_boost <- function(
 
 ## plot varaible importance
 
-plot_var_importance_boost <- function(fit_train, method, fold){
-  df <- summary(fit_train) %>% as.data.frame() %>% {{temp <<-.}} %>%
-    dplyr::mutate(variable = rownames(temp)) %>%
-    rename(value = rel.inf)
+# plot_var_importance_boost <- function(fit_train, method, fold){
+#   df <- summary(fit_train) %>% as.data.frame() %>% {{temp <<-.}} %>%
+#     dplyr::mutate(variable = rownames(temp)) %>%
+#     rename(value = rel.inf)
 
-  highlight_df <- df[c("pseudo"),]
+#   highlight_df <- df[c("pseudo"),]
 
-  # ## recode the variable names                
-  # df$variable <- fct_recode(df$variable,
-  #                           "Area population" = "area_pop_base",
-  #                           "Total oustanding debt in area" =  "area_debt_total_base", 
-  #                           "Total number of business in area" = "area_business_total_base", 
-  #                           "Area mean montly pc expenditure" = "area_exp_pc_mean_base", 
-  #                           "Area literacy rate (HH heads)" = "area_literate_head_base","Area literacy rate" = "area_literate_base")
+#   # ## recode the variable names                
+#   # df$variable <- fct_recode(df$variable,
+#   #                           "Area population" = "area_pop_base",
+#   #                           "Total oustanding debt in area" =  "area_debt_total_base", 
+#   #                           "Total number of business in area" = "area_business_total_base", 
+#   #                           "Area mean montly pc expenditure" = "area_exp_pc_mean_base", 
+#   #                           "Area literacy rate (HH heads)" = "area_literate_head_base","Area literacy rate" = "area_literate_base")
 
-  #   highlight_df$variable  <- fct_recode(highlight_df$variable,
-  #                           "Total oustanding debt in area" = "area_debt_total_base",
-  #                           "Area mean montly pc expenditure" = "area_exp_pc_mean_base",
-  #                           "Area literacy rate" = "area_literate_base")
+#   #   highlight_df$variable  <- fct_recode(highlight_df$variable,
+#   #                           "Total oustanding debt in area" = "area_debt_total_base",
+#   #                           "Area mean montly pc expenditure" = "area_exp_pc_mean_base",
+#   #                           "Area literacy rate" = "area_literate_base")
 
-  df  %>% 
-    ggplot(., aes(x = reorder(variable,value), y = value)) + 
-    geom_bar(stat="identity", fill= rainbow(1), alpha=.4) +
-    geom_bar(data = highlight_df, stat="identity", fill= rainbow(1), alpha=.8) +
-    theme_bw()  +
-    coord_flip() +
-    ggtitle(method) +
-    labs(y = "Coefficient",
-       x = "Variable") 
+#   df  %>% 
+#     ggplot(., aes(x = reorder(variable,value), y = value)) + 
+#     geom_bar(stat="identity", fill= rainbow(1), alpha=.4) +
+#     geom_bar(data = highlight_df, stat="identity", fill= rainbow(1), alpha=.8) +
+#     theme_bw()  +
+#     coord_flip() +
+#     ggtitle(method) +
+#     labs(y = "Coefficient",
+#        x = "Variable") 
 
 
-  ggsave(here("plot", paste0("boosting_var_importance", fold, ".png")), width = 6, height = 4.5, dpi = 300)
+#   ggsave(here("plot", paste0("boosting_var_importance", fold, ".png")), width = 6, height = 4.5, dpi = 300)
 
-}
+# }
 
 
   

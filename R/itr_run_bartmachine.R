@@ -1,4 +1,4 @@
-#' @export
+#'
 run_bartmachine <- function(
   dat_train, 
   dat_test, 
@@ -21,11 +21,11 @@ run_bartmachine <- function(
   )
     
   # plot
-  if(plot == TRUE){
-  plot <- plot_var_importance_bart(fit_train, iter)
-  }else {
-     plot <- NULL
-  }  
+  # if(plot == TRUE){
+  # plot <- plot_var_importance_bart(fit_train, iter)
+  # }else {
+  #    plot <- NULL
+  # }  
   
   return(fit_test)
 }
@@ -56,6 +56,7 @@ train_bart <- function(dat_train) {
   return(fit)
 }
 
+#'@importFrom stats predict runif
 test_bart <- function(
   fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, plim
 ) {
@@ -92,10 +93,10 @@ test_bart <- function(
 
 
 ## plot varaible importance
-plot_var_importance_bart <- function(fit_train, fold){
+# plot_var_importance_bart <- function(fit_train, fold){
 
-  png(paste0("plot/bart_var_importance", fold, ".png"))
-  investigate_var_importance(fit_train, plot = TRUE) 
-  dev.off()
+#   png(paste0("plot/bart_var_importance", fold, ".png"))
+#   investigate_var_importance(fit_train, plot = TRUE) 
+#   dev.off()
 
-}
+# }
