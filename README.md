@@ -18,7 +18,12 @@ devtools::install_github("MichaelLLi/evalITR")
 
 ## Example
 
-This is an example using the STAT dataset
+This is an example using the STAT dataset. We first load the `star`
+dataset and specify outcome variables (reading, math, and writing) and
+covariates we want to include in the model. Then we use machine learning
+algorithms to estimate the heterogeneous effects of small classes on
+educational attainment. We use 20% as a budget constraint and tuned the
+model through through the 3-fold cross validation.
 
 ``` r
 library(tidyverse)
@@ -52,6 +57,10 @@ fit <- run_itr(outcome = outcomes,
                n_folds = 3)
 ```
 
+We plot the estimated Area Under the Prescriptive Effect Curve (AUPEC)
+for the writing score across a range of budget constraints for different
+machine learning algorithms.
+
 ``` r
 # plot the AUPEC with different ML algorithms
 plot_aupec(fit = fit$qoi[1], 
@@ -68,4 +77,4 @@ plot_aupec(fit = fit$qoi[1],
                   "cart"))
 ```
 
-![](man/figures/README-pressure-1.png)<!-- -->
+![](man/figures/README-unnamed-chunk-3-1.png)<!-- -->
