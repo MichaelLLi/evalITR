@@ -30,7 +30,7 @@ plan(multisession, workers =nworkers)
 
 This is an example using the `star` dataset (for more information about the dataset, please use `?star`). 
 
-We first load the dataset and specify outcome variables (reading, math, and writing scores) and
+We first load the dataset and specify both outcome variables (reading, math, and writing scores) and
 covariates we want to include in the model. Then we use a series of machine learning
 algorithms to estimate the heterogeneous effects of small classes on
 educational attainment. We use 20% as a budget constraint and tuned the
