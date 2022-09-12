@@ -274,4 +274,4 @@ itr_single_outcome <- function(
   ))
 }
 
-utils::globalVariables(c("Treat","aupec", "sd", "Pval", "aupec.y", "fraction", "type", "AUPECmin", "AUPECmax", "."))
+utils::globalVariables(c("Treat","aupec", "sd", "Pval", "aupec.y", "fraction", "type", "AUPECmin", "AUPECmax", ".", "fit"))

@@ -1,5 +1,5 @@
 #' Summarize run_itr output
-#' @param object An object of \code{run_itr} class.
+#' @param object An object of \code{run_itr} class
 #' @param type A string indicates the quantity of interests to compute. \code{type} includes PAPE, PAPEp, PAPDp
 #' @param m A numeric value indicates which outcome to look at from the vector of \code{outcomes}
 #' @param ... Other parameters. Currently not supported

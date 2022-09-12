@@ -7,7 +7,7 @@
 \method{summary}{itr}(object, m, type, ...)
 }
 \arguments{
-\item{object}{An object of \code{run_itr} class.}
+\item{object}{An object of \code{run_itr} class}
 
 \item{m}{A numeric value indicates which outcome to look at from the vector of \code{outcomes}}
 

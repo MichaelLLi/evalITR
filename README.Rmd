@@ -55,9 +55,8 @@ library(evalITR)
 load("data/star.rda")
 
 # specifying outcomes
-# outcomes <- c("g3tlangss",
-#                 "g3treadss","g3tmathss")
-outcomes <- c("g3tlangss")
+outcomes <- c("g3tlangss",
+                "g3treadss","g3tmathss")
 
 
 # specifying covariates
@@ -72,19 +71,23 @@ fit <- run_itr(outcome = outcomes,
                data = star,
                algorithms = c(
                   "causal_forest", 
-                  # "bart",
-                  # "lasso",
-                  # "boost", 
-                  # "random_forest",
-                  # "bagging",
+                  "bart",
+                  "lasso",
+                  "boost", 
+                  "random_forest",
+                  "bagging",
                   "cart"),
                plim = 0.2,
                n_folds = 3)
 ```
 
+The`summary()` function display  the following summary statistics: (1) population average prescriptive effect `PAPE`; (2) population average prescriptive effect with a budget constraint `PAPEp`; (3) population average prescriptive effect difference with a budget constraint `PAPDp`; (4) and area under the prescriptive effect curve `AUPEC`. For more information about these evaluation metrics, please refer to [this paper](https://arxiv.org/abs/1905.05389).
+
+
+
 ```{r output}
 # get PAPE estimates
-summary(fit,1, type = "PAPE")
+summary(fit, 1, type = "PAPE")
 
 # get PAPE estimates
 summary(fit, 1, type = "PAPEp")
@@ -97,22 +100,22 @@ summary(fit, 1, type = "AUPEC")
 ```
 
 
-We plot the estimated Area Under the Prescriptive Effect Curve (AUPEC)
+We plot the estimated Area Under the Prescriptive Effect Curve
 for the writing score across a range of budget constraints for different algorithms.
 
 ```{r plot}
 # plot the AUPEC with different ML algorithms
-plot_aupec(fit = fit$qoi[1], 
-          outcome = outcomes[1],
-          treatment = "treatment",
-          data = star, 
-          algorithms = c(
-                  "causal_forest",
-                  # "bart",
-                  # "lasso",
-                  # "boost", 
-                  # "random_forest",
-                  # "bagging", 
-                  "cart"))
+plot(x = fit, 
+      outcome = outcomes[1],
+      treatment = "treatment",
+      data = star, 
+      algorithms = c(
+          "causal_forest",
+          "bart",
+          "lasso",
+          "boost", 
+          "random_forest",
+          "bagging", 
+          "cart"))
 
 ```

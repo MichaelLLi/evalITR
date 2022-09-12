@@ -3,16 +3,17 @@
 #' @import ggthemes
 #' @importFrom stats sd
 #' @importFrom rlang .data
-#' @param fit A list that contains the following items:
-#' * `aupec`: The estimated Area Under Prescription Evaluation Curve
-#' * `sd`: The estimated standard deviation of AUPEC
-#' * `aupec_cv`: The estimated Area Under Prescription Evaluation Curve using cross-validation
+#' @param x An object of \code{run_itr} class. This is typically an output of \code{run_itr()} function. 
 #' @param data The dataset.
 #' @param treatment A vector of the unit-level binary treatment receipt variable for each sample.
 #' @param outcome A vector of the outcome variable of interest for each sample.
 #' @param algorithms A vector of machine learning algorithms. 
-#' @export plot_aupec 
-plot_aupec <- function(fit, data, treatment, outcome, algorithms){
+#' @param ... Other parameters. Currently not supported
+#' @return A plot of ggplot2 object.
+#' @export 
+plot.itr <- function(x, data, treatment, outcome, algorithms,...){
+
+fit <- x$qoi
 
 graphLabels <- data.frame(type = algorithms,
                           Pval = bind_rows(map(fit[[1]]$AUPEC, ~.x$aupec_cv)) %>% 
@@ -54,5 +55,5 @@ data %>%
           axis.text = element_text(size=10),
           strip.text = element_text(size = 13.5)) -> out
 
-return(out)
+  return(out)
 }
