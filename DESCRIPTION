@@ -27,6 +27,7 @@ Depends:
 Imports:
     bartMachine,
     caret,
+    cli,
     furrr,
     gbm,
     ggplot2,

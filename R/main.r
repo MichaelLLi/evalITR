@@ -17,6 +17,7 @@
 #' @import dplyr
 #' @importFrom rlang !! sym
 #' @export
+#' @return An object of \code{itr} class
 run_itr <- function(
   outcome,
   treatment, 
@@ -73,9 +74,12 @@ run_itr <- function(
     
   }
 
+  out <- list(qoi       = qoi,
+              estimates = estimates)
+              
+  class(out) <- c("itr", class(out))
 
-  return(list(qoi       = qoi,
-              estimates = estimates))
+  return(out)
 
 }
 

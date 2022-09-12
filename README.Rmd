@@ -55,8 +55,10 @@ library(evalITR)
 load("data/star.rda")
 
 # specifying outcomes
-outcomes <- c("g3tlangss",
-                "g3treadss","g3tmathss")
+# outcomes <- c("g3tlangss",
+#                 "g3treadss","g3tmathss")
+outcomes <- c("g3tlangss")
+
 
 # specifying covariates
 covariates <-  star %>% 
@@ -70,15 +72,31 @@ fit <- run_itr(outcome = outcomes,
                data = star,
                algorithms = c(
                   "causal_forest", 
-                  "bart",
-                  "lasso",
-                  "boost", 
-                  "random_forest",
-                  "bagging",
+                  # "bart",
+                  # "lasso",
+                  # "boost", 
+                  # "random_forest",
+                  # "bagging",
                   "cart"),
                plim = 0.2,
                n_folds = 3)
 ```
+
+```{r output}
+# get PAPE estimates
+summary(fit,1, type = "PAPE")
+
+# get PAPE estimates
+summary(fit, 1, type = "PAPEp")
+
+# get PAPDp estimates
+summary(fit, 1, type = "PAPDp")
+
+# get AUPEC estimates
+summary(fit, 1, type = "AUPEC")
+```
+
+
 We plot the estimated Area Under the Prescriptive Effect Curve (AUPEC)
 for the writing score across a range of budget constraints for different algorithms.
 
@@ -90,11 +108,11 @@ plot_aupec(fit = fit$qoi[1],
           data = star, 
           algorithms = c(
                   "causal_forest",
-                  "bart",
-                  "lasso",
-                  "boost", 
-                  "random_forest",
-                  "bagging", 
+                  # "bart",
+                  # "lasso",
+                  # "boost", 
+                  # "random_forest",
+                  # "bagging", 
                   "cart"))
 
 ```

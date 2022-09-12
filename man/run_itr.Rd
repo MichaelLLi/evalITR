@@ -32,6 +32,9 @@ run_itr(
 
 \item{plot}{Variable importance plot.}
 }
+\value{
+An object of \code{itr} class
+}
 \description{
 Evaluate ITR
 }

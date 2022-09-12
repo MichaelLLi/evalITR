@@ -1,11 +1,4 @@
-
-##
-## Quantities of Interest (PAPE, PAPEp, PAPD, AUPEC)
-##
-
-
-
-#' Compute Quantities of Interest
+#' Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC)
 #' @param fit_obj An output object from \code{itr_single_outcome} function.
 #' @param algorithms Machine learning algorithms
 #' @importFrom rlang .data
