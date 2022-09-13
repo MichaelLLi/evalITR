@@ -4,14 +4,12 @@
 \alias{summary.itr}
 \title{Summarize run_itr output}
 \usage{
-\method{summary}{itr}(object, m, type, ...)
+\method{summary}{itr}(object, m = 1, ...)
 }
 \arguments{
 \item{object}{An object of \code{run_itr} class}
 
-\item{m}{A numeric value indicates which outcome to look at from the vector of \code{outcomes}}
-
-\item{type}{A string indicates the quantity of interests to compute. \code{type} includes PAPE, PAPEp, PAPDp}
+\item{m}{A numeric value indicates which element to focus on from the vector of \code{outcomes}. The default is the first outcome in the vector \code{outcomes}.}
 
 \item{...}{Other parameters. Currently not supported}
 }

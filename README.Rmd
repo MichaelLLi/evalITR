@@ -81,31 +81,22 @@ fit <- run_itr(outcome = outcomes,
                n_folds = 3)
 ```
 
-The`summary()` function display  the following summary statistics: (1) population average prescriptive effect `PAPE`; (2) population average prescriptive effect with a budget constraint `PAPEp`; (3) population average prescriptive effect difference with a budget constraint `PAPDp`; (4) and area under the prescriptive effect curve `AUPEC`. For more information about these evaluation metrics, please refer to [this paper](https://arxiv.org/abs/1905.05389).
+The`summary()` function displays the following summary statistics: (1) population average prescriptive effect `PAPE`; (2) population average prescriptive effect with a budget constraint `PAPEp`; (3) population average prescriptive effect difference with a budget constraint `PAPDp`; (4) and area under the prescriptive effect curve `AUPEC`. For more information about these evaluation metrics, please refer to [this paper](https://arxiv.org/abs/1905.05389).
 
 
 
 ```{r output}
-# get PAPE estimates
-summary(fit, 1, type = "PAPE")
-
-# get PAPE estimates
-summary(fit, 1, type = "PAPEp")
-
-# get PAPDp estimates
-summary(fit, 1, type = "PAPDp")
-
-# get AUPEC estimates
-summary(fit, 1, type = "AUPEC")
+# summarize estimates
+summary(fit)
 ```
 
 We plot the estimated Area Under the Prescriptive Effect Curve
 for the writing score across a range of budget constraints for different algorithms.
 
-```{r plot}
+```{r plot, fig.width=8, fig.height=8,fig.align = "center"}
 # plot the AUPEC with different ML algorithms
 plot(x = fit, 
-      outcome = outcomes[1],
+      outcome = "g3tlangss",
       treatment = "treatment",
       data = star, 
       algorithms = c(

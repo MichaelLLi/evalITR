@@ -73,7 +73,7 @@ fit <- run_itr(outcome = outcomes,
                n_folds = 3)
 ```
 
-The`summary()` function display the following summary statistics: (1)
+The`summary()` function displays the following summary statistics: (1)
 population average prescriptive effect `PAPE`; (2) population average
 prescriptive effect with a budget constraint `PAPEp`; (3) population
 average prescriptive effect difference with a budget constraint `PAPDp`;
@@ -82,67 +82,61 @@ information about these evaluation metrics, please refer to [this
 paper](https://arxiv.org/abs/1905.05389).
 
 ``` r
-# get PAPE estimates
-summary(fit, 1, type = "PAPE")
-#> ── Estimates ───────────────────────────────────────────────────────────────────
-#>    pape   sd           alg
-#> 1 -0.40 0.56 causal_forest
-#> 2 -0.11 1.24          bart
-#> 3  0.81 1.25         lasso
-#> 4  1.56 1.29         boost
-#> 5  2.76 1.01 random_forest
-#> 6  2.75 1.12       bagging
-#> 7  1.84 1.16          cart
-
-# get PAPEp estimates
-summary(fit, 1, type = "PAPEp")
-#> ── Estimates ───────────────────────────────────────────────────────────────────
-#>   papep   sd           alg
-#> 1  0.48 0.95 causal_forest
-#> 2  1.28 1.05          bart
-#> 3  0.73 0.88         lasso
-#> 4  1.15 0.65         boost
-#> 5  0.82 0.71 random_forest
-#> 6  1.29 1.06       bagging
-#> 7  1.26 1.10          cart
-
-# get PAPDp estimates
-summary(fit, 1, type = "PAPDp")
-#> ── Estimates ───────────────────────────────────────────────────────────────────
-#>       papd   sd                           alg
-#> 1  -0.7973 0.60          causal_forest x bart
-#> 2  -0.2439 1.27         causal_forest x lasso
-#> 3  -0.6641 0.97         causal_forest x boost
-#> 4  -0.3328 0.77 causal_forest x random_forest
-#> 5  -0.8030 1.02       causal_forest x bagging
-#> 6  -0.7758 1.51          causal_forest x cart
-#> 7   0.5534 0.99                  bart x lasso
-#> 8   0.1332 0.84                  bart x boost
-#> 9   0.4644 0.97          bart x random_forest
-#> 10 -0.0057 1.36                bart x bagging
-#> 11  0.0215 1.49                   bart x cart
-#> 12 -0.4202 0.71                 lasso x boost
-#> 13 -0.0889 0.77         lasso x random_forest
-#> 14 -0.5590 0.79               lasso x bagging
-#> 15 -0.5318 1.47                  lasso x cart
-#> 16  0.3313 0.75         boost x random_forest
-#> 17 -0.1389 0.77               boost x bagging
-#> 18 -0.1117 0.91                  boost x cart
-#> 19 -0.4701 0.90       random_forest x bagging
-#> 20 -0.4429 0.88          random_forest x cart
-#> 21  0.0272 1.25                bagging x cart
-
-# get AUPEC estimates
-summary(fit, 1, type = "AUPEC")
-#> ── Estimates ───────────────────────────────────────────────────────────────────
-#>   aupec   sd     algorithm
-#> 1  0.20 1.06 causal_forest
-#> 2  0.98 0.90          bart
-#> 3  0.26 1.44         lasso
-#> 4  1.04 1.03         boost
-#> 5  1.69 0.66 random_forest
-#> 6  1.57 0.73       bagging
-#> 7  1.19 1.04          cart
+# summarize estimates
+summary(fit)
+#> ── PAPE ────────────────────────────────────────────────────────────────────────
+#>   estimate std.deviation     algorithm statistic p.value
+#> 1     0.65          1.69 causal_forest      0.38   0.702
+#> 2     1.80          1.09          bart      1.65   0.099
+#> 3     2.02          1.08         lasso      1.88   0.061
+#> 4     0.61          0.83         boost      0.74   0.462
+#> 5     1.97          1.28 random_forest      1.55   0.122
+#> 6     1.18          0.84       bagging      1.40   0.161
+#> 7     1.59          1.82          cart      0.88   0.381
+#> 
+#> ── PAPEp ───────────────────────────────────────────────────────────────────────
+#>   estimate std.deviation     algorithm statistic p.value
+#> 1     1.26          1.08 causal_forest      1.16   0.245
+#> 2     1.14          0.65          bart      1.77   0.077
+#> 3     0.74          1.07         lasso      0.69   0.487
+#> 4     1.67          0.66         boost      2.54   0.011
+#> 5     0.79          0.68 random_forest      1.17   0.243
+#> 6     0.46          0.69       bagging      0.67   0.501
+#> 7     0.87          0.66          cart      1.31   0.191
+#> 
+#> ── PAPDp ───────────────────────────────────────────────────────────────────────
+#>    estimate std.deviation                     algorithm statistic p.value
+#> 1     0.116          0.55          causal_forest x bart     0.211    0.83
+#> 2     0.515          1.30         causal_forest x lasso     0.396    0.69
+#> 3    -0.410          0.96         causal_forest x boost    -0.427    0.67
+#> 4     0.465          0.79 causal_forest x random_forest     0.593    0.55
+#> 5     0.794          0.85       causal_forest x bagging     0.930    0.35
+#> 6     0.391          1.19          causal_forest x cart     0.329    0.74
+#> 7     0.399          0.76                  bart x lasso     0.526    0.60
+#> 8    -0.526          1.46                  bart x boost    -0.361    0.72
+#> 9     0.350          1.13          bart x random_forest     0.310    0.76
+#> 10    0.678          1.42                bart x bagging     0.478    0.63
+#> 11    0.276          1.39                   bart x cart     0.199    0.84
+#> 12   -0.925          0.76                 lasso x boost    -1.209    0.23
+#> 13   -0.049          0.86         lasso x random_forest    -0.057    0.95
+#> 14    0.279          0.85               lasso x bagging     0.327    0.74
+#> 15   -0.123          1.16                  lasso x cart    -0.107    0.91
+#> 16    0.875          0.77         boost x random_forest     1.140    0.25
+#> 17    1.204          1.29               boost x bagging     0.935    0.35
+#> 18    0.801          1.47                  boost x cart     0.544    0.59
+#> 19    0.328          0.46       random_forest x bagging     0.708    0.48
+#> 20   -0.074          0.86          random_forest x cart    -0.086    0.93
+#> 21   -0.402          1.40                bagging x cart    -0.288    0.77
+#> 
+#> ── AUPEC ───────────────────────────────────────────────────────────────────────
+#>   estimate std.deviation     algorithm statistic p.value
+#> 1     1.06           2.3 causal_forest      0.46    0.65
+#> 2     0.93           1.8          bart      0.51    0.61
+#> 3     0.89           2.4         lasso      0.37    0.71
+#> 4     0.39           1.6         boost      0.25    0.81
+#> 5     1.04           2.2 random_forest      0.47    0.64
+#> 6     0.47           2.5       bagging      0.19    0.85
+#> 7     0.91           1.8          cart      0.51    0.61
 ```
 
 We plot the estimated Area Under the Prescriptive Effect Curve for the
@@ -152,7 +146,7 @@ algorithms.
 ``` r
 # plot the AUPEC with different ML algorithms
 plot(x = fit, 
-      outcome = outcomes[1],
+      outcome = "g3tlangss",
       treatment = "treatment",
       data = star, 
       algorithms = c(
@@ -165,4 +159,4 @@ plot(x = fit,
           "cart"))
 ```
 
-![](man/figures/README-plot-1.png)<!-- -->
+<img src="man/figures/README-plot-1.png" style="display: block; margin: auto;" />
