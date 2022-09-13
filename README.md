@@ -94,7 +94,7 @@ summary(fit,1, type = "PAPE")
 #> 6  1.990 0.89       bagging
 #> 7 -0.716 1.15          cart
 
-# get PAPE estimates
+# get PAPEp estimates
 summary(fit, 1, type = "PAPEp")
 #> ── Estimates ───────────────────────────────────────────────────────────────────
 #>   papep   sd           alg
