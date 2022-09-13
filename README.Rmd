@@ -99,7 +99,6 @@ summary(fit, 1, type = "PAPDp")
 summary(fit, 1, type = "AUPEC")
 ```
 
-
 We plot the estimated Area Under the Prescriptive Effect Curve
 for the writing score across a range of budget constraints for different algorithms.
 
