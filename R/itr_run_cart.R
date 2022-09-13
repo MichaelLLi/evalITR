@@ -22,13 +22,6 @@ run_cart <- function(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb, 
     indcv, iter, plim
   )
-
-  # plot
-  # if(plot == TRUE){
-  #   plot <- plot_var_importance_cart(fit_train, "CART", iter)
-  # }else {
-  #    plot <- NULL
-  # }
   
 
   return(fit_test)
@@ -87,54 +80,3 @@ test_cart <- function(
 }
 
 
-
-## plot varaible importance
-
-# plot_var_importance_cart <- function(fit_train, method, fold){
-
-#   df <- fit_train$"variable.importance" %>% as.data.frame() %>% {{temp <<-.}} %>%
-#   dplyr::mutate(variable = rownames(temp)) %>%
-#     rename(value = ".")
-
-#   highlight_df <- df[c("pseudo"),]
-
-#   # ## recode the variable names                
-#   # df$variable <- fct_recode(df$variable,
-#   #                           "Area population" = "area_pop_base",
-#   #                           "Total oustanding debt in area" =  "area_debt_total_base", 
-#   #                           "Total number of business in area" = "area_business_total_base", 
-#   #                           "Area mean montly pc expenditure" = "area_exp_pc_mean_base", 
-#   #                           "Area literacy rate (HH heads)" = "area_literate_head_base","Area literacy rate" = "area_literate_base")
-
-#   #   highlight_df$variable  <- fct_recode(highlight_df$variable,
-#   #                           "Total oustanding debt in area" = "area_debt_total_base",
-#   #                           "Area mean montly pc expenditure" = "area_exp_pc_mean_base",
-#   #                           "Area literacy rate" = "area_literate_base")
-
-#   df  %>% 
-#     ggplot(., aes(x = reorder(variable,value), y = value)) + 
-#     geom_bar(stat="identity", fill= rainbow(1), alpha=.4) +
-#     geom_bar(data = highlight_df, stat="identity", fill= rainbow(1), alpha=.8) +
-#     theme_bw()  +
-#     coord_flip() +
-#     ggtitle(method) +
-#     labs(y = "Coefficient",
-#        x = "Variable") 
-
-#   ggsave(here("plot", paste0("cart_var_importance", fold, ".png")), width = 6, height = 4.5, dpi = 300)
-
-# }
-
-
-# fit$"variable.importance" %>% as.data.frame() %>% {{tmp <<-.}} %>%
-#     dplyr::mutate(variable = rownames(tmp)) %>%
-#     rename(value = ".") %>% 
-#     ggplot(., aes(x = reorder(variable,value), y = value)) + 
-#     geom_bar(stat="identity", fill= rainbow(1), alpha=.4) +
-#     theme_bw()  +
-#     coord_flip() +
-#     ggtitle("yes") +
-#     labs(y = "Coefficient",
-#        x = "Variable") 
-
-  

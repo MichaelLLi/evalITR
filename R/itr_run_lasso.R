@@ -20,14 +20,6 @@ run_lasso <- function(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb, 
     indcv, iter, plim
   )
-  
-  # plot
-  # if(plot == TRUE){
-  #   plot <- plot_var_importance_lasso(fit_train, "Lasso", iter)
-  # }else {
-  #    plot <- NULL
-  # }
-  
 
   
   return(fit_test)
@@ -82,31 +74,4 @@ test_lasso <- function(
   return(cf_output)
 }
 
-
-
-
-## plot varaible importance
-
-# plot_var_importance_lasso <- function(fit_train, method, fold){
-
-#   df <- coefficients(fit_train) %>% as.matrix() %>% as.data.frame() %>%
-#    {{temp <<-.}} %>%
-#   dplyr::mutate(variable = rownames(temp)) %>%
-#     rename(value = "s0")
-
-#   highlight_df <- df[c("pseudo"),]
-
-#   df  %>% 
-#     ggplot(., aes(x = reorder(variable,value), y = value)) + 
-#     geom_bar(stat="identity", fill= rainbow(1), alpha=.4) +
-#     geom_bar(data = highlight_df, stat="identity", fill= rainbow(1), alpha=.8) +
-#     theme_bw()  +
-#     coord_flip() +
-#     ggtitle(method) +
-#     labs(y = "Coefficient",
-#        x = "Variable") 
-
-#   ggsave(here("plot", paste0("lasso_var_importance", fold, ".png")), width = 6, height = 4.5, dpi = 300)
-
-# }
 
