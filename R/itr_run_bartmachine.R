@@ -19,13 +19,6 @@ run_bartmachine <- function(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb, 
     indcv, iter, plim
   )
-    
-  # plot
-  # if(plot == TRUE){
-  # plot <- plot_var_importance_bart(fit_train, iter)
-  # }else {
-  #    plot <- NULL
-  # }  
   
   return(fit_test)
 }
@@ -90,13 +83,3 @@ test_bart <- function(
   
   return(cf_output)
 }
-
-
-## plot varaible importance
-# plot_var_importance_bart <- function(fit_train, fold){
-
-#   png(paste0("plot/bart_var_importance", fold, ".png"))
-#   investigate_var_importance(fit_train, plot = TRUE) 
-#   dev.off()
-
-# }
