@@ -31,12 +31,44 @@ train_lasso <- function(dat_train) {
   
   ## format training data 
   training_data_elements_lasso <- create_ml_args_lasso(dat_train)
-  
-  ## fit
-  fit <- glmnet::glmnet(training_data_elements_lasso[["X_expand"]],
-                training_data_elements_lasso[["Y"]],
-                alpha = 1,
-                lambda = 0.05)
+
+   ## outcome
+  outcome = training_data_elements_lasso[["Y"]]
+
+  if(length(unique(outcome)) > 2){
+      ## find the best lambda
+      # cv.lasso <- glmnet::cv.glmnet(
+      #   training_data_elements_lasso[["X_expand"]], 
+      #   training_data_elements_lasso[["Y"]], 
+      #   alpha = 1, 
+      #   family = "gaussian")
+
+      ## fit
+      fit <- glmnet::glmnet(
+        training_data_elements_lasso[["X_expand"]],
+        training_data_elements_lasso[["Y"]],
+        alpha = 1,
+        family = "gaussian",
+        # lambda = cv.lasso$lambda.min)
+        lambda = 0.05)
+
+    }else {
+      ## find the best lambda
+      # cv.lasso <- glmnet::cv.glmnet(
+      #   training_data_elements_lasso[["X_expand"]], 
+      #   training_data_elements_lasso[["Y"]], 
+      #   alpha = 1, 
+      #   family = "binomial")
+
+      ## fit
+      fit <- glmnet::glmnet(
+        training_data_elements_lasso[["X_expand"]],
+        training_data_elements_lasso[["Y"]],
+        alpha = 1,
+        family = "binomial",
+        # lambda = cv.lasso$lambda.min)
+        lambda = 0.05)
+  }
 
   return(fit)
 }
