@@ -28,7 +28,6 @@ run_bartmachine <- function(
 train_bart <- function(dat_train) {
   
   ## format training data 
-  # training_data_elements_bartc = create_ml_args_bartc(dat_train)
   training_data_elements_bart = create_ml_args_bart(dat_train)
 
   ## fit
@@ -39,13 +38,6 @@ train_bart <- function(dat_train) {
             run_in_sample = TRUE,
             serialize = TRUE)
 
-
-
-  # fit <- bartc(response = training_data_elements_bartc[["Y"]],
-  #                     treatment = training_data_elements_bartc[["Treat"]],
-  #                     confounders = training_data_elements_bartc[["X"]],
-  #                     keepTrees = TRUE)
-
   return(fit)
 }
 
@@ -55,8 +47,6 @@ test_bart <- function(
 ) {
   
   ## format data 
-  # testing_data_elements_bartc = create_ml_args_bartc(dat_test)
-  # total_data_elements_bartc = create_ml_args_bartc(dat_total)
   testing_data_elements_bart = create_ml_args_bart(dat_test)
   total_data_elements_bart   = create_ml_args_bart(dat_total)
   

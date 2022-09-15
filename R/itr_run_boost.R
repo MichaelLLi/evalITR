@@ -35,11 +35,22 @@ train_boost <- function(dat_train) {
   ## train formula
   formula_boosted = training_data_elements_boosted[["formula"]] 
 
-  ## fit
-  fit <- gbm::gbm(formula_boosted, data = training_data_elements_boosted[["data"]],
-                    distribution = "gaussian",
-                    n.trees = 5000,
-                    interaction.depth = 4)
+  ## outcome
+  outcome = training_data_elements_boosted[["data"]][["Y"]]
+
+  if(length(unique(outcome)) > 2){
+      ## fit
+      fit <- gbm::gbm(formula_boosted, data = training_data_elements_boosted[["data"]],
+                        distribution = "gaussian",
+                        n.trees = 5000,
+                        interaction.depth = 4)
+  }else {
+     ## fit
+      fit <- gbm::gbm(formula_boosted, data = training_data_elements_boosted[["data"]],
+                        distribution = "bernoulli",
+                        n.trees = 5000,
+                        interaction.depth = 4)
+  }
 
   return(fit)
 

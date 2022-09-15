@@ -37,10 +37,18 @@ train_cart <- function(dat_train) {
   ## train formula
   formula_cart = training_data_elements_cart[["formula"]]
 
-  ## fit
-  fit <- rpart(formula_cart, data = training_data_elements_cart[["data"]], method = "anova", 
-  control = rpart.control(minsplit = 2, minbucket = 1, 
-        cp = 0.0015)) #relax the contraint for cart
+  ## outcome
+  outcome = training_data_elements_cart[["data"]][["Y"]]
+
+  if(length(unique(outcome)) > 2){
+      ## fit
+      fit <- rpart(formula_cart, data = training_data_elements_cart[["data"]], method = "anova") 
+      # control = rpart.control(minsplit = 2, minbucket = 1, 
+            # cp = 0.0015)) #relax the contraint for cart
+  }else {
+      ## fit
+      fit <- rpart(formula_cart, data = training_data_elements_cart[["data"]], method = "class") 
+  }
 
   return(fit)
 }
@@ -54,12 +62,30 @@ test_cart <- function(
   testing_data_elements_cart = create_ml_args_cart(dat_test)
   total_data_elements_cart   = create_ml_args_cart(dat_total)
   
-  ## predict 
-  
-  Y0t_total = predict(fit_train, newdata=total_data_elements_cart[["data0t"]])
-  Y1t_total = predict(fit_train, newdata=total_data_elements_cart[["data1t"]])
+  ## outcome
+  outcome = testing_data_elements_cart[["data"]][["Y"]]
 
-  tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
+  if(length(unique(outcome)) > 2){
+      ## predict 
+      Y0t_total = predict(fit_train, newdata=total_data_elements_cart[["data0t"]])
+      Y1t_total = predict(fit_train, newdata=total_data_elements_cart[["data1t"]])
+
+      tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
+  }else {
+      ## predict 
+      Y0t_total <- Y1t_total <-  vector()
+
+      Y0t_predict = predict(fit_train, newdata=total_data_elements_cart[["data0t"]])      
+      Y1t_predict = predict(fit_train, newdata=total_data_elements_cart[["data1t"]])
+
+      # convert predicted probability to predicted outcome
+      Y0t_total <- sapply(seq(1:nrow(Y0t_predict)),convert_outcome, predict_outcome = Y0t_predict)
+      Y1t_total <- sapply(seq(1:nrow(Y1t_predict)),convert_outcome, predict_outcome = Y1t_predict)
+
+      tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
+           
+  }
+
 
 
   ## compute quantities of interest 
