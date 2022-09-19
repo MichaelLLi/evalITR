@@ -9,8 +9,7 @@ run_random_forest <- function(
   params, 
   indcv, 
   iter,
-  plim,
-  plot
+  plim
 ) {
   
   ## train 
@@ -30,7 +29,13 @@ run_random_forest <- function(
 train_random_forest <- function(dat_train) {
   
   ## format training data 
-  training_data_elements_rf = create_ml_args_rf(dat_train)
+  outcome = dat_train[["Y"]]
+
+  if(length(unique(outcome)) > 2){
+    training_data_elements_rf = create_ml_args_rf(dat_train)
+  }else {
+     training_data_elements_rf = create_ml_args_rf_cls(dat_train)
+  }
   
   ## train formula
   formula_rf = training_data_elements_rf[["formula"]] 
@@ -46,17 +51,30 @@ test_random_forest <- function(
   fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, plim
 ) {
   
-  ## format data 
-  testing_data_elements_rf = create_ml_args_rf(dat_test)
-  total_data_elements_rf   = create_ml_args_rf(dat_total)
+  outcome = dat_total[["Y"]]
+
+  if(length(unique(outcome)) > 2){
+    
+    ## format data 
+    testing_data_elements_rf = create_ml_args_rf(dat_test)
+    total_data_elements_rf   = create_ml_args_rf(dat_total)
+
+    ## predict 
+    Y0t_total = predict(fit_train, newdata=total_data_elements_rf[["data0t"]])
+    Y1t_total = predict(fit_train, newdata=total_data_elements_rf[["data1t"]])
+
+  }else {
+    ## format data  
+    testing_data_elements_rf = create_ml_args_rf_cls(dat_test)
+    total_data_elements_rf   = create_ml_args_rf_cls(dat_total)
+
+    ## predict 
+    Y0t_total = predict(fit_train, newdata=total_data_elements_rf[["data0t"]]) %>% as.numeric()
+    Y1t_total = predict(fit_train, newdata=total_data_elements_rf[["data1t"]]) %>% as.numeric()
+  }  
   
-  ## predict 
-  
-  Y0t_total = predict(fit_train, newdata=total_data_elements_rf[["data0t"]])
-  Y1t_total = predict(fit_train, newdata=total_data_elements_rf[["data1t"]])
 
   tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
-
 
   ## compute quantities of interest 
   tau_test <-  tau_total[indcv == iter] 

@@ -199,16 +199,14 @@ create_ml_args_rf = function(data){
   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
 }
 
-#' Create argments for random forest for classification 
-#' @importFrom stats as.formula
-#' @param data A dataset
+#' Create argments for random forest (classification)
 create_ml_args_rf_cls = function(data){
   
   Y = data[["Y"]]
   X = data[["X"]]
   Treat = data[["Treat"]]
   
-  formula = as.formula(paste(as.factor("Y"), "~", paste(c("Treat", names(X)), collapse = "+")))
+  formula = as.formula(paste("as.factor(Y) ~", paste(c("Treat", names(X)), collapse = "+")))
   
   data = cbind(Y, X, Treat)
   
@@ -219,7 +217,6 @@ create_ml_args_rf_cls = function(data){
   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
 }
 
-
 # Create arguments for bagging 
 create_ml_args_bagging = function(data){
   
@@ -227,6 +224,24 @@ create_ml_args_bagging = function(data){
   Y = data[["Y"]]
   X = data[["X"]]
   Treat = data[["Treat"]]
+  
+  data = cbind(Y, X, Treat)
+  
+  # also needed for testing:
+  data0t = cbind(Y, X, Treat = 0)
+  data1t = cbind(Y, X, Treat = 1)
+  
+  return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
+}
+
+# Create arguments for bagging (classification)
+create_ml_args_bagging_cls = function(data){
+  
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat = data[["Treat"]]
+
+  formula = as.formula(paste("as.factor(Y) ~", paste(c("Treat", names(X)), collapse = "+")))  
   
   data = cbind(Y, X, Treat)
   
@@ -314,6 +329,8 @@ getAupecOutput = function(
   NFOLDS, Ycv, Tcv, indcv
 ){
   aupec_grid = list()
+  Ycv = as.numeric(Ycv)
+
   for (j in 1:NFOLDS){
     tau = tauML[,j][!is.na(tauML[,j])]
     aupec_grid[[j]] = AUPEC(Tcv[indcv==j], tau,Ycv[indcv==j])

@@ -2,13 +2,10 @@
 % Please edit documentation in R/itr_helpers.R
 \name{create_ml_args_rf_cls}
 \alias{create_ml_args_rf_cls}
-\title{Create argments for random forest for classification}
+\title{Create argments for random forest (classification)}
 \usage{
 create_ml_args_rf_cls(data)
 }
-\arguments{
-\item{data}{A dataset}
-}
 \description{
-Create argments for random forest for classification
+Create argments for random forest (classification)
 }
