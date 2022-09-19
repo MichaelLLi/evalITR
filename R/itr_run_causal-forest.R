@@ -9,8 +9,7 @@ run_causal_forest <- function(
   params, 
   indcv, 
   iter,
-  plim,
-  plot
+  plim
 ) {
   
   ## train 

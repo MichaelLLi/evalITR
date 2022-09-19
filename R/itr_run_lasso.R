@@ -8,8 +8,7 @@ run_lasso <- function(
   params, 
   indcv, 
   iter,
-  plim,
-  plot
+  plim
 ) {
   
   ## train 

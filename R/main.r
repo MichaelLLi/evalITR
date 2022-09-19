@@ -25,8 +25,7 @@ run_itr <- function(
   data, 
   algorithms,
   plim,
-  n_folds,
-  plot = FALSE
+  n_folds
 ) {
 
 
@@ -64,8 +63,7 @@ run_itr <- function(
       algorithms = algorithms, 
       params     = params, 
       folds      = folds,
-      plim       = plim,
-      plot       = plot
+      plim       = plim
     )
 
     
@@ -93,14 +91,12 @@ run_itr <- function(
 #' @param params A list of parameters
 #' @param folds Number of folds
 #' @param plim The maximum percentage of population that can be treated under the budget constraint
-#' @param plot Variable importance plot
 itr_single_outcome <- function(
   data, 
   algorithms,
   params, 
   folds,
-  plim,
-  plot
+  plim
 ) {
 
   ## obj to store outputs 
@@ -109,7 +105,7 @@ itr_single_outcome <- function(
 
 
   Tcv <- dplyr::pull(data, "Treat")
-  Ycv <- dplyr::pull(data, "Y")
+  Ycv <- dplyr::pull(data, "Y") 
   indcv <- rep(0, length(Ycv))
 
 
@@ -156,8 +152,7 @@ itr_single_outcome <- function(
         params    = params, 
         indcv     = indcv, 
         iter      = j, 
-        plim      = plim,
-        plot      = plot 
+        plim      = plim
       )
     }
     
@@ -169,8 +164,7 @@ itr_single_outcome <- function(
         params    = params, 
         indcv     = indcv, 
         iter      = j, 
-        plim      = plim,
-        plot      = plot          
+        plim      = plim
       )
     }
     
@@ -182,8 +176,7 @@ itr_single_outcome <- function(
         params    = params, 
         indcv     = indcv, 
         iter      = j, 
-        plim      = plim,
-        plot      = plot 
+        plim      = plim
       )
     }
     
@@ -196,8 +189,7 @@ itr_single_outcome <- function(
         params    = params, 
         indcv     = indcv, 
         iter      = j, 
-        plim      = plim,
-        plot      = plot 
+        plim      = plim
       )
     }
 
@@ -209,8 +201,7 @@ itr_single_outcome <- function(
         params    = params, 
         indcv     = indcv, 
         iter      = j, 
-        plim      = plim,
-        plot      = plot          
+        plim      = plim
       )
     }    
     
@@ -222,8 +213,7 @@ itr_single_outcome <- function(
         params    = params, 
         indcv     = indcv, 
         iter      = j, 
-        plim      = plim,
-        plot      = plot  
+        plim      = plim
       )
     }
     
@@ -235,8 +225,7 @@ itr_single_outcome <- function(
         params    = params, 
         indcv     = indcv, 
         iter      = j, 
-        plim      = plim,
-        plot      = plot  
+        plim      = plim
       )
     }
      
@@ -248,8 +237,7 @@ itr_single_outcome <- function(
         params    = params, 
         indcv     = indcv, 
         iter      = j, 
-        plim      = plim,
-        plot      = plot  
+        plim      = plim
       )
     }
 
@@ -261,8 +249,7 @@ itr_single_outcome <- function(
         params    = params, 
         indcv     = indcv, 
         iter      = j, 
-        plim      = plim,
-        plot      = plot  
+        plim      = plim
       )
     }    
 

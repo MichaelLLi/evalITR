@@ -4,16 +4,7 @@
 \alias{run_itr}
 \title{Evaluate ITR}
 \usage{
-run_itr(
-  outcome,
-  treatment,
-  covariates,
-  data,
-  algorithms,
-  plim,
-  n_folds,
-  plot = FALSE
-)
+run_itr(outcome, treatment, covariates, data, algorithms, plim, n_folds)
 }
 \arguments{
 \item{outcome}{Outcome variable (or a list of outcome variables)}

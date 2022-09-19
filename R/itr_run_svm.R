@@ -8,8 +8,7 @@ run_svm <- function(
   params, 
   indcv, 
   iter,
-  plim,
-  plot
+  plim
 ) {
   
   ## train 
@@ -21,14 +20,6 @@ run_svm <- function(
     indcv, iter, plim
   )
   
-  # plot
-  # if(plot == TRUE){
-  #   plot <- plot_var_importance_svm(dat_train, fit_train, "SVM", iter)
-  # }else {
-  #    plot <- NULL
-  # }
-  
-
 
   return(fit_test)
 }
