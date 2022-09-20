@@ -185,10 +185,15 @@ create_ml_args_boosted = function(data){
 # Create arguments for random forest 
 create_ml_args_rf = function(data){
   
-  formula = data[["formula"]]
   Y = data[["Y"]]
   X = data[["X"]]
   Treat = data[["Treat"]]
+  
+  if(length(unique(Y)) > 2){
+    formula = data[["formula"]]
+  }else{
+    formula = as.formula(paste("as.factor(Y) ~", paste(c("Treat", names(X)), collapse = "+")))
+  }
   
   data = cbind(Y, X, Treat)
   
@@ -199,49 +204,19 @@ create_ml_args_rf = function(data){
   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
 }
 
-#' Create argments for random forest (classification)
-create_ml_args_rf_cls = function(data){
-  
-  Y = data[["Y"]]
-  X = data[["X"]]
-  Treat = data[["Treat"]]
-  
-  formula = as.formula(paste("as.factor(Y) ~", paste(c("Treat", names(X)), collapse = "+")))
-  
-  data = cbind(Y, X, Treat)
-  
-  # also needed for testing:
-  data0t = cbind(Y, X, Treat = 0)
-  data1t = cbind(Y, X, Treat = 1)
-  
-  return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
-}
 
 # Create arguments for bagging 
 create_ml_args_bagging = function(data){
   
-  formula = data[["formula"]]
-  Y = data[["Y"]]
-  X = data[["X"]]
-  Treat = data[["Treat"]]
-  
-  data = cbind(Y, X, Treat)
-  
-  # also needed for testing:
-  data0t = cbind(Y, X, Treat = 0)
-  data1t = cbind(Y, X, Treat = 1)
-  
-  return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
-}
-
-# Create arguments for bagging (classification)
-create_ml_args_bagging_cls = function(data){
-  
   Y = data[["Y"]]
   X = data[["X"]]
   Treat = data[["Treat"]]
 
-  formula = as.formula(paste("as.factor(Y) ~", paste(c("Treat", names(X)), collapse = "+")))  
+  if(length(unique(Y)) >2){
+    formula = data[["formula"]]
+  }else{
+    formula = as.formula(paste("as.factor(Y) ~", paste(c("Treat", names(X)), collapse = "+")))
+  }  
   
   data = cbind(Y, X, Treat)
   
@@ -316,11 +291,14 @@ create_ml_args_knn = function(create_ml_arguments_outputs){
 
 # convert predicted outcomes for CART
 convert_outcome <- function(x, predict_outcome){
+  
+  outcome = c()
+
   if(predict_outcome[x,1] >= 0.5){
-  outcome[x] = colnames(predict_outcome)[1] %>% as.numeric()
-}else {
-   outcome[x] = colnames(predict_outcome)[2] %>% as.numeric()
-}
+    outcome[x] = colnames(predict_outcome)[1] %>% as.numeric()
+  }else {
+    outcome[x] = colnames(predict_outcome)[2] %>% as.numeric()
+  }
 }
 
 # Re-organize cross-validation output to plot the AUPEC curve  

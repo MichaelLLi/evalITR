@@ -1,6 +1,6 @@
 #' Evaluate ITR
 #' 
-#' @param outcome Outcome variable (or a list of outcome variables)
+#' @param outcome Outcome variable (or a list of outcome variables). Only takes in numeric values for both continous outcomes and binary outcomes (0 or 1).
 #' @param treatment Treatment variable 
 #' @param data 
 #'   A data frame that contains \code{outcome} and \code{treatment}.
@@ -12,8 +12,6 @@
 #'   Number of cross-validation folds.
 #' @param covariates
 #'   Covariates included in the model.
-#' @param plot
-#'   Variable importance plot.
 #' @import dplyr
 #' @importFrom rlang !! sym
 #' @export
@@ -181,8 +179,8 @@ itr_single_outcome <- function(
     }
     
     
-    if("bart" %in% algorithms){
-      fit_ml[["bart"]][[j]] <- run_bart(
+    if("bartc" %in% algorithms){
+      fit_ml[["bartc"]][[j]] <- run_bartc(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
@@ -193,8 +191,8 @@ itr_single_outcome <- function(
       )
     }
 
-    if("bartmachine" %in% algorithms){
-      fit_ml[["bartmachine"]][[j]] <- run_bartmachine(
+    if("bart" %in% algorithms){
+      fit_ml[["bart"]][[j]] <- run_bartmachine(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,

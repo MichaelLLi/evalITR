@@ -23,16 +23,23 @@ run_bartmachine <- function(
 }
 
 
-
+#' @import haven
 train_bart <- function(dat_train) {
   
   ## format training data 
   training_data_elements_bart = create_ml_args_bart(dat_train)
 
+  ## format binary outcome
+  outcome_bart = training_data_elements_bart[["Y"]]
+
+  if(length(unique(outcome_bart)) == 2){
+    outcome_bart = factor(outcome_bart, levels = c(1,0))
+  }
+
   ## fit
   fit <- bartMachine::bartMachine(
             X=training_data_elements_bart[["X_and_Treat"]],
-            y=training_data_elements_bart[["Y"]],
+            y=outcome_bart,
             num_trees = 30, 
             run_in_sample = TRUE,
             serialize = TRUE)

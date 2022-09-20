@@ -28,14 +28,8 @@ run_bagging <- function(
 
 train_bagging <- function(dat_train) {
   
-  ## format training data 
-  outcome = dat_train[["Y"]]
-
-  if(length(unique(outcome)) > 2){
-    training_data_elements_bagging = create_ml_args_bagging(dat_train)
-  }else {
-     training_data_elements_bagging = create_ml_args_bagging_cls(dat_train)
-  }  
+  ## format data
+  training_data_elements_bagging = create_ml_args_bagging(dat_train)
   
   ## train formula
   formula_bagging = training_data_elements_bagging[["formula"]]
@@ -57,28 +51,13 @@ test_bagging <- function(
   fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, plim
 ) {
   
-  outcome = dat_total[["Y"]]
-
-  if(length(unique(outcome)) > 2){
-
-    ## format data 
-    testing_data_elements_bagging = create_ml_args_bagging(dat_test)
-    total_data_elements_bagging   = create_ml_args_bagging(dat_total)
+  ## format data 
+  testing_data_elements_bagging = create_ml_args_bagging(dat_test)
+  total_data_elements_bagging   = create_ml_args_bagging(dat_total)
     
-    ## predict 
-    Y0t_total = predict(fit_train, newdata=total_data_elements_bagging[["data0t"]])
-    Y1t_total = predict(fit_train, newdata=total_data_elements_bagging[["data1t"]])
-
-  }else {
-    ## format data 
-    testing_data_elements_bagging = create_ml_args_bagging_cls(dat_test)
-    total_data_elements_bagging   = create_ml_args_bagging_cls(dat_total)
-    
-    ## predict 
-    
-    Y0t_total = predict(fit_train, newdata=total_data_elements_bagging[["data0t"]]) %>% as.numeric()
-    Y1t_total = predict(fit_train, newdata=total_data_elements_bagging[["data1t"]]) %>% as.numeric()
-  }
+  ## predict 
+  Y0t_total = predict(fit_train, newdata=total_data_elements_bagging[["data0t"]]) %>% as.numeric()
+  Y1t_total = predict(fit_train, newdata=total_data_elements_bagging[["data1t"]]) %>% as.numeric()
 
   tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
 

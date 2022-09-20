@@ -36,8 +36,6 @@ train_causal_forest <- function(dat_train) {
     training_data_elements_cf[["X_expand"]],
     training_data_elements_cf[["Y"]],
     training_data_elements_cf[["Treat"]],
-    ci.group.size = 1,
-    sample.fraction = 0.2,
     num.trees = 2000
   )
   return(fit)

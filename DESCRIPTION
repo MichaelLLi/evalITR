@@ -25,6 +25,7 @@ Depends:
     R (>= 3.5.0),
     stats
 Imports:
+    bartCause,
     bartMachine,
     caret,
     cli,
