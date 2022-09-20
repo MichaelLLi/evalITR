@@ -8,8 +8,7 @@ run_svm <- function(
   params, 
   indcv, 
   iter,
-  plim,
-  plot
+  plim
 ) {
   
   ## train 
@@ -21,14 +20,6 @@ run_svm <- function(
     indcv, iter, plim
   )
   
-  # plot
-  if(plot == TRUE){
-    plot <- plot_var_importance_svm(dat_train, fit_train, "SVM", iter)
-  }else {
-     plot <- NULL
-  }
-  
-
 
   return(fit_test)
 }
@@ -79,6 +70,7 @@ train_svm <- function(dat_train) {
   return(fit)
 }
 
+#'@importFrom stats predict runif
 test_svm <- function(
   fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, plim
 ) {
@@ -109,59 +101,4 @@ test_svm <- function(
   )
   
   return(cf_output)
-}
-
-## plot variable importance
-
-plot_var_importance_svm <- function(dat_train,fit_train, method, fold){
-
-  training_data_elements_svm <- create_ml_args_svm(dat_train)
-
-  ## Importance() function requires to take 
-  ## create our own function for input of importance()
-  # fit.pred =function(fit,data) {return (predict(fit,data)) }
-
-  # svm.imp <- Importance(fit_train, 
-  #                       data=training_data_elements_svm[["data"]],
-  #                       PRED = fit.pred, 
-  #                       outindex = 1, 
-  #                       method = "svm")
-
-  svm.imp <- Importance(fit_train, data=training_data_elements_svm[["data"]])
-  svm.imp$imp                        
-
-  df <- cbind(variable = names(training_data_elements_svm[["data"]]),
-              value = round(svm.imp$imp, 3)) %>%
-        as.data.frame() %>%
-        slice(-1)
-
-
-  highlight_df <- df %>% filter(variable %in% c("pseudo")) 
-
-  # ## recode the variable names                
-  # df$variable <- fct_recode(df$variable,
-  #                           "Area population" = "area_pop_base",
-  #                           "Total oustanding debt in area" =  "area_debt_total_base", 
-  #                           "Total number of business in area" = "area_business_total_base", 
-  #                           "Area mean montly pc expenditure" = "area_exp_pc_mean_base", 
-  #                           "Area literacy rate (HH heads)" = "area_literate_head_base","Area literacy rate" = "area_literate_base")
-
-  # highlight_df$variable  <- fct_recode(highlight_df$variable,
-  #                         "Total oustanding debt in area" = "area_debt_total_base",
-  #                         "Area mean montly pc expenditure" = "area_exp_pc_mean_base",
-  #                         "Area literacy rate" = "area_literate_base")
-
-
-  df %>% 
-    ggplot(., aes(x = reorder(variable,value), y = value)) + 
-    geom_bar(stat="identity", fill= rainbow(1), alpha=.4) +
-    geom_bar(data = highlight_df, stat="identity", fill= rainbow(1), alpha=.8) +
-    theme_bw()  +
-    coord_flip() +
-    ggtitle(method) +
-    labs(y = "Coefficient",
-       x = "Variable") 
-
-  ggsave(here("plot", paste0("svm_var_importance", fold, ".png")), width = 6, height = 4.5, dpi = 300)
-
 }

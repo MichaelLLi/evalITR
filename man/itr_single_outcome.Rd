@@ -4,7 +4,18 @@
 \alias{itr_single_outcome}
 \title{Evaluate ITR for Single Outcome}
 \usage{
-itr_single_outcome(data, algorithms, params, folds, plim, plot)
+itr_single_outcome(data, algorithms, params, folds, plim)
+}
+\arguments{
+\item{data}{A dataset}
+
+\item{algorithms}{Machine learning algorithms}
+
+\item{params}{A list of parameters}
+
+\item{folds}{Number of folds}
+
+\item{plim}{The maximum percentage of population that can be treated under the budget constraint}
 }
 \description{
 Evaluate ITR for Single Outcome

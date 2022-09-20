@@ -10,8 +10,7 @@ run_cart <- function(
   params, 
   indcv, 
   iter,
-  plim,
-  plot
+  plim
 ) {
   
   ## train 
@@ -22,13 +21,6 @@ run_cart <- function(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb, 
     indcv, iter, plim
   )
-
-  # plot
-  if(plot == TRUE){
-    plot <- plot_var_importance_cart(fit_train, "CART", iter)
-  }else {
-     plot <- NULL
-  }
   
 
   return(fit_test)
@@ -44,14 +36,23 @@ train_cart <- function(dat_train) {
   ## train formula
   formula_cart = training_data_elements_cart[["formula"]]
 
-  ## fit
-  fit <- rpart(formula_cart, data = training_data_elements_cart[["data"]], method = "anova", 
-  control = rpart.control(minsplit = 2, minbucket = 1, 
-        cp = 0.0015)) #relax the contraint for cart
+  ## outcome
+  outcome = training_data_elements_cart[["data"]][["Y"]]
+
+  if(length(unique(outcome)) > 2){
+      ## fit
+      fit <- rpart(formula_cart, data = training_data_elements_cart[["data"]], method = "anova") 
+      # control = rpart.control(minsplit = 2, minbucket = 1, 
+            # cp = 0.0015)) #relax the contraint for cart
+  }else {
+      ## fit
+      fit <- rpart(formula_cart, data = training_data_elements_cart[["data"]], method = "class") 
+  }
 
   return(fit)
 }
 
+#'@importFrom stats predict runif
 test_cart <- function(
   fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, plim
 ) {
@@ -60,12 +61,30 @@ test_cart <- function(
   testing_data_elements_cart = create_ml_args_cart(dat_test)
   total_data_elements_cart   = create_ml_args_cart(dat_total)
   
-  ## predict 
-  
-  Y0t_total = predict(fit_train, newdata=total_data_elements_cart[["data0t"]])
-  Y1t_total = predict(fit_train, newdata=total_data_elements_cart[["data1t"]])
+  ## outcome
+  outcome = testing_data_elements_cart[["data"]][["Y"]]
 
-  tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
+  if(length(unique(outcome)) > 2){
+      ## predict 
+      Y0t_total = predict(fit_train, newdata=total_data_elements_cart[["data0t"]])
+      Y1t_total = predict(fit_train, newdata=total_data_elements_cart[["data1t"]])
+
+      tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
+  }else {
+      ## predict 
+      Y0t_total <- Y1t_total <-  vector()
+
+      Y0t_predict = predict(fit_train, newdata=total_data_elements_cart[["data0t"]])      
+      Y1t_predict = predict(fit_train, newdata=total_data_elements_cart[["data1t"]])
+
+      # convert predicted probability to predicted outcome
+      Y0t_total <- sapply(seq(1:nrow(Y0t_predict)),convert_outcome, predict_outcome = Y0t_predict)
+      Y1t_total <- sapply(seq(1:nrow(Y1t_predict)),convert_outcome, predict_outcome = Y1t_predict)
+
+      tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
+           
+  }
+
 
 
   ## compute quantities of interest 
@@ -86,54 +105,3 @@ test_cart <- function(
 }
 
 
-
-## plot varaible importance
-
-plot_var_importance_cart <- function(fit_train, method, fold){
-
-  df <- fit_train$"variable.importance" %>% as.data.frame() %>% {{temp <<-.}} %>%
-  dplyr::mutate(variable = rownames(temp)) %>%
-    rename(value = ".")
-
-  highlight_df <- df[c("pseudo"),]
-
-  # ## recode the variable names                
-  # df$variable <- fct_recode(df$variable,
-  #                           "Area population" = "area_pop_base",
-  #                           "Total oustanding debt in area" =  "area_debt_total_base", 
-  #                           "Total number of business in area" = "area_business_total_base", 
-  #                           "Area mean montly pc expenditure" = "area_exp_pc_mean_base", 
-  #                           "Area literacy rate (HH heads)" = "area_literate_head_base","Area literacy rate" = "area_literate_base")
-
-  #   highlight_df$variable  <- fct_recode(highlight_df$variable,
-  #                           "Total oustanding debt in area" = "area_debt_total_base",
-  #                           "Area mean montly pc expenditure" = "area_exp_pc_mean_base",
-  #                           "Area literacy rate" = "area_literate_base")
-
-  df  %>% 
-    ggplot(., aes(x = reorder(variable,value), y = value)) + 
-    geom_bar(stat="identity", fill= rainbow(1), alpha=.4) +
-    geom_bar(data = highlight_df, stat="identity", fill= rainbow(1), alpha=.8) +
-    theme_bw()  +
-    coord_flip() +
-    ggtitle(method) +
-    labs(y = "Coefficient",
-       x = "Variable") 
-
-  ggsave(here("plot", paste0("cart_var_importance", fold, ".png")), width = 6, height = 4.5, dpi = 300)
-
-}
-
-
-# fit$"variable.importance" %>% as.data.frame() %>% {{tmp <<-.}} %>%
-#     dplyr::mutate(variable = rownames(tmp)) %>%
-#     rename(value = ".") %>% 
-#     ggplot(., aes(x = reorder(variable,value), y = value)) + 
-#     geom_bar(stat="identity", fill= rainbow(1), alpha=.4) +
-#     theme_bw()  +
-#     coord_flip() +
-#     ggtitle("yes") +
-#     labs(y = "Coefficient",
-#        x = "Variable") 
-
-  

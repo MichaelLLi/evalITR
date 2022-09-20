@@ -1,23 +1,20 @@
-
-## bartCause
-
-run_bart <- function(
+#'
+run_bartc <- function(
   dat_train, 
   dat_test, 
   dat_total,
   params, 
   indcv, 
   iter,
-  plim,
-  plot = FALSE
+  plim
 ) {
   
   ## train 
-  fit_train <- train_bart(dat_train)
+  fit_train <- train_bartc(dat_train)
   
 
   ## test 
-  fit_test <- test_bart(
+  fit_test <- test_bartc(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb, 
     indcv, iter, plim
   )
@@ -27,13 +24,13 @@ run_bart <- function(
 
 
 
-train_bart <- function(dat_train) {
+train_bartc <- function(dat_train) {
   
   ## format training data 
   training_data_elements_bartc = create_ml_args_bartc(dat_train)
   
   ## fit
-  fit <- bartc(response = training_data_elements_bartc[["Y"]],
+  fit <- bartCause::bartc(response = training_data_elements_bartc[["Y"]],
                       treatment = training_data_elements_bartc[["Treat"]],
                       confounders = training_data_elements_bartc[["X"]],
                       keepTrees = TRUE)
@@ -41,7 +38,8 @@ train_bart <- function(dat_train) {
   return(fit)
 }
 
-test_bart <- function(
+#'@importFrom stats predict runif
+test_bartc <- function(
   fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, plim
 ) {
   

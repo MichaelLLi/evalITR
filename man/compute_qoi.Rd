@@ -2,13 +2,15 @@
 % Please edit documentation in R/itr_qoi.R
 \name{compute_qoi}
 \alias{compute_qoi}
-\title{Compute Quantities of Interest}
+\title{Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC)}
 \usage{
 compute_qoi(fit_obj, algorithms)
 }
 \arguments{
 \item{fit_obj}{An output object from \code{itr_single_outcome} function.}
+
+\item{algorithms}{Machine learning algorithms}
 }
 \description{
-Compute Quantities of Interest
+Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC)
 }

@@ -1,4 +1,4 @@
-#' @export
+#'
 run_bartmachine <- function(
   dat_train, 
   dat_test, 
@@ -6,8 +6,7 @@ run_bartmachine <- function(
   params, 
   indcv, 
   iter,
-  plim,
-  plot
+  plim
 ) {
   
   ## train 
@@ -19,50 +18,41 @@ run_bartmachine <- function(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb, 
     indcv, iter, plim
   )
-    
-  # plot
-  if(plot == TRUE){
-  plot <- plot_var_importance_bart(fit_train, iter)
-  }else {
-     plot <- NULL
-  }  
   
   return(fit_test)
 }
 
 
-
+#' @import haven
 train_bart <- function(dat_train) {
   
   ## format training data 
-  # training_data_elements_bartc = create_ml_args_bartc(dat_train)
   training_data_elements_bart = create_ml_args_bart(dat_train)
+
+  ## format binary outcome
+  outcome_bart = training_data_elements_bart[["Y"]]
+
+  if(length(unique(outcome_bart)) == 2){
+    outcome_bart = factor(outcome_bart, levels = c(1,0))
+  }
 
   ## fit
   fit <- bartMachine::bartMachine(
             X=training_data_elements_bart[["X_and_Treat"]],
-            y=training_data_elements_bart[["Y"]],
+            y=outcome_bart,
             num_trees = 30, 
             run_in_sample = TRUE,
             serialize = TRUE)
 
-
-
-  # fit <- bartc(response = training_data_elements_bartc[["Y"]],
-  #                     treatment = training_data_elements_bartc[["Treat"]],
-  #                     confounders = training_data_elements_bartc[["X"]],
-  #                     keepTrees = TRUE)
-
   return(fit)
 }
 
+#'@importFrom stats predict runif
 test_bart <- function(
   fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, plim
 ) {
   
   ## format data 
-  # testing_data_elements_bartc = create_ml_args_bartc(dat_test)
-  # total_data_elements_bartc = create_ml_args_bartc(dat_total)
   testing_data_elements_bart = create_ml_args_bart(dat_test)
   total_data_elements_bart   = create_ml_args_bart(dat_total)
   
@@ -88,14 +78,4 @@ test_bart <- function(
   )
   
   return(cf_output)
-}
-
-
-## plot varaible importance
-plot_var_importance_bart <- function(fit_train, fold){
-
-  png(paste0("plot/bart_var_importance", fold, ".png"))
-  investigate_var_importance(fit_train, plot = TRUE) 
-  dev.off()
-
 }

@@ -4,31 +4,25 @@
 \alias{run_itr}
 \title{Evaluate ITR}
 \usage{
-run_itr(
-  outcome,
-  treatment,
-  covariates,
-  data,
-  algorithms,
-  plim,
-  n_folds,
-  plot = FALSE
-)
+run_itr(outcome, treatment, covariates, data, algorithms, plim, n_folds)
 }
 \arguments{
-\item{outcome}{XXX}
+\item{outcome}{Outcome variable (or a list of outcome variables). Only takes in numeric values for both continous outcomes and binary outcomes (0 or 1).}
 
-\item{treatment}{YYY}
+\item{treatment}{Treatment variable}
+
+\item{covariates}{Covariates included in the model.}
 
 \item{data}{A data frame that contains \code{outcome} and \code{treatment}.}
 
-\item{algorithms}{Machine learning algorithms.}
+\item{algorithms}{List of machine learning algorithms.}
 
 \item{plim}{Proportion of treated units.}
 
 \item{n_folds}{Number of cross-validation folds.}
-
-\item{options}{List of options.}
+}
+\value{
+An object of \code{itr} class
 }
 \description{
 Evaluate ITR

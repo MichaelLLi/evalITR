@@ -8,16 +8,14 @@ output: github_document
 knitr::opts_chunk$set(
   collapse = TRUE,
   comment = "#>",
-  fig.path = "man/figures/README-",
-  out.width = "80%"
-)
+  fig.path = "man/figures/README-"
+  )
 ```
 
 # evalITR
 
 <!-- badges: start -->
 <!-- badges: end -->
-
 
 ## Installation
 
@@ -26,14 +24,31 @@ You can install the development version of evalITR from [GitHub](https://github.
 ``` r
 # install.packages("devtools")
 devtools::install_github("MichaelLLi/evalITR")
-
 ```
+
+
+(Optional) if you have multiple cores, we recommendate using multisession futures and processing in parallel. This would increase computation efficiency and reduce the time to fit the model. 
+
+```r
+library(furrr)
+library(future.apply)
+
+nworkers <- 4
+plan(multisession, workers =nworkers)
+```
+
 
 ## Example
 
-This is an example using the STAT dataset
+This is an example using the `star` dataset (for more information about the dataset, please use `?star`). 
 
-```{r example, message=FALSE}
+We first load the dataset and specify both outcome variables (reading, math, and writing scores) and
+covariates we want to include in the model. Then we use a series of machine learning
+algorithms to estimate the heterogeneous effects of small classes on
+educational attainment. We use 20% as a budget constraint and tuned the
+model through through the 3-fold cross validation.
+
+```{r message = FALSE}
 library(tidyverse)
 library(evalITR)
 
@@ -42,6 +57,7 @@ load("data/star.rda")
 # specifying outcomes
 outcomes <- c("g3tlangss",
                 "g3treadss","g3tmathss")
+
 
 # specifying covariates
 covariates <-  star %>% 
@@ -65,19 +81,31 @@ fit <- run_itr(outcome = outcomes,
                n_folds = 3)
 ```
 
+The`summary()` function displays the following summary statistics: (1) population average prescriptive effect `PAPE`; (2) population average prescriptive effect with a budget constraint `PAPEp`; (3) population average prescriptive effect difference with a budget constraint `PAPDp`; (4) and area under the prescriptive effect curve `AUPEC`. For more information about these evaluation metrics, please refer to [this paper](https://arxiv.org/abs/1905.05389).
 
-```{r pressure, message=FALSE}
+
+
+```{r output}
+# summarize estimates
+summary(fit)
+```
+
+We plot the estimated Area Under the Prescriptive Effect Curve
+for the writing score across a range of budget constraints for different algorithms.
+
+```{r plot, fig.width=8, fig.height=8,fig.align = "center"}
 # plot the AUPEC with different ML algorithms
-plot_aupec(fit = fit$qoi[1], 
-          outcome = outcomes[1],
-          treatment = "treatment",
-          data = star, 
-          algorithms = c(
-                  "causal_forest",
-                  "bart",
-                  "lasso",
-                  "boost", 
-                  "random_forest",
-                  "bagging", 
-                  "cart"))
+plot(x = fit, 
+      outcome = "g3tlangss",
+      treatment = "treatment",
+      data = star, 
+      algorithms = c(
+          "causal_forest",
+          "bart",
+          "lasso",
+          "boost", 
+          "random_forest",
+          "bagging", 
+          "cart"))
+
 ```

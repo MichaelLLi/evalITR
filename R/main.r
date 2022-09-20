@@ -1,30 +1,29 @@
 #' Evaluate ITR
 #'
-#' @param outcome YYY
-#' @param treatment XXX
+#' @param outcome Outcome variable (or a list of outcome variables). Only takes in numeric values for both continous outcomes and binary outcomes (0 or 1).
+#' @param treatment Treatment variable
 #' @param data
 #'   A data frame that contains \code{outcome} and \code{treatment}.
 #' @param algorithms
-#'   Machine learning algorithms.
+#'   List of machine learning algorithms.
 #' @param plim
 #'   Proportion of treated units.
 #' @param n_folds
 #'   Number of cross-validation folds.
-#' @param options
-#'   List of options.
-#'
+#' @param covariates
+#'   Covariates included in the model.
 #' @import dplyr
 #' @importFrom rlang !! sym
 #' @export
+#' @return An object of \code{itr} class
 run_itr <- function(
-  outcome,
-  treatment,
-  covariates,
-  data,
-  algorithms,
-  plim,
-  n_folds,
-  plot = FALSE
+    outcome,
+    treatment,
+    covariates,
+    data,
+    algorithms,
+    plim,
+    n_folds
 ) {
 
 
@@ -62,8 +61,7 @@ run_itr <- function(
       algorithms = algorithms,
       params     = params,
       folds      = folds,
-      plim       = plim,
-      plot       = plot
+      plim       = plim
     )
 
 
@@ -72,9 +70,12 @@ run_itr <- function(
 
   }
 
+  out <- list(qoi       = qoi,
+              estimates = estimates)
 
-  return(list(qoi       = qoi,
-              estimates = estimates))
+  class(out) <- c("itr", class(out))
+
+  return(out)
 
 }
 
@@ -83,13 +84,17 @@ run_itr <- function(
 #'
 #' @importFrom purrr map
 #' @importFrom dplyr pull
+#' @param data A dataset
+#' @param algorithms Machine learning algorithms
+#' @param params A list of parameters
+#' @param folds Number of folds
+#' @param plim The maximum percentage of population that can be treated under the budget constraint
 itr_single_outcome <- function(
-  data,
-  algorithms,
-  params,
-  folds,
-  plim,
-  plot
+    data,
+    algorithms,
+    params,
+    folds,
+    plim
 ) {
 
   ## obj to store outputs
@@ -145,8 +150,7 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = indcv,
         iter      = j,
-        plim      = plim,
-        plot      = plot
+        plim      = plim
       )
     }
 
@@ -158,8 +162,7 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = indcv,
         iter      = j,
-        plim      = plim,
-        plot      = plot
+        plim      = plim
       )
     }
 
@@ -171,35 +174,32 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = indcv,
         iter      = j,
-        plim      = plim,
-        plot      = plot
+        plim      = plim
       )
     }
 
+
+    if("bartc" %in% algorithms){
+      fit_ml[["bartc"]][[j]] <- run_bartc(
+        dat_train = training_data_elements,
+        dat_test  = testing_data_elements,
+        dat_total = total_data_elements,
+        params    = params,
+        indcv     = indcv,
+        iter      = j,
+        plim      = plim
+      )
+    }
 
     if("bart" %in% algorithms){
-      fit_ml[["bart"]][[j]] <- run_bart(
+      fit_ml[["bart"]][[j]] <- run_bartmachine(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
         params    = params,
         indcv     = indcv,
         iter      = j,
-        plim      = plim,
-        plot      = plot
-      )
-    }
-
-    if("bartmachine" %in% algorithms){
-      fit_ml[["bartmachine"]][[j]] <- run_bartmachine(
-        dat_train = training_data_elements,
-        dat_test  = testing_data_elements,
-        dat_total = total_data_elements,
-        params    = params,
-        indcv     = indcv,
-        iter      = j,
-        plim      = plim,
-        plot      = plot
+        plim      = plim
       )
     }
 
@@ -211,8 +211,7 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = indcv,
         iter      = j,
-        plim      = plim,
-        plot      = plot
+        plim      = plim
       )
     }
 
@@ -224,8 +223,7 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = indcv,
         iter      = j,
-        plim      = plim,
-        plot      = plot
+        plim      = plim
       )
     }
 
@@ -237,8 +235,7 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = indcv,
         iter      = j,
-        plim      = plim,
-        plot      = plot
+        plim      = plim
       )
     }
 
@@ -250,17 +247,9 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = indcv,
         iter      = j,
-        plim      = plim,
-        plot      = plot
+        plim      = plim
       )
     }
-
-    if("lm" %in% algorithms){
-      fit_ml[["lm"]][[j]] <- run_lm(
-        dat_train = training_data_elements
-      )
-    }
-
 
   } ## end of fold
 
@@ -270,5 +259,4 @@ itr_single_outcome <- function(
   ))
 }
 
-
-
+utils::globalVariables(c("Treat","aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type"))
