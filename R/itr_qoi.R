@@ -79,8 +79,15 @@ compute_qoi <- function(fit_obj, algorithms) {
     tau_cv <- furrr::future_map(fit_ml[[i]], ~.x$tau_cv) %>% do.call(cbind, .)
 
     ## Compute GATE
-    # GATE[[i]] <- GATE(Tcv, tau, Ycv, ngates = 10) # all have 3 lengths, but why tau has 3 items -> 3 folds?
-    GATEcv[[i]] <- GATEcv(Tcv, tau_cv, Ycv, indcv, ngates = 5)
+    # GATE[[i]] <- GATE(Tcv, tau, Ycv, ngates = 5) # tau is a matrix whereas others have 1 dim and colnum is nfolds; tau needs to be 1 dim
+    GATEcv[[i]] <- GATEcv(Tcv, tau_cv, Ycv, indcv, ngates = 5) #should enable user to set ngates
+
+    ## indicate algorithm
+    GATEcv[[i]]$alg <- algorithms[i]
+
+    ## indicate group number
+    GATEcv[[i]]$group <- seq_along(fit$qoi[[i]]$GATEcv[[i]][[i]])
+
   }
 
   return(

@@ -3,9 +3,9 @@
 #' @param m A numeric value indicates which element to focus on from the vector of \code{outcomes}. The default is the first outcome in the vector \code{outcomes}.
 #' @param ... Other parameters. Currently not supported
 #' @importFrom stats pnorm
-#' @export 
+#' @export
 summary.itr <- function(object, m = 1, ...){
-    
+
     out <- list()
 
     out[["PAPE"]] <- object$qoi[[m]]$PAPE %>%
@@ -41,9 +41,9 @@ summary.itr <- function(object, m = 1, ...){
           std.deviation = sd,
           algorithm = alg)
 
-    temp <- object$qoi[[m]]$AUPEC 
+    temp <- object$qoi[[m]]$AUPEC
 
-    out[["AUPEC"]] <- temp %>% 
+    out[["AUPEC"]] <- temp %>%
         map(., ~.x$aupec_cv) %>%
         bind_rows() %>%
         mutate(
@@ -55,6 +55,20 @@ summary.itr <- function(object, m = 1, ...){
           estimate = aupec,
           std.deviation = sd)
 
+    out[["GATEcv"]] <- object$qoi[[m]]$GATEcv %>%
+        map(.,~as_tibble(.)) %>%
+        bind_rows() %>%
+        mutate(
+            statistic = gate/sd,
+            p.value = 2*pnorm(abs(gate/sd), lower.tail = FALSE),
+            upper = c(mean(gate) - qnorm(0.95)*sd),
+            lower = c(mean(gate) + qnorm(0.95)*sd)) %>%
+        rename(
+            estimate = gate,
+            std.error = sd,
+            algorithm = alg,
+            group = group)
+
 class(out) <- c("summary.itr", class(out))
 
 return(out)
@@ -64,7 +78,7 @@ return(out)
 #' @importFrom cli cat_rule
 #' @param x An object of \code{summary.itr} class. This is typically an output of \code{summary.itr()} function.
 #' @param ... Other parameters. Currently not supported.
-#' @export 
+#' @export
 print.summary.itr <- function(x, ...) {
     # PAPE
     cli::cat_rule(left = "PAPE")
@@ -84,5 +98,10 @@ print.summary.itr <- function(x, ...) {
     # PAPE
     cli::cat_rule(left = "AUPEC")
     print(as.data.frame(x[["AUPEC"]]), digits = 2)
+    cli::cat_line("")
+
+    # GATEcv
+    cli::cat_rule(left = "GATEcv")
+    print(as.data.frame(x[["GATEcv"]]), digits = 2)
     cli::cat_line("")
 }
