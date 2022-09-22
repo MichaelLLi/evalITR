@@ -86,7 +86,7 @@ compute_qoi <- function(fit_obj, algorithms) {
     GATEcv[[i]]$alg <- algorithms[i]
 
     ## indicate group number
-    GATEcv[[i]]$group <- seq_along(fit$qoi[[i]]$GATEcv[[i]][[i]])
+    GATEcv[[i]]$group <- seq_along(GATEcv[[i]]$gate)
 
   }
 
