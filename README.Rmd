@@ -102,7 +102,7 @@ plot(x = fit,
       data = star, 
       algorithms = c(
           "causal_forest",
-          "bart",
+          # "bart",
           "lasso",
           "boost", 
           "random_forest",
