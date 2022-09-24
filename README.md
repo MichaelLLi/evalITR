@@ -163,7 +163,7 @@ plot(x = fit,
 
 ## Example under sample splitting (under development)
 
-Please set argument input of `n_folds` to 0 ion order to train the models under sample splitting. The split ratio between train and test set is determined by the `ratio` argument. 
+Please set argument input of `n_folds` to 0 in order to train the models under sample splitting. The split ratio between train and test set is determined by the `ratio` argument. 
 
 ```r
 library(tidyverse)
