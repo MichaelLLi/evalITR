@@ -23,7 +23,8 @@ run_itr <- function(
     data,
     algorithms,
     plim,
-    n_folds
+    n_folds,
+    ratio
 ) {
 
 
@@ -37,7 +38,7 @@ run_itr <- function(
   NFOLDS <- n_folds
 
   params <- list(
-    n_df = n_df, n_folds = n_folds, n_alg = n_alg
+    n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio
   )
 
 
@@ -50,23 +51,52 @@ run_itr <- function(
     data_filtered <- data %>%
       select(Y = !!sym(outcome[m]), Treat = !!sym(treatment), all_of(covariates))
 
-    ## create folds
-    treatment_vec <- data_filtered %>% dplyr::pull(Treat)
-    folds <- caret::createFolds(treatment_vec, k = NFOLDS)
 
+    if (n_folds == 0) {
 
-    ## run
-    estimates[[m]] <- itr_single_outcome(
-      data       = data_filtered,
-      algorithms = algorithms,
-      params     = params,
-      folds      = folds,
-      plim       = plim
-    )
+      ## run
+      estimates <- itr_single_outcome(
+        data       = data_filtered,
+        algorithms = algorithms,
+        params     = params,
+        folds      = folds,
+        plim       = plim
+      )
 
+      ## format output
+      qoi <- compute_qoi(estimates, algorithms, cv = FALSE)
 
-    ## format output
-    qoi[[m]] <- compute_qoi(estimates[[m]], algorithms)
+    } else {
+
+      ## create folds
+      treatment_vec <- data_filtered %>% dplyr::pull(Treat)
+      folds <- caret::createFolds(treatment_vec, k = NFOLDS)
+
+      ## run
+      estimates[[m]] <- itr_single_outcome(
+        data       = data_filtered,
+        algorithms = algorithms,
+        params     = params,
+        folds      = folds,
+        plim       = plim
+      )
+
+      ## format output
+      qoi[[m]] <- compute_qoi(estimates[[m]], algorithms, cv = TRUE)
+
+    }
+
+    # ## run
+    # estimates[[m]] <- itr_single_outcome(
+    #   data       = data_filtered,
+    #   algorithms = algorithms,
+    #   params     = params,
+    #   folds      = folds,
+    #   plim       = plim
+    # )
+    #
+    # ## format output
+    # qoi[[m]] <- compute_qoi(estimates[[m]], algorithms)
 
   }
 
@@ -101,7 +131,6 @@ itr_single_outcome <- function(
   fit_ml <- lapply(1:params$n_alg, function(x) vector("list", length = params$n_folds))
   names(fit_ml) <- algorithms
 
-
   Tcv <- dplyr::pull(data, "Treat")
   Ycv <- dplyr::pull(data, "Y")
   indcv <- rep(0, length(Ycv))
@@ -109,23 +138,19 @@ itr_single_outcome <- function(
 
   params$n_tb <- max(table(indcv))
 
-  ## run
-
-  for (j in seq_len(params$n_folds)) {
+  if (params$n_folds == 0) {
 
     ## ---------------------------------
-    ## data split
-    ## ---------------------------------
-    testset  <- data[folds[[j]], ]
-    trainset <- data[-folds[[j]], ]
-    indcv[folds[[j]]] <- rep(j, nrow(testset))
-
-
-    ## ---------------------------------
-    ## run ML
+    ## sample split
     ## ---------------------------------
 
-    ## prepare data
+    split <- caret::createDataPartition(data$Treat,
+                                        p = params$ratio,
+                                        list = FALSE) # create split series of test/training partitions
+    trainset = data[split,]
+    testset = data[-split,]
+
+    # prepare data
     training_data_elements <- create_ml_arguments(
       outcome = "Y", treatment = "Treat", data = trainset
     )
@@ -138,120 +163,265 @@ itr_single_outcome <- function(
       outcome = "Y", treatment = "Treat", data = data
     )
 
-
     ##
     ## run each ML algorithm
     ##
     if ("causal_forest" %in% algorithms) {
-      fit_ml[["causal_forest"]][[j]] <- run_causal_forest(
+      fit_ml[["causal_forest"]] <- run_causal_forest(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
         params    = params,
-        indcv     = indcv,
-        iter      = j,
-        plim      = plim
+        plim      = plim,
+        indcv     = 1, #indcv and iter set to 1 for sample splitting case
+        iter      = 1
       )
     }
 
     if("lasso" %in% algorithms){
-      fit_ml[["lasso"]][[j]] <- run_lasso(
+      fit_ml[["lasso"]] <- run_lasso(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
         params    = params,
-        indcv     = indcv,
-        iter      = j,
+        indcv     = 1,
+        iter      = 1,
         plim      = plim
       )
     }
 
     if("svm" %in% algorithms){
-      fit_ml[["svm"]][[j]] <- run_svm(
+      fit_ml[["svm"]] <- run_svm(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
         params    = params,
-        indcv     = indcv,
-        iter      = j,
+        indcv     = 1,
+        iter      = 1,
         plim      = plim
       )
     }
 
 
     if("bartc" %in% algorithms){
-      fit_ml[["bartc"]][[j]] <- run_bartc(
+      fit_ml[["bartc"]] <- run_bartc(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
         params    = params,
-        indcv     = indcv,
-        iter      = j,
+        indcv     = 1,
+        iter      = 1,
         plim      = plim
       )
     }
 
     if("bart" %in% algorithms){
-      fit_ml[["bart"]][[j]] <- run_bartmachine(
+      fit_ml[["bart"]] <- run_bartmachine(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
         params    = params,
-        indcv     = indcv,
-        iter      = j,
+        indcv     = 1,
+        iter      = 1,
         plim      = plim
       )
     }
 
     if("boost" %in% algorithms){
-      fit_ml[["boost"]][[j]] <- run_boost(
+      fit_ml[["boost"]] <- run_boost(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
         params    = params,
-        indcv     = indcv,
-        iter      = j,
+        indcv     = 1,
+        iter      = 1,
         plim      = plim
       )
     }
 
     if("random_forest" %in% algorithms){
-      fit_ml[["random_forest"]][[j]] <- run_random_forest(
+      fit_ml[["random_forest"]] <- run_random_forest(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
         params    = params,
-        indcv     = indcv,
-        iter      = j,
+        indcv     = 1,
+        iter      = 1,
         plim      = plim
       )
     }
 
     if("bagging" %in% algorithms){
-      fit_ml[["bagging"]][[j]] <- run_bagging(
+      fit_ml[["bagging"]] <- run_bagging(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
         params    = params,
-        indcv     = indcv,
-        iter      = j,
+        indcv     = 1,
+        iter      = 1,
         plim      = plim
       )
     }
 
     if("cart" %in% algorithms){
-      fit_ml[["cart"]][[j]] <- run_cart(
+      fit_ml[["cart"]] <- run_cart(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
         params    = params,
-        indcv     = indcv,
-        iter      = j,
+        indcv     = 1,
+        iter      = 1,
         plim      = plim
       )
-    }
+}
 
-  } ## end of fold
+  } else {
+
+    ## run
+
+    for (j in seq_len(params$n_folds)) {
+
+      ## ---------------------------------
+      ## data split
+      ## ---------------------------------
+      testset  <- data[folds[[j]], ]
+      trainset <- data[-folds[[j]], ]
+      indcv[folds[[j]]] <- rep(j, nrow(testset))
+
+
+      ## ---------------------------------
+      ## run ML
+      ## ---------------------------------
+
+      ## prepare data
+      training_data_elements <- create_ml_arguments(
+        outcome = "Y", treatment = "Treat", data = trainset
+      )
+
+      testing_data_elements <- create_ml_arguments(
+        outcome = "Y", treatment = "Treat", data = testset
+      )
+
+      total_data_elements <- create_ml_arguments(
+        outcome = "Y", treatment = "Treat", data = data
+      )
+
+
+      ##
+      ## run each ML algorithm
+      ##
+      if ("causal_forest" %in% algorithms) {
+        fit_ml[["causal_forest"]][[j]] <- run_causal_forest(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          indcv     = indcv,
+          iter      = j,
+          plim      = plim
+        )
+      }
+
+      if("lasso" %in% algorithms){
+        fit_ml[["lasso"]][[j]] <- run_lasso(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          indcv     = indcv,
+          iter      = j,
+          plim      = plim
+        )
+      }
+
+      if("svm" %in% algorithms){
+        fit_ml[["svm"]][[j]] <- run_svm(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          indcv     = indcv,
+          iter      = j,
+          plim      = plim
+        )
+      }
+
+
+      if("bartc" %in% algorithms){
+        fit_ml[["bartc"]][[j]] <- run_bartc(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          indcv     = indcv,
+          iter      = j,
+          plim      = plim
+        )
+      }
+
+      if("bart" %in% algorithms){
+        fit_ml[["bart"]][[j]] <- run_bartmachine(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          indcv     = indcv,
+          iter      = j,
+          plim      = plim
+        )
+      }
+
+      if("boost" %in% algorithms){
+        fit_ml[["boost"]][[j]] <- run_boost(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          indcv     = indcv,
+          iter      = j,
+          plim      = plim
+        )
+      }
+
+      if("random_forest" %in% algorithms){
+        fit_ml[["random_forest"]][[j]] <- run_random_forest(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          indcv     = indcv,
+          iter      = j,
+          plim      = plim
+        )
+      }
+
+      if("bagging" %in% algorithms){
+        fit_ml[["bagging"]][[j]] <- run_bagging(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          indcv     = indcv,
+          iter      = j,
+          plim      = plim
+        )
+      }
+
+      if("cart" %in% algorithms){
+        fit_ml[["cart"]][[j]] <- run_cart(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          indcv     = indcv,
+          iter      = j,
+          plim      = plim
+        )
+      }
+
+    } ## end of fold
+
+  }
 
   return(list(
     params = params, fit_ml = fit_ml,

@@ -65,7 +65,7 @@ summary.itr <- function(object, m = 1, ...){
             lower = c(mean(gate) + qnorm(0.95)*sd)) %>%
         rename(
             estimate = gate,
-            std.error = sd,
+            std.deviation = sd,
             algorithm = alg,
             group = group)
 
