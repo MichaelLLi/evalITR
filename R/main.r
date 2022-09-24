@@ -26,7 +26,6 @@ run_itr <- function(
   n_folds
 ) {
 
-
   ## number of algorithms
   n_alg <- length(algorithms)
 
@@ -40,9 +39,8 @@ run_itr <- function(
     n_df = n_df, n_folds = n_folds, n_alg = n_alg
   )
 
-
   ## loop over all outcomes
-  estimates <- qoi <- vector("list", length = length(outcome))
+  estimates <- vector("list", length = length(outcome))
   for (m in 1:length(outcome)) {
 
     ## data to use 
@@ -63,21 +61,46 @@ run_itr <- function(
       folds      = folds,
       plim       = plim
     )
-
-    
-    ## format output 
-    qoi[[m]] <- compute_qoi(estimates[[m]], algorithms)
     
   }
+              
+  class(estimates) <- c("itr", class(estimates))
 
-  out <- list(qoi       = qoi,
-              estimates = estimates)
+  return(estimates)
+
+}
+#' Estimate quantity of interests
+#' @param fit Fitted model. Usually an output from \code{run_itr}
+#' @param algorithms Machine learning algorithms
+#' @param outcome Outcome variable. Need to be the same as the input of \code{run_itr}
+#' @return An object of \code{itr} class
+#' @export 
+estimate_itr <- function(
+  fit, 
+  algorithms, 
+  outcome){
+
+  ## get estimates
+  estimates = fit
+
+  ## loop over all outcomes
+  qoi <- vector("list", length = length(outcome))
+
+  ## loop over all outcomes
+  for (m in 1:length(outcome)) {
+
+    ## compute qoi
+    qoi[[m]] <- compute_qoi(estimates[[m]], algorithms)
+  
+  }
+  
+  out <- list(qoi = qoi)
               
   class(out) <- c("itr", class(out))
 
   return(out)
 
-}
+  }
 
 
 #' Evaluate ITR for Single Outcome
@@ -259,4 +282,4 @@ itr_single_outcome <- function(
   ))
 }
 
-utils::globalVariables(c("Treat","aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type"))
+utils::globalVariables(c("Treat","aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "estimates"))
