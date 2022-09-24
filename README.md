@@ -28,7 +28,7 @@ nworkers <- 4
 plan(multisession, workers =nworkers)
 ```
 
-## Example
+## Example (cross-validation)
 
 This is an example using the `star` dataset (for more information about
 the dataset, please use `?star`).
@@ -160,3 +160,212 @@ plot(x = fit,
 ```
 
 <img src="man/figures/README-plot-1.png" style="display: block; margin: auto;" />
+
+## Example under sample splitting (under development)
+
+Please set argument input of `n_folds` to 0 ion order to train the models under sample splitting. The split ratio between train and test set is determined by the `ratio` argument. 
+
+```r
+library(tidyverse)
+library(evalITR)
+
+load("data/star.rda")
+
+# specifying outcomes
+outcomes <- c("g3tlangss",
+              "g3treadss",
+              "g3tmathss")
+
+
+# specifying covariates
+covariates <-  star %>% 
+                dplyr::select(-c(all_of(outcomes),"treatment")) %>% 
+                colnames()
+
+# estimate ITR 
+fit <- run_itr(outcome = outcomes,
+               treatment = "treatment",
+               covariates = covariates,
+               data = star,
+               algorithms = c(
+                  "causal_forest", 
+                  "lasso",
+                  "boost", 
+                  "random_forest",
+                  "bagging",
+                  "cart"),
+               plim = 0.2,
+               n_folds = 0, # train under sample splitting
+               ratio = 0.67) # set 0.67 as the split ratio between train and test set
+
+glimpse(fit$qoi)
+
+List of 6
+#> $ PAPE  :List of 6
+#>  ..$ :List of 3
+#>  .. ..$ pape: num 5.12
+#>  .. ..$ sd  : num 0.642
+#>  .. ..$ alg : chr "causal_forest"
+#>  ..$ :List of 3
+#>  .. ..$ pape: num 2.72
+#>  .. ..$ sd  : num 0.808
+#>  .. ..$ alg : chr "lasso"
+#>  ..$ :List of 3
+#>  .. ..$ pape: num 8.28
+#>  .. ..$ sd  : num 0.871
+#>  .. ..$ alg : chr "boost"
+#>  ..$ :List of 3
+#>  .. ..$ pape: num 13.6
+#>  .. ..$ sd  : num 0.835
+#>  .. ..$ alg : chr "random_forest"
+#>  ..$ :List of 3
+#>  .. ..$ pape: num 13.8
+#>  .. ..$ sd  : num 0.832
+#>  .. ..$ alg : chr "bagging"
+#>  ..$ :List of 3
+#>  .. ..$ pape: num 0.421
+#>  .. ..$ sd  : num 0.901
+#>  .. ..$ alg : chr "cart"
+#> $ PAPEp :List of 6
+#>  ..$ :List of 3
+#>  .. ..$ pape: num 5.04
+#>  .. ..$ sd  : num 0.711
+#>  .. ..$ alg : chr "causal_forest"
+#>  ..$ :List of 3
+#>  .. ..$ pape: num 2.79
+#>  .. ..$ sd  : num 0.72
+#>  .. ..$ alg : chr "lasso"
+#>  ..$ :List of 3
+#>  .. ..$ pape: num 5.51
+#>  .. ..$ sd  : num 0.712
+#>  .. ..$ alg : chr "boost"
+#>  ..$ :List of 3
+#>  .. ..$ pape: num 9.6
+#>  .. ..$ sd  : num 0.678
+#>  .. ..$ alg : chr "random_forest"
+#>  ..$ :List of 3
+#>  .. ..$ pape: num 9.53
+#>  .. ..$ sd  : num 0.675
+#>  .. ..$ alg : chr "bagging"
+#>  ..$ :List of 3
+#>  .. ..$ pape: num -0.148
+#>  .. ..$ sd  : num 0.709
+#>  .. ..$ alg : chr "cart"
+#> $ PAPDp :List of 15
+#>  ..$ :List of 3
+#>  .. ..$ papd: num 2.25
+#>  .. ..$ sd  : num 0.853
+#>  .. ..$ alg : chr "causal_forest x lasso"
+#>  ..$ :List of 3
+#>  .. ..$ papd: num -0.471
+#>  .. ..$ sd  : num 0.814
+#>  .. ..$ alg : chr "causal_forest x boost"
+#>  ..$ :List of 3
+#>  .. ..$ papd: num -4.56
+#>  .. ..$ sd  : num 0.706
+#>  .. ..$ alg : chr "causal_forest x random_forest"
+#>  ..$ :List of 3
+#>  .. ..$ papd: num -4.49
+#>  .. ..$ sd  : num 0.813
+#>  .. ..$ alg : chr "causal_forest x bagging"
+#>  ..$ :List of 3
+#>  .. ..$ papd: num 5.19
+#>  .. ..$ sd  : num 1.03
+#>  .. ..$ alg : chr "causal_forest x cart"
+#>  ..$ :List of 3
+#>  .. ..$ papd: num -2.72
+#>  .. ..$ sd  : num 0.866
+#>  .. ..$ alg : chr "lasso x boost"
+#>  ..$ :List of 3
+#>  .. ..$ papd: num -6.81
+#>  .. ..$ sd  : num 0.9
+#>  .. ..$ alg : chr "lasso x random_forest"
+#>  ..$ :List of 3
+#>  .. ..$ papd: num -6.74
+#>  .. ..$ sd  : num 0.898
+#>  .. ..$ alg : chr "lasso x bagging"
+#>  ..$ :List of 3
+#>  .. ..$ papd: num 2.94
+#>  .. ..$ sd  : num 1.04
+#>  .. ..$ alg : chr "lasso x cart"
+#>  ..$ :List of 3
+#>  .. ..$ papd: num -4.09
+#>  .. ..$ sd  : num 0.787
+#>  .. ..$ alg : chr "boost x random_forest"
+#>  ..$ :List of 3
+#>  .. ..$ papd: num -4.02
+#>  .. ..$ sd  : num 0.824
+#>  .. ..$ alg : chr "boost x bagging"
+#>  ..$ :List of 3
+#>  .. ..$ papd: num 5.66
+#>  .. ..$ sd  : num 1.02
+#>  .. ..$ alg : chr "boost x cart"
+#>  ..$ :List of 3
+#>  .. ..$ papd: num 0.0753
+#>  .. ..$ sd  : num 0.487
+#>  .. ..$ alg : chr "random_forest x bagging"
+#>  ..$ :List of 3
+#>  .. ..$ papd: num 9.75
+#>  .. ..$ sd  : num 0.954
+#>  .. ..$ alg : chr "random_forest x cart"
+#>  ..$ :List of 3
+#>  .. ..$ papd: num 9.68
+#>  .. ..$ sd  : num 0.977
+#>  .. ..$ alg : chr "bagging x cart"
+#> $ AUPEC :List of 6
+#>  ..$ :List of 3
+#>  .. ..$ aupec: num 5.65
+#>  .. ..$ sd   : num 0.583
+#>  .. ..$ vec  : num [1:1911] -2.69 -2.69 -2.63 -2.68 -2.68 ...
+#>  ..$ :List of 3
+#>  .. ..$ aupec: num 2.58
+#>  .. ..$ sd   : num 0.618
+#>  .. ..$ vec  : num [1:1911] -2.63 -2.69 -2.69 -2.71 -2.75 ...
+#>  ..$ :List of 3
+#>  .. ..$ aupec: num 6.38
+#>  .. ..$ sd   : num 0.705
+#>  .. ..$ vec  : num [1:1911] -2.63 -2.56 -2.6 -2.61 -2.59 ...
+#>  ..$ :List of 3
+#>  .. ..$ aupec: num 11.1
+#>  .. ..$ sd   : num 0.716
+#>  .. ..$ vec  : num [1:1911] -2.63 -2.56 -2.47 -2.42 -2.39 ...
+#>  ..$ :List of 3
+#>  .. ..$ aupec: num 11.4
+#>  .. ..$ sd   : num 0.716
+#>  .. ..$ vec  : num [1:1911] -2.63 -2.56 -2.52 -2.42 -2.39 ...
+#>  ..$ :List of 3
+#>  .. ..$ aupec: num -0.475
+#>  .. ..$ sd   : num 0.742
+#>  .. ..$ vec  : num [1:1911] -2.75 -2.74 -2.73 -2.67 -2.67 ...
+#> $ GATE  :List of 6
+#>  ..$ :List of 4
+#>  .. ..$ gate : num [1:5] -24.2 -81.8 79.6 -68.8 124
+#>  .. ..$ sd   : num [1:5] 57.6 57.4 57.8 57.3 58
+#>  .. ..$ alg  : chr "causal_forest"
+#>  .. ..$ group: int [1:5] 1 2 3 4 5
+#>  ..$ :List of 4
+#>  .. ..$ gate : num [1:5] 12.03 -6.65 6.99 94.71 -78.2
+#>  .. ..$ sd   : num [1:5] 57.5 57.8 57.9 57.6 57.5
+#>  .. ..$ alg  : chr "lasso"
+#>  .. ..$ group: int [1:5] 1 2 3 4 5
+#>  ..$ :List of 4
+#>  .. ..$ gate : num [1:5] -35.8 89.7 -48.7 55.6 -31.9
+#>  .. ..$ sd   : num [1:5] 57.5 57.5 57.5 57.8 57.9
+#>  .. ..$ alg  : chr "boost"
+#>  .. ..$ group: int [1:5] 1 2 3 4 5
+#>  ..$ :List of 4
+#>  .. ..$ gate : num [1:5] -21.7 -76.4 42.8 16.7 67.5
+#>  .. ..$ sd   : num [1:5] 57.6 57.2 57.4 57.4 58.5
+#>  .. ..$ alg  : chr "random_forest"
+#>  .. ..$ group: int [1:5] 1 2 3 4 5
+#>  ..$ :List of 4
+#>  .. ..$ gate : num [1:5] -58.1 -33.5 45.1 -24.5 99.9
+#>  .. ..$ sd   : num [1:5] 57.5 57.4 57.4 57.2 58.6
+#>  .. ..$ alg  : chr "bagging"
+#>  .. ..$ group: int [1:5] 1 2 3 4 5
+#>  ..$ :List of 4
+#>  .. ..$ gate : num [1:5] 42.9 48.91 41.89 -103.68 -1.14
+#>  .. ..$ sd   : num [1:5] 57.9 57.7 57.8 57.3 57.5
+#>  .. ..$ alg  : chr "cart"
+#>  .. ..$ group: int [1:5] 1 2 3 4 5
+```
