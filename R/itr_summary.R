@@ -8,7 +8,7 @@ summary.itr <- function(object, m = 1, ...){
     
     out <- list()
 
-    out[["PAPE"]] <- object$qoi[[m]]$PAPE %>%
+    out[["PAPE"]] <- object[[m]]$PAPE %>%
         map(.,~as_tibble(.)) %>%
         bind_rows() %>%
         mutate(
@@ -19,7 +19,7 @@ summary.itr <- function(object, m = 1, ...){
           std.deviation = sd,
           algorithm = alg)
 
-    out[["PAPEp"]] <- object$qoi[[m]]$PAPEp %>%
+    out[["PAPEp"]] <- object[[m]]$PAPEp %>%
         map(.,~as_tibble(.)) %>%
         bind_rows() %>%
         mutate(
@@ -30,7 +30,11 @@ summary.itr <- function(object, m = 1, ...){
           std.deviation = sd,
           algorithm = alg)
 
-    out[["PAPDp"]] <- object$qoi[[m]]$PAPDp %>%
+    # not print out papd if only one alg is selected
+    if(length(object[[m]]$PAPDp) == 0){
+      out[["PAPDp"]] <- NULL
+    }else {
+       out[["PAPDp"]] <- object[[m]]$PAPDp %>%
         map(.,~as_tibble(.)) %>%
         bind_rows() %>%
         mutate(
@@ -40,8 +44,9 @@ summary.itr <- function(object, m = 1, ...){
           estimate = papd,
           std.deviation = sd,
           algorithm = alg)
+    }
 
-    temp <- object$qoi[[m]]$AUPEC 
+    temp <- object[[m]]$AUPEC 
 
     out[["AUPEC"]] <- temp %>% 
         map(., ~.x$aupec_cv) %>%

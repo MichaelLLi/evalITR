@@ -80,10 +80,7 @@ estimate_itr <- function(
   algorithms, 
   outcome){
 
-  ## get estimates
-  estimates = fit
-
-  ## loop over all outcomes
+  estimates <- fit
   qoi <- vector("list", length = length(outcome))
 
   ## loop over all outcomes
@@ -93,12 +90,10 @@ estimate_itr <- function(
     qoi[[m]] <- compute_qoi(estimates[[m]], algorithms)
   
   }
-  
-  out <- list(qoi = qoi)
-              
-  class(out) <- c("itr", class(out))
+                
+  class(qoi) <- c("itr", class(qoi))
 
-  return(out)
+  return(qoi)
 
   }
 

@@ -13,7 +13,7 @@
 #' @export 
 plot.itr <- function(x, data, treatment, outcome, algorithms,...){
 
-fit <- x$qoi
+fit = x
 
 graphLabels <- data.frame(type = algorithms,
                           Pval = bind_rows(map(fit[[1]]$AUPEC, ~.x$aupec_cv)) %>% 
