@@ -47,7 +47,8 @@ train_boost <- function(dat_train) {
      ## fit
       fit <- gbm::gbm(formula_boosted, data = training_data_elements_boosted[["data"]],
                         distribution = "bernoulli",
-                        n.trees = 5000)
+                        n.trees = 5000,
+                        interaction.depth = 4)
   }
 
   return(fit)
