@@ -23,7 +23,8 @@ run_itr <- function(
     data,
     algorithms,
     plim,
-    n_folds
+    n_folds,
+    ratio
 ) {
 
 
@@ -37,7 +38,7 @@ run_itr <- function(
   NFOLDS <- n_folds
 
   params <- list(
-    n_df = n_df, n_folds = n_folds, n_alg = n_alg
+    n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio
   )
 
 
@@ -50,17 +51,15 @@ run_itr <- function(
     data_filtered <- data %>%
       select(Y = !!sym(outcome[m]), Treat = !!sym(treatment), all_of(covariates))
 
-    ## create folds
-    treatment_vec <- data_filtered %>% dplyr::pull(Treat)
-    folds <- caret::createFolds(treatment_vec, k = NFOLDS)
 
     if (n_folds == 0) {
+
       ## run
       estimates <- itr_single_outcome(
         data       = data_filtered,
         algorithms = algorithms,
         params     = params,
-        folds      = 0,
+        folds      = folds,
         plim       = plim
       )
 
@@ -68,6 +67,11 @@ run_itr <- function(
       qoi <- compute_qoi(estimates, algorithms, cv = FALSE)
 
     } else {
+
+      ## create folds
+      treatment_vec <- data_filtered %>% dplyr::pull(Treat)
+      folds <- caret::createFolds(treatment_vec, k = NFOLDS)
+
       ## run
       estimates[[m]] <- itr_single_outcome(
         data       = data_filtered,
@@ -139,10 +143,12 @@ itr_single_outcome <- function(
     ## ---------------------------------
     ## sample split
     ## ---------------------------------
-    pct_train = 0.67
-    a <- caret::createDataPartition(data$treatment, p = pct_train, list = FALSE) # create A series of test/training partitions
-    trainset = data[a,]
-    testset = data[-a,]
+
+    split <- caret::createDataPartition(data$Treat,
+                                        p = params$ratio,
+                                        list = FALSE) # create split series of test/training partitions
+    trainset = data[split,]
+    testset = data[-split,]
 
     # prepare data
     training_data_elements <- create_ml_arguments(
@@ -416,158 +422,6 @@ itr_single_outcome <- function(
     } ## end of fold
 
   }
-
-  # Tcv <- dplyr::pull(data, "Treat")
-  # Ycv <- dplyr::pull(data, "Y")
-  # indcv <- rep(0, length(Ycv))
-  #
-  #
-  # params$n_tb <- max(table(indcv))
-  #
-  # ## run
-  #
-  #
-  # for (j in seq_len(params$n_folds)) {
-  #
-  #   ## ---------------------------------
-  #   ## data split
-  #   ## ---------------------------------
-  #   testset  <- data[folds[[j]], ]
-  #   trainset <- data[-folds[[j]], ]
-  #   indcv[folds[[j]]] <- rep(j, nrow(testset))
-  #
-  #
-  #   ## ---------------------------------
-  #   ## run ML
-  #   ## ---------------------------------
-  #
-  #   ## prepare data
-  #   training_data_elements <- create_ml_arguments(
-  #     outcome = "Y", treatment = "Treat", data = trainset
-  #   )
-  #
-  #   testing_data_elements <- create_ml_arguments(
-  #     outcome = "Y", treatment = "Treat", data = testset
-  #   )
-  #
-  #   total_data_elements <- create_ml_arguments(
-  #     outcome = "Y", treatment = "Treat", data = data
-  #   )
-  #
-  #
-  #   ##
-  #   ## run each ML algorithm
-  #   ##
-  #   if ("causal_forest" %in% algorithms) {
-  #     fit_ml[["causal_forest"]][[j]] <- run_causal_forest(
-  #       dat_train = training_data_elements,
-  #       dat_test  = testing_data_elements,
-  #       dat_total = total_data_elements,
-  #       params    = params,
-  #       indcv     = indcv,
-  #       iter      = j,
-  #       plim      = plim
-  #     )
-  #   }
-  #
-  #   if("lasso" %in% algorithms){
-  #     fit_ml[["lasso"]][[j]] <- run_lasso(
-  #       dat_train = training_data_elements,
-  #       dat_test  = testing_data_elements,
-  #       dat_total = total_data_elements,
-  #       params    = params,
-  #       indcv     = indcv,
-  #       iter      = j,
-  #       plim      = plim
-  #     )
-  #   }
-  #
-  #   if("svm" %in% algorithms){
-  #     fit_ml[["svm"]][[j]] <- run_svm(
-  #       dat_train = training_data_elements,
-  #       dat_test  = testing_data_elements,
-  #       dat_total = total_data_elements,
-  #       params    = params,
-  #       indcv     = indcv,
-  #       iter      = j,
-  #       plim      = plim
-  #     )
-  #   }
-  #
-  #
-  #   if("bartc" %in% algorithms){
-  #     fit_ml[["bartc"]][[j]] <- run_bartc(
-  #       dat_train = training_data_elements,
-  #       dat_test  = testing_data_elements,
-  #       dat_total = total_data_elements,
-  #       params    = params,
-  #       indcv     = indcv,
-  #       iter      = j,
-  #       plim      = plim
-  #     )
-  #   }
-  #
-  #   if("bart" %in% algorithms){
-  #     fit_ml[["bart"]][[j]] <- run_bartmachine(
-  #       dat_train = training_data_elements,
-  #       dat_test  = testing_data_elements,
-  #       dat_total = total_data_elements,
-  #       params    = params,
-  #       indcv     = indcv,
-  #       iter      = j,
-  #       plim      = plim
-  #     )
-  #   }
-  #
-  #   if("boost" %in% algorithms){
-  #     fit_ml[["boost"]][[j]] <- run_boost(
-  #       dat_train = training_data_elements,
-  #       dat_test  = testing_data_elements,
-  #       dat_total = total_data_elements,
-  #       params    = params,
-  #       indcv     = indcv,
-  #       iter      = j,
-  #       plim      = plim
-  #     )
-  #   }
-  #
-  #   if("random_forest" %in% algorithms){
-  #     fit_ml[["random_forest"]][[j]] <- run_random_forest(
-  #       dat_train = training_data_elements,
-  #       dat_test  = testing_data_elements,
-  #       dat_total = total_data_elements,
-  #       params    = params,
-  #       indcv     = indcv,
-  #       iter      = j,
-  #       plim      = plim
-  #     )
-  #   }
-  #
-  #   if("bagging" %in% algorithms){
-  #     fit_ml[["bagging"]][[j]] <- run_bagging(
-  #       dat_train = training_data_elements,
-  #       dat_test  = testing_data_elements,
-  #       dat_total = total_data_elements,
-  #       params    = params,
-  #       indcv     = indcv,
-  #       iter      = j,
-  #       plim      = plim
-  #     )
-  #   }
-  #
-  #   if("cart" %in% algorithms){
-  #     fit_ml[["cart"]][[j]] <- run_cart(
-  #       dat_train = training_data_elements,
-  #       dat_test  = testing_data_elements,
-  #       dat_total = total_data_elements,
-  #       params    = params,
-  #       indcv     = indcv,
-  #       iter      = j,
-  #       plim      = plim
-  #     )
-  #   }
-  #
-  # } ## end of fold
 
   return(list(
     params = params, fit_ml = fit_ml,
