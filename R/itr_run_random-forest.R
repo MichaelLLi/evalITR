@@ -49,9 +49,31 @@ test_random_forest <- function(
   testing_data_elements_rf = create_ml_args_rf(dat_test)
   total_data_elements_rf   = create_ml_args_rf(dat_total)  
 
+  ## outcome
+  outcome = testing_data_elements_rf[["data"]][["Y"]]
+
+  if(length(unique(outcome)) > 2){
+
   ## predict 
-  Y0t_total = predict(fit_train, newdata=total_data_elements_rf[["data0t"]]) %>% as.numeric()
-  Y1t_total = predict(fit_train, newdata=total_data_elements_rf[["data1t"]]) %>% as.numeric()
+  Y0t_total = predict(
+    fit_train, 
+    newdata = total_data_elements_rf[["data0t"]])
+  Y1t_total = predict(
+    fit_train, 
+    newdata = total_data_elements_rf[["data1t"]])
+
+  }else {
+
+  ## predict 
+  Y0t_total = predict(
+    fit_train, 
+    newdata = total_data_elements_rf[["data0t"]],
+    type = "prob")[, 2]
+  Y1t_total = predict(
+    fit_train, 
+    newdata = total_data_elements_rf[["data1t"]],
+    type = "prob")[, 2] 
+  }
 
   tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
 

@@ -65,26 +65,26 @@ test_cart <- function(
   outcome = testing_data_elements_cart[["data"]][["Y"]]
 
   if(length(unique(outcome)) > 2){
+    
       ## predict 
       Y0t_total = predict(fit_train, newdata=total_data_elements_cart[["data0t"]])
       Y1t_total = predict(fit_train, newdata=total_data_elements_cart[["data1t"]])
 
-      tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
   }else {
+
       ## predict 
-      Y0t_total <- Y1t_total <-  vector()
-
-      Y0t_predict = predict(fit_train, newdata=total_data_elements_cart[["data0t"]])      
-      Y1t_predict = predict(fit_train, newdata=total_data_elements_cart[["data1t"]])
-
-      # convert predicted probability to predicted outcome
-      Y0t_total <- sapply(seq(1:nrow(Y0t_predict)),convert_outcome, predict_outcome = Y0t_predict)
-      Y1t_total <- sapply(seq(1:nrow(Y1t_predict)),convert_outcome, predict_outcome = Y1t_predict)
-
-      tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
-           
+      Y0t_total = predict(
+        fit_train, 
+        newdata = total_data_elements_cart[["data0t"]],
+        type = "prob")[, 2]      
+      Y1t_total = predict(
+        fit_train, 
+        newdata = total_data_elements_cart[["data1t"]], 
+        type = "prob")[, 2]           
   }
 
+  # predicted tau
+  tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
 
 
   ## compute quantities of interest 
