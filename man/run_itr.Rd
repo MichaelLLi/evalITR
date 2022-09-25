@@ -4,7 +4,7 @@
 \alias{run_itr}
 \title{Evaluate ITR}
 \usage{
-run_itr(outcome, treatment, covariates, data, algorithms, plim, n_folds)
+run_itr(outcome, treatment, covariates, data, algorithms, plim, n_folds, ratio)
 }
 \arguments{
 \item{outcome}{Outcome variable (or a list of outcome variables). Only takes in numeric values for both continous outcomes and binary outcomes (0 or 1).}
@@ -20,6 +20,8 @@ run_itr(outcome, treatment, covariates, data, algorithms, plim, n_folds)
 \item{plim}{Proportion of treated units.}
 
 \item{n_folds}{Number of cross-validation folds.}
+
+\item{ratio}{Split ratio between train and test set under sample splitting.}
 }
 \value{
 An object of \code{itr} class
