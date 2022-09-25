@@ -72,7 +72,10 @@ run_itr <- function(
       qoi[[m]] <- compute_qoi(estimates[[m]], algorithms, cv = FALSE)
 
     } else {
+
+      # set ratio default value as 0 under cross validation
       params$ratio <- 0
+
       ## create folds
       treatment_vec <- data_filtered %>% dplyr::pull(Treat)
       folds <- caret::createFolds(treatment_vec, k = NFOLDS)
@@ -427,4 +430,4 @@ itr_single_outcome <- function(
   ))
 }
 
-utils::globalVariables(c("Treat","aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type"))
+utils::globalVariables(c("Treat", "aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm"))
