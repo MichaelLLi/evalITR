@@ -54,7 +54,10 @@ run_itr <- function(
       select(Y = !!sym(outcome[m]), Treat = !!sym(treatment), all_of(covariates))
 
 
-    if (n_folds == 0) {
+    # if (n_folds == 0) {
+    if (ratio > 0) {
+
+      params$n_folds <- 0
 
       ## run under sample splitting
       estimates[[m]] <- itr_single_outcome(
@@ -69,7 +72,7 @@ run_itr <- function(
       qoi[[m]] <- compute_qoi(estimates[[m]], algorithms, cv = FALSE)
 
     } else {
-
+      params$ratio <- 0
       ## create folds
       treatment_vec <- data_filtered %>% dplyr::pull(Treat)
       folds <- caret::createFolds(treatment_vec, k = NFOLDS)
@@ -271,6 +274,7 @@ itr_single_outcome <- function(
 }
   } else {
 
+    ratio <- 0
     ## loop over j number of folds
 
     for (j in seq_len(params$n_folds)) {
