@@ -12,6 +12,8 @@
 #'   Number of cross-validation folds.
 #' @param covariates
 #'   Covariates included in the model.
+#' @param ratio
+#'   Split ratio between train and test set under sample splitting.
 #' @import dplyr
 #' @importFrom rlang !! sym
 #' @export
@@ -54,8 +56,8 @@ run_itr <- function(
 
     if (n_folds == 0) {
 
-      ## run
-      estimates <- itr_single_outcome(
+      ## run under sample splitting
+      estimates[[m]] <- itr_single_outcome(
         data       = data_filtered,
         algorithms = algorithms,
         params     = params,
@@ -64,7 +66,7 @@ run_itr <- function(
       )
 
       ## format output
-      qoi <- compute_qoi(estimates, algorithms, cv = FALSE)
+      qoi[[m]] <- compute_qoi(estimates[[m]], algorithms, cv = FALSE)
 
     } else {
 
@@ -72,7 +74,7 @@ run_itr <- function(
       treatment_vec <- data_filtered %>% dplyr::pull(Treat)
       folds <- caret::createFolds(treatment_vec, k = NFOLDS)
 
-      ## run
+      ## run under cross validation
       estimates[[m]] <- itr_single_outcome(
         data       = data_filtered,
         algorithms = algorithms,
@@ -85,19 +87,6 @@ run_itr <- function(
       qoi[[m]] <- compute_qoi(estimates[[m]], algorithms, cv = TRUE)
 
     }
-
-    # ## run
-    # estimates[[m]] <- itr_single_outcome(
-    #   data       = data_filtered,
-    #   algorithms = algorithms,
-    #   params     = params,
-    #   folds      = folds,
-    #   plim       = plim
-    # )
-    #
-    # ## format output
-    # qoi[[m]] <- compute_qoi(estimates[[m]], algorithms)
-
   }
 
   out <- list(qoi       = qoi,
@@ -114,11 +103,12 @@ run_itr <- function(
 #'
 #' @importFrom purrr map
 #' @importFrom dplyr pull
-#' @param data A dataset
-#' @param algorithms Machine learning algorithms
-#' @param params A list of parameters
-#' @param folds Number of folds
-#' @param plim The maximum percentage of population that can be treated under the budget constraint
+#' @param data A dataset.
+#' @param algorithms Machine learning algorithms.
+#' @param params A list of parameters.
+#' @param folds Number of folds.
+#' @param plim The maximum percentage of population that can be treated under the budget constraint.
+
 itr_single_outcome <- function(
     data,
     algorithms,
@@ -144,11 +134,16 @@ itr_single_outcome <- function(
     ## sample split
     ## ---------------------------------
 
+    # create split series of test/training partitions
     split <- caret::createDataPartition(data$Treat,
                                         p = params$ratio,
-                                        list = FALSE) # create split series of test/training partitions
+                                        list = FALSE)
     trainset = data[split,]
     testset = data[-split,]
+
+    ## ---------------------------------
+    ## run ML
+    ## ---------------------------------
 
     # prepare data
     training_data_elements <- create_ml_arguments(
@@ -173,7 +168,7 @@ itr_single_outcome <- function(
         dat_total = total_data_elements,
         params    = params,
         plim      = plim,
-        indcv     = 1, #indcv and iter set to 1 for sample splitting case
+        indcv     = 1, #indcv and iter set to 1 for sample splitting
         iter      = 1
       )
     }
@@ -274,10 +269,9 @@ itr_single_outcome <- function(
         plim      = plim
       )
 }
-
   } else {
 
-    ## run
+    ## loop over j number of folds
 
     for (j in seq_len(params$n_folds)) {
 

@@ -2,7 +2,7 @@
 % Please edit documentation in R/itr_helpers.R
 \name{create_ml_args_bart}
 \alias{create_ml_args_bart}
-\title{Create arguments for BART}
+\title{Create arguments for bartMachine}
 \usage{
 create_ml_args_bart(data)
 }
@@ -10,5 +10,5 @@ create_ml_args_bart(data)
 \item{data}{A dataset}
 }
 \description{
-Create arguments for BART
+Create arguments for bartMachine
 }

@@ -1,6 +1,6 @@
 #' Estimation of the Population Average Prescription Difference in Randomized Experiments Under Cross Validation
 #'
-#' This function estimates the Population Average Prescription Difference The details of the methods for this design are given in Imai and Li (2019).
+#' This function estimates the Population Average Prescription Difference with a budget constaint under cross validation. The details of the methods for this design are given in Imai and Li (2019).
 #'
 #'
 #'

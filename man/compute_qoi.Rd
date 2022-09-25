@@ -2,15 +2,17 @@
 % Please edit documentation in R/itr_qoi.R
 \name{compute_qoi}
 \alias{compute_qoi}
-\title{Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC)}
+\title{Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv)}
 \usage{
-compute_qoi(fit_obj, algorithms)
+compute_qoi(fit_obj, algorithms, cv)
 }
 \arguments{
 \item{fit_obj}{An output object from \code{itr_single_outcome} function.}
 
 \item{algorithms}{Machine learning algorithms}
+
+\item{cv}{Indicate training method. Set \code{cv = TRUE} for cross validation and \code{FALSE} for sample splitting.}
 }
 \description{
-Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC)
+Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv)
 }

@@ -7,15 +7,15 @@
 itr_single_outcome(data, algorithms, params, folds, plim)
 }
 \arguments{
-\item{data}{A dataset}
+\item{data}{A dataset.}
 
-\item{algorithms}{Machine learning algorithms}
+\item{algorithms}{Machine learning algorithms.}
 
-\item{params}{A list of parameters}
+\item{params}{A list of parameters.}
 
-\item{folds}{Number of folds}
+\item{folds}{Number of folds.}
 
-\item{plim}{The maximum percentage of population that can be treated under the budget constraint}
+\item{plim}{The maximum percentage of population that can be treated under the budget constraint.}
 }
 \description{
 Evaluate ITR for Single Outcome
