@@ -9,11 +9,11 @@
 #' @param plim
 #'   Proportion of treated units.
 #' @param n_folds
-#'   Number of cross-validation folds.
+#'   Number of cross-validation folds. Default is 5.
 #' @param covariates
 #'   Covariates included in the model.
 #' @param ratio
-#'   Split ratio between train and test set under sample splitting.
+#'   Split ratio between train and test set under sample splitting. Default is 0.
 #' @import dplyr
 #' @importFrom rlang !! sym
 #' @export
@@ -25,8 +25,8 @@ run_itr <- function(
     data,
     algorithms,
     plim,
-    n_folds,
-    ratio
+    n_folds = 5,
+    ratio = 0
 ) {
 
 
@@ -56,6 +56,9 @@ run_itr <- function(
 
     # if (n_folds == 0) {
     if (ratio > 0) {
+    # might be a better approach; now if ratio > 0, then sp regardless folds
+    # if (ratio = 0) {
+    #   params$n_folds <- params$n_folds
 
       params$n_folds <- 0
 
