@@ -302,7 +302,7 @@ convert_outcome <- function(x, predict_outcome){
 }
 
 # Re-organize cross-validation output to plot the AUPEC curve
-getAupecOutput = function(
+getAupecOutput_cv = function(
   tauML, taucvML, That_pcv_mat, MLname,
   NFOLDS, Ycv, Tcv, indcv
 ){
@@ -334,4 +334,3 @@ getAupecOutput = function(
               aupec_vec = aupec_vec,
               outputdf = outputdf))
 }
-

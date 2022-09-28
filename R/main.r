@@ -14,6 +14,8 @@
 #'   Covariates included in the model.
 #' @param ratio
 #'   Split ratio between train and test set under sample splitting. Default is 0.
+#' @param ngates
+#'   The number of groups to separate the data into. The groups are determined by tau. Default is 5.
 #' @import dplyr
 #' @importFrom rlang !! sym
 #' @export
@@ -26,7 +28,8 @@ run_itr <- function(
     algorithms,
     plim,
     n_folds = 5,
-    ratio = 0
+    ratio = 0,
+    ngates = 5
 ) {
 
 
@@ -40,7 +43,7 @@ run_itr <- function(
   NFOLDS <- n_folds
 
   params <- list(
-    n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio
+    n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio, ngates = ngates
   )
 
 
