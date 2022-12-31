@@ -4,7 +4,7 @@
 \alias{compute_qoi}
 \title{Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv)}
 \usage{
-compute_qoi(fit_obj, algorithms, cv)
+compute_qoi(fit_obj, algorithms, cv, quantities)
 }
 \arguments{
 \item{fit_obj}{An output object from \code{itr_single_outcome} function.}
