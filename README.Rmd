@@ -38,7 +38,7 @@ plan(multisession, workers =nworkers)
 ```
 
 
-## Example
+## Example under cross-validation
 
 This is an example using the `star` dataset (for more information about the dataset, please use `?star`). 
 
@@ -71,14 +71,15 @@ fit <- run_itr(outcome = outcomes,
                data = star,
                algorithms = c(
                   "causal_forest", 
-                  "bart",
+                  # "bart",
                   "lasso",
                   "boost", 
                   "random_forest",
                   "bagging",
                   "cart"),
                plim = 0.2,
-               n_folds = 3)
+               n_folds = 3,
+               ratio = 0.67)
 ```
 
 ```{r estimates}
@@ -122,4 +123,44 @@ plot(x = est,
                 "bagging",
                 "cart"))
 
+
+```
+
+## Example under sample splitting (under development)
+
+Please set argument input of `n_folds` to 0 ion order to train the models under sample splitting. The split ratio between train and test set is determined by the `ratio` argument. 
+```{r message = FALSE}
+library(tidyverse)
+library(evalITR)
+
+load("data/star.rda")
+
+# specifying outcomes
+outcomes <- c("g3tlangss",
+              "g3treadss",
+              "g3tmathss")
+
+
+# specifying covariates
+covariates <-  star %>% 
+                dplyr::select(-c(all_of(outcomes),"treatment")) %>% 
+                colnames()
+
+# estimate ITR 
+fit <- run_itr(outcome = outcomes,
+               treatment = "treatment",
+               covariates = covariates,
+               data = star,
+               algorithms = c(
+                  "causal_forest", 
+                  "lasso",
+                  "boost", 
+                  "random_forest",
+                  "bagging",
+                  "cart"),
+               plim = 0.2,
+               n_folds = 0,
+               ratio = 0.67)
+
+glimpse(fit$qoi)
 ```

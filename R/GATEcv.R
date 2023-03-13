@@ -5,7 +5,7 @@
 #'
 #'
 #' @param T A vector of the unit-level binary treatment receipt variable for each sample.
-#' @param tau A vector of the unit-level continuous score. Conditional Average Treatment Effect is one possible measure.
+#' @param tau A matrix where the \code{i}th column is the unit-level continuous score for treatment assignment generated in the \code{i}th fold. Conditional Average Treatment Effect is one possible measure.
 #' @param Y A vector of the outcome variable of interest for each sample.
 #' @param ind A vector of integers (between 1 and number of folds inclusive) indicating which testing set does each sample belong to.
 #' @param ngates The number of groups to separate the data into. The groups are determined by \code{tau}. Default is 5.

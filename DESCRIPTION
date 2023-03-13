@@ -41,7 +41,8 @@ Imports:
     rlang,
     rpart,
     scales,
-    utils
+    utils,
+    haven
 Suggests: 
     testthat
 Encoding: UTF-8

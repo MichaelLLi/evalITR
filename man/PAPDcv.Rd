@@ -33,7 +33,7 @@ Population Average Prescription Difference.} \item{sd}{The estimated standard de
 of PAPD.}
 }
 \description{
-This function estimates the Population Average Prescription Difference The details of the methods for this design are given in Imai and Li (2019).
+This function estimates the Population Average Prescription Difference with a budget constaint under cross validation. The details of the methods for this design are given in Imai and Li (2019).
 }
 \examples{
 T = c(1,0,1,0,1,0,1,0)
