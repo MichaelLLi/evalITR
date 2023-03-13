@@ -16,6 +16,7 @@ compute_qoi <- function(fit_obj, algorithms, cv) {
   plim   <- fit_obj$plim
   cv     <- cv
 
+
   if (cv == TRUE) {
 
     ## compute quantities under cross validation
@@ -71,7 +72,7 @@ compute_qoi <- function(fit_obj, algorithms, cv) {
       tau_cv <- furrr::future_map(fit_ml[[i]], ~.x$tau_cv) %>% do.call(cbind, .)
       That_pcv_mat <- furrr::future_map(fit_ml[[i]], ~.x$That_pcv) %>% do.call(cbind, .)
 
-      aupec[[i]] <- getAupecOutput(
+      aupec[[i]] <- getAupecOutput_cv(
         tau, tau_cv, That_pcv_mat, algorithms[i],
         NFOLDS = params$n_folds, Ycv = Ycv, Tcv = Tcv, indcv = indcv
       )
@@ -84,7 +85,7 @@ compute_qoi <- function(fit_obj, algorithms, cv) {
       tau_cv <- furrr::future_map(fit_ml[[i]], ~.x$tau_cv) %>% do.call(cbind, .)
 
       ## Compute GATE
-      GATEcv[[i]] <- GATEcv(Tcv, tau_cv, Ycv, indcv, ngates = 5) #should enable user to set ngates
+      GATEcv[[i]] <- GATEcv(Tcv, tau_cv, Ycv, indcv, params$ngates) #should enable user to set ngates
 
       ## indicate algorithm
       GATEcv[[i]]$alg <- algorithms[i]
@@ -101,9 +102,9 @@ compute_qoi <- function(fit_obj, algorithms, cv) {
     for (i in seq_len(params$n_alg)) {
 
       ## compute PAPE
-      PAPE[[i]] <- PAPE(Tcv, fit_ml[[i]][[3]], Ycv, centered = TRUE, plim = NA)
+      PAPE[[i]] <- PAPE(Tcv, fit_ml[[i]][[3]], Ycv, centered = TRUE)
 
-      ## compute PAPEp
+      ## compute PAPEp: sp does not have papep, check PAPE.R
       PAPEp[[i]] <- PAPE(Tcv, fit_ml[[i]][[4]], Ycv, centered = TRUE, plim)
 
       ## name
@@ -148,7 +149,7 @@ compute_qoi <- function(fit_obj, algorithms, cv) {
     for (i in seq_along(algorithms)) {
 
       ## Compute GATE
-      GATE[[i]] <- GATE(Tcv, fit_ml[[i]][[1]], Ycv, ngates = 5)
+      GATE[[i]] <- GATE(Tcv, fit_ml[[i]][[1]], Ycv, params$ngates)
 
       ## indicate algorithm
       GATE[[i]]$alg <- algorithms[i]

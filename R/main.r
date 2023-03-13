@@ -9,11 +9,13 @@
 #' @param plim
 #'   Proportion of treated units.
 #' @param n_folds
-#'   Number of cross-validation folds.
+#'   Number of cross-validation folds. Default is 5.
 #' @param covariates
 #'   Covariates included in the model.
 #' @param ratio
-#'   Split ratio between train and test set under sample splitting.
+#'   Split ratio between train and test set under sample splitting. Default is 0.
+#' @param ngates
+#'   The number of groups to separate the data into. The groups are determined by tau. Default is 5.
 #' @import dplyr
 #' @importFrom rlang !! sym
 #' @export
@@ -25,8 +27,9 @@ run_itr <- function(
     data,
     algorithms,
     plim,
-    n_folds,
-    ratio
+    n_folds = 5,
+    ratio = 0,
+    ngates = 5
 ) {
 
 
@@ -40,7 +43,7 @@ run_itr <- function(
   NFOLDS <- n_folds
 
   params <- list(
-    n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio
+    n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio, ngates = ngates
   )
 
 
@@ -54,7 +57,13 @@ run_itr <- function(
       select(Y = !!sym(outcome[m]), Treat = !!sym(treatment), all_of(covariates))
 
 
-    if (n_folds == 0) {
+    # if (n_folds == 0) {
+    if (ratio > 0) {
+    # might be a better approach; now if ratio > 0, then sp regardless folds
+    # if (ratio = 0) {
+    #   params$n_folds <- params$n_folds
+
+      params$n_folds <- 0
 
       ## run under sample splitting
       estimates[[m]] <- itr_single_outcome(
@@ -69,6 +78,9 @@ run_itr <- function(
       qoi[[m]] <- compute_qoi(estimates[[m]], algorithms, cv = FALSE)
 
     } else {
+
+      # set ratio default value as 0 under cross validation
+      params$ratio <- 0
 
       ## create folds
       treatment_vec <- data_filtered %>% dplyr::pull(Treat)
@@ -271,6 +283,7 @@ itr_single_outcome <- function(
 }
   } else {
 
+    ratio <- 0
     ## loop over j number of folds
 
     for (j in seq_len(params$n_folds)) {
@@ -423,4 +436,4 @@ itr_single_outcome <- function(
   ))
 }
 
-utils::globalVariables(c("Treat","aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type"))
+utils::globalVariables(c("Treat", "aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm"))
