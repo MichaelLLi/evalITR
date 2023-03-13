@@ -40,7 +40,8 @@ train_bagging <- function(dat_train) {
   ## fit
   fit <- randomForest::randomForest(formula_bagging, 
                       data = training_data_elements_bagging[["data"]],
-                      mtry=tune_parameter, ntree = 500)
+                      mtry=tune_parameter, ntree = 500,
+                      norm.votes=TRUE)
   
   return(fit)
 
@@ -54,12 +55,34 @@ test_bagging <- function(
   ## format data 
   testing_data_elements_bagging = create_ml_args_bagging(dat_test)
   total_data_elements_bagging   = create_ml_args_bagging(dat_total)
-    
-  ## predict 
-  Y0t_total = predict(fit_train, newdata=total_data_elements_bagging[["data0t"]]) %>% as.numeric()
-  Y1t_total = predict(fit_train, newdata=total_data_elements_bagging[["data1t"]]) %>% as.numeric()
 
-  tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
+  ## outcome
+  outcome = testing_data_elements_bagging[["data"]][["Y"]]
+
+  if(length(unique(outcome)) > 2){
+  
+  ## predict 
+  Y0t_total = predict(
+    fit_train,
+    newdata = total_data_elements_bagging[["data0t"]])
+  Y1t_total = predict(
+    fit_train,
+    newdata = total_data_elements_bagging[["data1t"]])
+
+  }else{
+  
+  ## predict 
+  Y0t_total = predict(
+    fit_train,
+    newdata = total_data_elements_bagging[["data0t"]],
+    type = "prob")[, 2]
+  Y1t_total = predict(
+    fit_train,
+    newdata = total_data_elements_bagging[["data1t"]],
+    type = "prob")[, 2]
+    }
+
+  tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
 
 
   ## compute quantities of interest 

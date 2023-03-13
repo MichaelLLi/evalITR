@@ -83,8 +83,14 @@ test_lasso <- function(
   
   ## predict 
   
-  Y0t1_total=predict(fit_train,total_data_elements_lasso[["X0t_expand"]])
-  Y1t1_total=predict(fit_train,total_data_elements_lasso[["X1t_expand"]])
+  Y0t1_total = predict(
+    fit_train,
+    total_data_elements_lasso[["X0t_expand"]],
+    type = "response")
+  Y1t1_total = predict(
+    fit_train,
+    total_data_elements_lasso[["X1t_expand"]],
+    type = "response")
 
   tau_total=Y1t1_total-Y0t1_total + runif(n_df,-1e-6,1e-6)
 

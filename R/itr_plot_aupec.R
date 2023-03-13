@@ -13,7 +13,7 @@
 #' @export 
 plot.itr <- function(x, data, treatment, outcome, algorithms,...){
 
-fit <- x$qoi
+fit = x
 
 graphLabels <- data.frame(type = algorithms,
                           Pval = bind_rows(map(fit[[1]]$AUPEC, ~.x$aupec_cv)) %>% 
@@ -32,7 +32,6 @@ bind_rows(map(fit[[1]]$AUPEC, ~.x$aupec_cv)) %>%
   ) %>%
   mutate(AUPECmin = aupec.y - 1.96*sd,
          AUPECmax = aupec.y + 1.96*sd) -> data
-
 
 data %>% 
   ggplot(aes(x=fraction,y=aupec.y,group=type)) + 

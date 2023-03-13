@@ -64,7 +64,7 @@ covariates <-  star %>%
                 dplyr::select(-c(all_of(outcomes),"treatment")) %>% 
                 colnames()
 
-# estimate ITR 
+# train the model
 fit <- run_itr(outcome = outcomes,
                treatment = "treatment",
                covariates = covariates,
@@ -82,32 +82,47 @@ fit <- run_itr(outcome = outcomes,
                ratio = 0.67)
 ```
 
+```{r estimates}
+# compute estimates
+est <- estimate_itr(
+          fit = fit,
+          outcome = "g3tlangss",
+          algorithms = c(
+                "causal_forest", 
+                "bart",
+                "lasso",
+                "boost", 
+                "random_forest",
+                "bagging",
+                "cart"))
+```
+
+```{r summary}
+# summarize estimates
+summary(est)
+```
+
 The`summary()` function displays the following summary statistics: (1) population average prescriptive effect `PAPE`; (2) population average prescriptive effect with a budget constraint `PAPEp`; (3) population average prescriptive effect difference with a budget constraint `PAPDp`; (4) and area under the prescriptive effect curve `AUPEC`. For more information about these evaluation metrics, please refer to [this paper](https://arxiv.org/abs/1905.05389).
 
-
-
-```{r output}
-# summarize estimates
-summary(fit)
-```
 
 We plot the estimated Area Under the Prescriptive Effect Curve
 for the writing score across a range of budget constraints for different algorithms.
 
 ```{r plot, fig.width=8, fig.height=8,fig.align = "center"}
 # plot the AUPEC with different ML algorithms
-plot(x = fit, 
+plot(x = est, 
       outcome = "g3tlangss",
       treatment = "treatment",
       data = star, 
       algorithms = c(
-          "causal_forest",
-          # "bart",
-          "lasso",
-          "boost", 
-          "random_forest",
-          "bagging", 
-          "cart"))
+                "causal_forest", 
+                "bart",
+                "lasso",
+                "boost", 
+                "random_forest",
+                "bagging",
+                "cart"))
+
 
 ```
 

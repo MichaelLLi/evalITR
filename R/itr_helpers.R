@@ -289,20 +289,8 @@ create_ml_args_knn = function(create_ml_arguments_outputs){
   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
 }
 
-# convert predicted outcomes for CART
-convert_outcome <- function(x, predict_outcome){
-
-  outcome = c()
-
-  if(predict_outcome[x,1] >= 0.5){
-    outcome[x] = colnames(predict_outcome)[1] %>% as.numeric()
-  }else {
-    outcome[x] = colnames(predict_outcome)[2] %>% as.numeric()
-  }
-}
-
-# Re-organize cross-validation output to plot the AUPEC curve
-getAupecOutput_cv = function(
+# Re-organize cross-validation output to plot the AUPEC curve  
+getAupecOutput = function(
   tauML, taucvML, That_pcv_mat, MLname,
   NFOLDS, Ycv, Tcv, indcv
 ){

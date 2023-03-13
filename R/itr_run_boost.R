@@ -47,7 +47,8 @@ train_boost <- function(dat_train) {
      ## fit
       fit <- gbm::gbm(formula_boosted, data = training_data_elements_boosted[["data"]],
                         distribution = "bernoulli",
-                        n.trees = 5000)
+                        n.trees = 5000,
+                        interaction.depth = 4)
   }
 
   return(fit)
@@ -65,8 +66,14 @@ test_boost <- function(
   
   ## predict 
   
-  Y0t_total=predict(fit_train, as.data.frame(total_data_elements_boosted[["data0t"]]))
-  Y1t_total=predict(fit_train, as.data.frame(total_data_elements_boosted[["data1t"]]))
+  Y0t_total = predict(
+    fit_train, 
+    as.data.frame(total_data_elements_boosted[["data0t"]]),
+    type = "response")
+  Y1t_total = predict(
+    fit_train, 
+    as.data.frame(total_data_elements_boosted[["data1t"]]),
+    type = "response")
 
   tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
 

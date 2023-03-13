@@ -32,7 +32,6 @@ run_itr <- function(
     ngates = 5
 ) {
 
-
   ## number of algorithms
   n_alg <- length(algorithms)
 
@@ -46,69 +45,63 @@ run_itr <- function(
     n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio, ngates = ngates
   )
 
-
   ## loop over all outcomes
-  estimates <- qoi <- vector("list", length = length(outcome))
+  estimates <- vector("list", length = length(outcome))
   for (m in 1:length(outcome)) {
 
     ## data to use
     ## rename outcome and treatment variable
     data_filtered <- data %>%
       select(Y = !!sym(outcome[m]), Treat = !!sym(treatment), all_of(covariates))
+    
+    ## create folds 
+    treatment_vec <- data_filtered %>% dplyr::pull(Treat)
+    folds <- caret::createFolds(treatment_vec, k = NFOLDS)
 
 
-    # if (n_folds == 0) {
-    if (ratio > 0) {
-    # might be a better approach; now if ratio > 0, then sp regardless folds
-    # if (ratio = 0) {
-    #   params$n_folds <- params$n_folds
-
-      params$n_folds <- 0
-
-      ## run under sample splitting
-      estimates[[m]] <- itr_single_outcome(
-        data       = data_filtered,
-        algorithms = algorithms,
-        params     = params,
-        folds      = folds,
-        plim       = plim
-      )
-
-      ## format output
-      qoi[[m]] <- compute_qoi(estimates[[m]], algorithms, cv = FALSE)
-
-    } else {
-
-      # set ratio default value as 0 under cross validation
-      params$ratio <- 0
-
-      ## create folds
-      treatment_vec <- data_filtered %>% dplyr::pull(Treat)
-      folds <- caret::createFolds(treatment_vec, k = NFOLDS)
-
-      ## run under cross validation
-      estimates[[m]] <- itr_single_outcome(
-        data       = data_filtered,
-        algorithms = algorithms,
-        params     = params,
-        folds      = folds,
-        plim       = plim
-      )
-
-      ## format output
-      qoi[[m]] <- compute_qoi(estimates[[m]], algorithms, cv = TRUE)
-
-    }
+    ## run 
+    estimates[[m]] <- itr_single_outcome(
+      data       = data_filtered, 
+      algorithms = algorithms, 
+      params     = params, 
+      folds      = folds,
+      plim       = plim
+    )
+    
   }
+              
+  class(estimates) <- c("itr", class(estimates))
 
-  out <- list(qoi       = qoi,
-              estimates = estimates)
-
-  class(out) <- c("itr", class(out))
-
-  return(out)
+  return(estimates)
 
 }
+#' Estimate quantity of interests
+#' @param fit Fitted model. Usually an output from \code{run_itr}
+#' @param algorithms Machine learning algorithms
+#' @param outcome Outcome variable. Need to be the same as the input of \code{run_itr}
+#' @return An object of \code{itr} class
+#' @export 
+estimate_itr <- function(
+  fit, 
+  algorithms, 
+  outcome){
+
+  estimates <- fit
+  qoi <- vector("list", length = length(outcome))
+
+  ## loop over all outcomes
+  for (m in 1:length(outcome)) {
+
+    ## compute qoi
+    qoi[[m]] <- compute_qoi(estimates[[m]], algorithms)
+  
+  }
+                
+  class(qoi) <- c("itr", class(qoi))
+
+  return(qoi)
+
+  }
 
 
 #' Evaluate ITR for Single Outcome
@@ -437,3 +430,4 @@ itr_single_outcome <- function(
 }
 
 utils::globalVariables(c("Treat", "aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm"))
+
