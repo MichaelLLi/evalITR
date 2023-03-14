@@ -179,7 +179,8 @@ plot(est_cv)
 ```
 
 <img src="man/figures/README-plot-1.png" style="display: block; margin: auto;" />
-\## Example under sample splitting
+
+## Example under sample splitting
 
 Please set argument input of `n_folds` to 0 ion order to train the
 models under sample splitting. The split ratio between train and test
