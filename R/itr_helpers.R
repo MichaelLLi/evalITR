@@ -302,9 +302,6 @@ getAupecOutput = function(
     aupec_grid[[j]] = AUPEC(Tcv[indcv==j], tau,Ycv[indcv==j])
   }
 
-  ## use That_pcv_mat
-  # aupec_cv = AUPECcv(T = Tcv, tau = That_pcv_mat, Y = Ycv, ind = indcv)
-
   ## use taucv
   aupec_cv = AUPECcv(T = Tcv, tau = taucvML, Y = Ycv, ind = indcv)
 

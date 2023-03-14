@@ -1,11 +1,10 @@
 #' Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv)
 #' @param fit_obj An output object from \code{itr_single_outcome} function.
 #' @param algorithms Machine learning algorithms
-#' @param cv Indicate training method. Set \code{cv = TRUE} for cross validation and \code{FALSE} for sample splitting.
 #' @importFrom rlang .data
 # compute_qoi <- function(fit_obj, algorithms) {
 
-compute_qoi <- function(fit_obj, algorithms, cv) {
+compute_qoi <- function(fit_obj, algorithms) {
 
   ## extract objects
   fit_ml <- fit_obj$fit_ml
@@ -14,12 +13,14 @@ compute_qoi <- function(fit_obj, algorithms, cv) {
   Tcv    <- fit_obj$Tcv
   indcv  <- fit_obj$indcv
   plim   <- fit_obj$plim
-  cv     <- cv
+  cv     <- fit_obj$params$cv
 
 
+
+  ## -----------------------------------------
+  ## compute quantities under cross validation
+  ## -----------------------------------------
   if (cv == TRUE) {
-
-    ## compute quantities under cross validation
 
     ## PAPE and PAPEp
     PAPE <- PAPEp <- vector("list", params$n_alg)
@@ -72,40 +73,46 @@ compute_qoi <- function(fit_obj, algorithms, cv) {
       tau_cv <- furrr::future_map(fit_ml[[i]], ~.x$tau_cv) %>% do.call(cbind, .)
       That_pcv_mat <- furrr::future_map(fit_ml[[i]], ~.x$That_pcv) %>% do.call(cbind, .)
 
-      aupec[[i]] <- getAupecOutput_cv(
+      aupec[[i]] <- getAupecOutput(
         tau, tau_cv, That_pcv_mat, algorithms[i],
         NFOLDS = params$n_folds, Ycv = Ycv, Tcv = Tcv, indcv = indcv
       )
     }
 
-    ## GATEcv
-    GATEcv <- vector("list", length = length(algorithms))
+    ## GATE
+    GATE <- vector("list", length = length(algorithms))
     for (i in seq_along(algorithms)) {
       tau <- furrr::future_map(fit_ml[[i]], ~.x$tau) %>% do.call(cbind, .)
       tau_cv <- furrr::future_map(fit_ml[[i]], ~.x$tau_cv) %>% do.call(cbind, .)
 
       ## Compute GATE
-      GATEcv[[i]] <- GATEcv(Tcv, tau_cv, Ycv, indcv, params$ngates) #should enable user to set ngates
+      GATE[[i]] <- GATEcv(Tcv, tau_cv, Ycv, indcv, params$ngates) 
 
       ## indicate algorithm
-      GATEcv[[i]]$alg <- algorithms[i]
+      GATE[[i]]$alg <- algorithms[i]
 
       ## indicate group number
-      GATEcv[[i]]$group <- seq_along(GATEcv[[i]]$gate)
+      GATE[[i]]$group <- seq_along(GATE[[i]]$gate)
     }
 
-  } else {
-    # compute quantities under sample splitting
+  } 
+  
+
+
+  ## -----------------------------------------
+  ## compute quantities under sample splitting
+  ## -----------------------------------------
+  if (cv == FALSE) {
 
     ## PAPE and PAPEp
     PAPE <- PAPEp <- vector("list", params$n_alg)
     for (i in seq_len(params$n_alg)) {
 
       ## compute PAPE
-      PAPE[[i]] <- PAPE(Tcv, fit_ml[[i]][[3]], Ycv, centered = TRUE)
+      PAPE[[i]] <- PAPE(Tcv, fit_ml[[i]][["That_cv"]], Ycv, centered = TRUE)
 
       ## compute PAPEp: sp does not have papep, check PAPE.R
-      PAPEp[[i]] <- PAPE(Tcv, fit_ml[[i]][[4]], Ycv, centered = TRUE, plim)
+      PAPEp[[i]] <- PAPE(Tcv, fit_ml[[i]][["That_pcv"]], Ycv, centered = TRUE, plim)
 
       ## name
       PAPE[[i]]$alg <-  PAPEp[[i]]$alg <- algorithms[i]
@@ -118,11 +125,11 @@ compute_qoi <- function(fit_obj, algorithms, cv) {
       count <- 1
 
       for (i in 1:(params$n_alg-1)) {
-        That_pcv_i <- fit_ml[[i]][[4]]
+        That_pcv_i <- fit_ml[[i]][["That_pcv"]]
 
         for (j in (i+1):params$n_alg) {
           # compare algorithm[i] and algorithm[j]
-          That_pcv_j <- fit_ml[[j]][[4]]
+          That_pcv_j <- fit_ml[[j]][["That_pcv"]]
 
           PAPDp[[count]] <- PAPD(
             Tcv, That_pcv_i, That_pcv_j, Ycv, plim, centered = TRUE
@@ -141,7 +148,7 @@ compute_qoi <- function(fit_obj, algorithms, cv) {
     aupec <- vector("list", length = length(algorithms))
     for (i in seq_along(algorithms)) {
 
-      aupec[[i]] <- AUPEC(Tcv, fit_ml[[i]][[1]], Ycv, centered = TRUE)
+      aupec[[i]] <- AUPEC(Tcv, fit_ml[[i]][["tau"]], Ycv, centered = TRUE)
     }
 
     ## GATE
@@ -149,7 +156,7 @@ compute_qoi <- function(fit_obj, algorithms, cv) {
     for (i in seq_along(algorithms)) {
 
       ## Compute GATE
-      GATE[[i]] <- GATE(Tcv, fit_ml[[i]][[1]], Ycv, params$ngates)
+      GATE[[i]] <- GATE(Tcv, fit_ml[[i]][["tau"]], Ycv, params$ngates)
 
       ## indicate algorithm
       GATE[[i]]$alg <- algorithms[i]
@@ -159,23 +166,12 @@ compute_qoi <- function(fit_obj, algorithms, cv) {
     }
   }
 
-  return(
-    if (cv == TRUE) {
-      list(
+  out <- list(
         PAPE = PAPE,
         PAPEp = PAPEp,
         PAPDp = PAPDp,
         AUPEC = aupec,
-        GATEcv = GATEcv
-      )
-    } else {
-      list(
-        PAPE = PAPE,
-        PAPEp = PAPEp,
-        PAPDp = PAPDp,
-        AUPEC = aupec,
-        GATE = GATE
-      )
-    }
-  )
+        GATE = GATE)
+
+  return(out)
 }

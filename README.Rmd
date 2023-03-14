@@ -55,17 +55,16 @@ library(evalITR)
 load("data/star.rda")
 
 # specifying outcomes
-outcomes <- c("g3tlangss",
-                "g3treadss","g3tmathss")
-
+outcomes <- c("g3tlangss")
 
 # specifying covariates
 covariates <-  star %>% 
-                dplyr::select(-c(all_of(outcomes),"treatment")) %>% 
+                dplyr::select(-c("g3tlangss",
+                "g3treadss","g3tmathss","treatment")) %>% 
                 colnames()
 
 # train the model
-fit <- run_itr(outcome = outcomes,
+fit_cv <- run_itr(outcome = outcomes,
                treatment = "treatment",
                covariates = covariates,
                data = star,
@@ -79,27 +78,17 @@ fit <- run_itr(outcome = outcomes,
                   "cart"),
                plim = 0.2,
                n_folds = 3,
-               ratio = 0.67)
+               ratio = 0)
 ```
 
 ```{r estimates}
 # compute estimates
-est <- estimate_itr(
-          fit = fit,
-          outcome = "g3tlangss",
-          algorithms = c(
-                "causal_forest", 
-                "bart",
-                "lasso",
-                "boost", 
-                "random_forest",
-                "bagging",
-                "cart"))
+est_cv <- estimate_itr(fit_cv)
 ```
 
 ```{r summary}
 # summarize estimates
-summary(est)
+summary(est_cv)
 ```
 
 The`summary()` function displays the following summary statistics: (1) population average prescriptive effect `PAPE`; (2) population average prescriptive effect with a budget constraint `PAPEp`; (3) population average prescriptive effect difference with a budget constraint `PAPDp`; (4) and area under the prescriptive effect curve `AUPEC`. For more information about these evaluation metrics, please refer to [this paper](https://arxiv.org/abs/1905.05389).
@@ -110,23 +99,11 @@ for the writing score across a range of budget constraints for different algorit
 
 ```{r plot, fig.width=8, fig.height=8,fig.align = "center"}
 # plot the AUPEC with different ML algorithms
-plot(x = est, 
-      outcome = "g3tlangss",
-      treatment = "treatment",
-      data = star, 
-      algorithms = c(
-                "causal_forest", 
-                "bart",
-                "lasso",
-                "boost", 
-                "random_forest",
-                "bagging",
-                "cart"))
+plot(est_cv)
 
 
 ```
-
-## Example under sample splitting (under development)
+## Example under sample splitting
 
 Please set argument input of `n_folds` to 0 ion order to train the models under sample splitting. The split ratio between train and test set is determined by the `ratio` argument. 
 ```{r message = FALSE}
@@ -136,14 +113,12 @@ library(evalITR)
 load("data/star.rda")
 
 # specifying outcomes
-outcomes <- c("g3tlangss",
-              "g3treadss",
-              "g3tmathss")
-
+outcomes <- c("g3tlangss")
 
 # specifying covariates
 covariates <-  star %>% 
-                dplyr::select(-c(all_of(outcomes),"treatment")) %>% 
+                dplyr::select(-c("g3tlangss",
+                "g3treadss","g3tmathss","treatment")) %>% 
                 colnames()
 
 # estimate ITR 
@@ -159,8 +134,20 @@ fit <- run_itr(outcome = outcomes,
                   "bagging",
                   "cart"),
                plim = 0.2,
-               n_folds = 0,
                ratio = 0.67)
+```
+```{r cv_estimates}
+# compute estimates
+est <- estimate_itr(fit)
+```
 
-glimpse(fit$qoi)
+```{r cv_summary}
+# summarize estimates
+summary(est)
+```
+
+```{r cv_plot, fig.width=8, fig.height=8,fig.align = "center"}
+# plot the AUPEC with different ML algorithms
+plot(est)
+
 ```

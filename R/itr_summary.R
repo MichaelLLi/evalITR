@@ -4,79 +4,177 @@
 #' @param ... Other parameters. Currently not supported
 #' @importFrom stats pnorm
 #' @export
-summary.itr <- function(object, m = 1, ...){
+summary.itr <- function(object, m = 1, ...) {
+  out <- list()
+  fit <- object$qoi[[m]]
+  algorithm <- object$algorithm
+  cv <- object$cv
 
-    out <- list()
+  ## -----------------------------------------
+  ## compute quantities under sample splitting
+  ## -----------------------------------------
+  if (cv == FALSE) {
+    out[["PAPE"]] <- fit$PAPE %>%
+      map(., ~ as_tibble(.)) %>%
+      bind_rows() %>%
+      mutate(
+        statistic = pape / sd,
+        p.value = 2 * pnorm(abs(pape / sd), lower.tail = FALSE)
+      ) %>%
+      rename(
+        estimate = pape,
+        std.deviation = sd,
+        algorithm = alg
+      )
 
-    out[["PAPE"]] <- object[[m]]$PAPE %>%
-        map(.,~as_tibble(.)) %>%
-        bind_rows() %>%
-        mutate(
-          statistic = pape/sd,
-          p.value = 2*pnorm(abs(pape/sd), lower.tail = FALSE)) %>%
-        rename(
-          estimate = pape,
-          std.deviation = sd,
-          algorithm = alg)
-
-    out[["PAPEp"]] <- object[[m]]$PAPEp %>%
-        map(.,~as_tibble(.)) %>%
-        bind_rows() %>%
-        mutate(
-          statistic = papep/sd,
-          p.value = 2*pnorm(abs(papep/sd), lower.tail = FALSE)) %>%
-        rename(
-          estimate = papep,
-          std.deviation = sd,
-          algorithm = alg)
+    out[["PAPEp"]] <- fit$PAPEp %>%
+      map(., ~ as_tibble(.)) %>%
+      bind_rows() %>%
+      mutate(
+        statistic = pape / sd, # names is pape but not papep
+        p.value = 2 * pnorm(abs(pape / sd), lower.tail = FALSE)
+      ) %>%
+      rename(
+        estimate = pape,
+        std.deviation = sd,
+        algorithm = alg
+      )
 
     # not print out papd if only one alg is selected
-    if(length(object[[m]]$PAPDp) == 0){
+    if (length(fit$PAPDp) == 0) {
       out[["PAPDp"]] <- NULL
-    }else {
-       out[["PAPDp"]] <- object[[m]]$PAPDp %>%
-        map(.,~as_tibble(.)) %>%
+    } else {
+      out[["PAPDp"]] <- fit$PAPDp %>%
+        map(., ~ as_tibble(.)) %>%
         bind_rows() %>%
         mutate(
-          statistic = papd/sd,
-          p.value = 2*pnorm(abs(papd/sd), lower.tail = FALSE)) %>%
+          statistic = papd / sd,
+          p.value = 2 * pnorm(abs(papd / sd), lower.tail = FALSE)
+        ) %>%
         rename(
           estimate = papd,
           std.deviation = sd,
-          algorithm = alg)
+          algorithm = alg
+        )
     }
 
-    temp <- object[[m]]$AUPEC 
+    temp <- fit$AUPEC
 
     out[["AUPEC"]] <- temp %>%
-        map(., ~.x$aupec_cv) %>%
+      map(., ~ .x[c("aupec", "sd")]) %>%
+      bind_rows() %>%
+      mutate(algorithm = algorithm) %>%
+      mutate(
+        statistic = aupec / sd,
+        p.value = 2 * pnorm(abs(aupec / sd), lower.tail = FALSE)
+      ) %>%
+      rename(
+        estimate = aupec,
+        std.deviation = sd
+      )
+
+    out[["GATE"]] <- fit$GATE %>%
+      map(., ~ as_tibble(.)) %>%
+      bind_rows() %>%
+      mutate(
+        statistic = gate / sd,
+        p.value = 2 * pnorm(abs(gate / sd), lower.tail = FALSE),
+        upper = c(mean(gate) - qnorm(0.95) * sd),
+        lower = c(mean(gate) + qnorm(0.95) * sd)
+      ) %>%
+      rename(
+        estimate = gate,
+        std.deviation = sd,
+        algorithm = alg,
+        group = group
+      )
+  }
+
+  if (cv == TRUE) {
+    ## -----------------------------------------
+    ## compute quantities under cross-validation
+    ## -----------------------------------------
+    out[["PAPE"]] <- fit$PAPE %>%
+      map(., ~ as_tibble(.)) %>%
+      bind_rows() %>%
+      mutate(
+        statistic = pape / sd,
+        p.value = 2 * pnorm(abs(pape / sd), lower.tail = FALSE)
+      ) %>%
+      rename(
+        estimate = pape,
+        std.deviation = sd,
+        algorithm = alg
+      )
+
+    out[["PAPEp"]] <- fit$PAPEp %>%
+      map(., ~ as_tibble(.)) %>%
+      bind_rows() %>%
+      mutate(
+        statistic = papep / sd,
+        p.value = 2 * pnorm(abs(papep / sd), lower.tail = FALSE)
+      ) %>%
+      rename(
+        estimate = papep,
+        std.deviation = sd,
+        algorithm = alg
+      )
+
+    # not print out papd if only one alg is selected
+    if (length(fit$PAPDp) == 0) {
+      out[["PAPDp"]] <- NULL
+    } else {
+      out[["PAPDp"]] <- fit$PAPDp %>%
+        map(., ~ as_tibble(.)) %>%
         bind_rows() %>%
         mutate(
-            algorithm = temp %>% map(., ~.x$outputdf$type %>% unique) %>% unlist) %>%
-        mutate(
-          statistic = aupec/sd,
-          p.value = 2*pnorm(abs(aupec/sd), lower.tail = FALSE)) %>%
+          statistic = papd / sd,
+          p.value = 2 * pnorm(abs(papd / sd), lower.tail = FALSE)
+        ) %>%
         rename(
-          estimate = aupec,
-          std.deviation = sd)
+          estimate = papd,
+          std.deviation = sd,
+          algorithm = alg
+        )
+    }
 
-    out[["GATEcv"]] <- object$qoi[[m]]$GATEcv %>%
-        map(.,~as_tibble(.)) %>%
-        bind_rows() %>%
-        mutate(
-            statistic = gate/sd,
-            p.value = 2*pnorm(abs(gate/sd), lower.tail = FALSE),
-            upper = c(mean(gate) - qnorm(0.95)*sd),
-            lower = c(mean(gate) + qnorm(0.95)*sd)) %>%
-        rename(
-            estimate = gate,
-            std.deviation = sd,
-            algorithm = alg,
-            group = group)
+    temp <- fit$AUPEC
 
-class(out) <- c("summary.itr", class(out))
+    out[["AUPEC"]] <- temp %>%
+      map(., ~ .x$aupec_cv) %>%
+      bind_rows() %>%
+      mutate(
+        algorithm = temp %>% map(., ~ .x$outputdf$type %>% unique()) %>% unlist()
+      ) %>%
+      mutate(
+        statistic = aupec / sd,
+        p.value = 2 * pnorm(abs(aupec / sd), lower.tail = FALSE)
+      ) %>%
+      rename(
+        estimate = aupec,
+        std.deviation = sd
+      )
 
-return(out)
+    out[["GATE"]] <- fit$GATE %>%
+      map(., ~ as_tibble(.)) %>%
+      bind_rows() %>%
+      mutate(
+        statistic = gate / sd,
+        p.value = 2 * pnorm(abs(gate / sd), lower.tail = FALSE),
+        upper = c(mean(gate) - qnorm(0.95) * sd),
+        lower = c(mean(gate) + qnorm(0.95) * sd)
+      ) %>%
+      rename(
+        estimate = gate,
+        std.deviation = sd,
+        algorithm = alg,
+        group = group
+      )
+  }
+
+  class(out) <- c("summary.itr", class(out))
+
+  return(out)
 }
 
 #' Print
@@ -85,28 +183,28 @@ return(out)
 #' @param ... Other parameters. Currently not supported.
 #' @export
 print.summary.itr <- function(x, ...) {
-    # PAPE
-    cli::cat_rule(left = "PAPE")
-    print(as.data.frame(x[["PAPE"]]), digits = 2)
-    cli::cat_line("")
+  # PAPE
+  cli::cat_rule(left = "PAPE")
+  print(as.data.frame(x[["PAPE"]]), digits = 2)
+  cli::cat_line("")
 
-    # PAPE
-    cli::cat_rule(left = "PAPEp")
-    print(as.data.frame(x[["PAPEp"]]), digits = 2)
-    cli::cat_line("")
+  # PAPE
+  cli::cat_rule(left = "PAPEp")
+  print(as.data.frame(x[["PAPEp"]]), digits = 2)
+  cli::cat_line("")
 
-    # PAPE
-    cli::cat_rule(left = "PAPDp")
-    print(as.data.frame(x[["PAPDp"]]), digits = 2)
-    cli::cat_line("")
+  # PAPE
+  cli::cat_rule(left = "PAPDp")
+  print(as.data.frame(x[["PAPDp"]]), digits = 2)
+  cli::cat_line("")
 
-    # PAPE
-    cli::cat_rule(left = "AUPEC")
-    print(as.data.frame(x[["AUPEC"]]), digits = 2)
-    cli::cat_line("")
+  # PAPE
+  cli::cat_rule(left = "AUPEC")
+  print(as.data.frame(x[["AUPEC"]]), digits = 2)
+  cli::cat_line("")
 
-    # GATEcv
-    cli::cat_rule(left = "GATEcv")
-    print(as.data.frame(x[["GATEcv"]]), digits = 2)
-    cli::cat_line("")
+  # GATE
+  cli::cat_rule(left = "GATE")
+  print(as.data.frame(x[["GATE"]]), digits = 2)
+  cli::cat_line("")
 }

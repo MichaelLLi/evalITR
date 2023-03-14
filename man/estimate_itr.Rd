@@ -4,14 +4,12 @@
 \alias{estimate_itr}
 \title{Estimate quantity of interests}
 \usage{
-estimate_itr(fit, algorithms, outcome)
+estimate_itr(fit, ...)
 }
 \arguments{
 \item{fit}{Fitted model. Usually an output from \code{run_itr}}
 
-\item{algorithms}{Machine learning algorithms}
-
-\item{outcome}{Outcome variable. Need to be the same as the input of \code{run_itr}}
+\item{...}{Further arguments passed to the function.}
 }
 \value{
 An object of \code{itr} class

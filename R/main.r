@@ -35,15 +35,16 @@ run_itr <- function(
   ## number of algorithms
   n_alg <- length(algorithms)
 
-
   ## some working variables
   n_df <- nrow(data)
   n_X  <- length(data) - 1
-  NFOLDS <- n_folds
+  n_folds <- n_folds
+  cv <- ifelse(ratio > 0, FALSE, TRUE)
 
   params <- list(
-    n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio, ngates = ngates
-  )
+    n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio, ngates = ngates, cv = cv)
+
+  df <- list(algorithms = algorithms, outcome = outcome, data = data, treatment = treatment)  
 
   ## loop over all outcomes
   estimates <- vector("list", length = length(outcome))
@@ -54,10 +55,17 @@ run_itr <- function(
     data_filtered <- data %>%
       select(Y = !!sym(outcome[m]), Treat = !!sym(treatment), all_of(covariates))
     
-    ## create folds 
-    treatment_vec <- data_filtered %>% dplyr::pull(Treat)
-    folds <- caret::createFolds(treatment_vec, k = NFOLDS)
+    ## cross-validation 
+    if(cv == TRUE){
+      ## create folds 
+      treatment_vec <- data_filtered %>% dplyr::pull(Treat)
+      folds <- caret::createFolds(treatment_vec, k = n_folds)
+    }
 
+    ## sample splitting 
+    if(cv == FALSE){
+      folds = n_folds
+    }
 
     ## run 
     estimates[[m]] <- itr_single_outcome(
@@ -69,41 +77,14 @@ run_itr <- function(
     )
     
   }
-              
-  class(estimates) <- c("itr", class(estimates))
 
-  return(estimates)
+  out <- list(estimates = estimates, df = df)
+              
+  class(out) <- c("itr", class(out))
+
+  return(out)
 
 }
-#' Estimate quantity of interests
-#' @param fit Fitted model. Usually an output from \code{run_itr}
-#' @param algorithms Machine learning algorithms
-#' @param outcome Outcome variable. Need to be the same as the input of \code{run_itr}
-#' @return An object of \code{itr} class
-#' @export 
-estimate_itr <- function(
-  fit, 
-  algorithms, 
-  outcome){
-
-  estimates <- fit
-  qoi <- vector("list", length = length(outcome))
-
-  ## loop over all outcomes
-  for (m in 1:length(outcome)) {
-
-    ## compute qoi
-    qoi[[m]] <- compute_qoi(estimates[[m]], algorithms)
-  
-  }
-                
-  class(qoi) <- c("itr", class(qoi))
-
-  return(qoi)
-
-  }
-
-
 #' Evaluate ITR for Single Outcome
 #'
 #' @importFrom purrr map
@@ -133,10 +114,16 @@ itr_single_outcome <- function(
 
   params$n_tb <- max(table(indcv))
 
-  if (params$n_folds == 0) {
+## =================================
+## sample splitting
+## =================================
+
+  if(params$cv == FALSE){
+
+    cat('Evaluate ITR under sample splitting ...')
 
     ## ---------------------------------
-    ## sample split
+    ## data split
     ## ---------------------------------
 
     # create split series of test/training partitions
@@ -274,9 +261,16 @@ itr_single_outcome <- function(
         plim      = plim
       )
 }
-  } else {
+  } 
 
-    ratio <- 0
+## =================================
+## k-folds cross-validation  
+## =================================
+
+  if(params$cv == TRUE) {
+
+    cat('Evaluate ITR with cross-validation ...')
+
     ## loop over j number of folds
 
     for (j in seq_len(params$n_folds)) {
@@ -428,6 +422,37 @@ itr_single_outcome <- function(
     Ycv = Ycv, Tcv = Tcv, indcv = indcv, plim = plim
   ))
 }
+#' Estimate quantity of interests
+#' @param fit Fitted model. Usually an output from \code{run_itr}
+#' @param ... Further arguments passed to the function.
+#' @return An object of \code{itr} class
+#' @export 
+estimate_itr <- function(fit, ...){
+  
+  estimates  <- fit$estimates
+  cv         <- estimates[[1]]$params$cv
+  treatment  <- fit$df$treatment
+  data       <- fit$df$data
+  algorithms <- fit$df$algorithms
+  outcome    <- fit$df$outcome
+  qoi        <- vector("list", length = length(outcome))
 
-utils::globalVariables(c("Treat", "aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm"))
+  ## loop over all outcomes
+  for (m in 1:length(outcome)) {
+
+    ## compute qoi
+    qoi[[m]] <- compute_qoi(estimates[[m]], algorithms)
+  
+  }
+  
+  out <- list(
+    qoi = qoi, algorithms = algorithms, cv = cv, outcome = outcome, data = data, treatment = treatment)   
+
+  class(out) <- c("itr", class(out))
+
+  return(out)
+
+  }
+
+utils::globalVariables(c("Treat", "aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm", "vec"))
 
