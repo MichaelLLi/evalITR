@@ -29,6 +29,7 @@ Imports:
     bartMachine,
     caret,
     cli,
+    e1071,
     furrr,
     gbm,
     ggplot2,

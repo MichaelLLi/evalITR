@@ -132,7 +132,7 @@ plot(est_cv)
 
 ## Example with multiple ML algorithms/outcomes
 
-We can estimate ITR with various machine learning algorithms and then compare the performance of each model. The package includes 7 different ML algorithms (causal forest, BART, lasso, boosting trees, random forest, CART, bagging trees).
+We can estimate ITR with various machine learning algorithms and then compare the performance of each model. The package includes 8 different ML algorithms (causal forest, BART, lasso, boosting trees, random forest, CART, bagging trees, svm).
 
 The package also allows estimate heterogeneous treatment effects on the individual and group-level. On the individual-level, the summary statistics and the AUPEC plot show whether assigning individualized treatment rules may outperform complete random experiment. On the group-level, we specify the number of groups through `ngates` and estimating heterogeneous treatment effects across groups. 
 
@@ -144,8 +144,7 @@ If the original experiment has diverse outcome measures, we develop ITRs for eac
 outcomes <- c("g3tlangss","g3treadss","g3tmathss")
 
 # specifying covariates
-covariates <-  star %>% dplyr::select(-c("g3tlangss","g3treadss","g3tmathss","treatment")) %>% 
-                colnames()
+covariates <-  star %>% dplyr::select(-c("g3tlangss","g3treadss","g3tmathss","treatment")) %>% colnames()
 
 # train the model
 fit_cv <- run_itr(outcome = outcomes,
@@ -155,6 +154,7 @@ fit_cv <- run_itr(outcome = outcomes,
                algorithms = c(
                   "causal_forest", 
                   # "bartc",
+                  # "svm",
                   "lasso",
                   "boost", 
                   "random_forest",

@@ -62,45 +62,89 @@ test_bagging <- function(
   ## outcome
   outcome = testing_data_elements_bagging[["data"]][["Y"]]
 
-  if(length(unique(outcome)) > 2){
-  
-  ## predict 
-  Y0t_total = predict(
-    fit_train,
-    newdata = total_data_elements_bagging[["data0t"]])
-  Y1t_total = predict(
-    fit_train,
-    newdata = total_data_elements_bagging[["data1t"]])
+  if(cv == TRUE){
 
-  }else{
-  
-  ## predict 
-  Y0t_total = predict(
-    fit_train,
-    newdata = total_data_elements_bagging[["data0t"]],
-    type = "prob")[, 2]
-  Y1t_total = predict(
-    fit_train,
-    newdata = total_data_elements_bagging[["data1t"]],
-    type = "prob")[, 2]
-    }
+    if(length(unique(outcome)) > 2){
+      
+      ## predict 
+      Y0t_total = predict(
+        fit_train,
+        newdata = total_data_elements_bagging[["data0t"]])
+      Y1t_total = predict(
+        fit_train,
+        newdata = total_data_elements_bagging[["data1t"]])
 
-  tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
+      }else{
+      
+      ## predict 
+      Y0t_total = predict(
+        fit_train,
+        newdata = total_data_elements_bagging[["data0t"]],
+        type = "prob")[, 2]
+      Y1t_total = predict(
+        fit_train,
+        newdata = total_data_elements_bagging[["data1t"]],
+        type = "prob")[, 2]
+        }
+
+      tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
 
 
-  ## compute quantities of interest 
-  tau_test <-  tau_total[indcv == iter] 
-  That     <-  as.numeric(tau_total > 0)
-  That_p   <- as.numeric(tau_total >= sort(tau_test, decreasing = TRUE)[floor(plim*length(tau_test))+1])
+      ## compute quantities of interest 
+      tau_test <-  tau_total[indcv == iter] 
+      That     <-  as.numeric(tau_total > 0)
+      That_p   <- as.numeric(tau_total >= sort(tau_test, decreasing = TRUE)[floor(plim*length(tau_test))+1])
+
+      ## output 
+      cf_output <- list(
+        tau      = c(tau_test, rep(NA, length(tau_total) - length(tau_test))),
+        tau_cv   = tau_total, 
+        That_cv  = That, 
+        That_pcv = That_p
+      )
+  }
   
-  
-  ## output 
-  cf_output <- list(
-    tau      = c(tau_test, rep(NA, length(tau_total) - length(tau_test))),
-    tau_cv   = tau_total, 
-    That_cv  = That, 
-    That_pcv = That_p
-  )
+  if(cv == FALSE){
+
+    if(length(unique(outcome)) > 2){
+      
+      ## predict 
+      Y0t_test = predict(
+        fit_train,
+        newdata = testing_data_elements_bagging[["data0t"]])
+      Y1t_test = predict(
+        fit_train,
+        newdata = testing_data_elements_bagging[["data1t"]])
+
+      }else{
+      
+      ## predict 
+      Y0t_test = predict(
+        fit_train,
+        newdata = testing_data_elements_bagging[["data0t"]],
+        type = "prob")[, 2]
+      Y1t_test = predict(
+        fit_train,
+        newdata = testing_data_elements_bagging[["data1t"]],
+        type = "prob")[, 2]
+        }
+
+      tau_test = Y1t_test - Y0t_test
+
+      ## compute quantities of interest 
+      That     =  as.numeric(tau_test > 0)
+      That_p   = numeric(length(That))
+      That_p[sort(tau_test,decreasing =TRUE,index.return=TRUE)$ix[1:(floor(plim*length(tau_test))+1)]] = 1
+
+      ## output 
+      cf_output <- list(
+        tau      = tau_test,
+        tau_cv   = tau_test, 
+        That_cv  = That, 
+        That_pcv = That_p
+      )
+
+  }
   
   return(cf_output)
 }
