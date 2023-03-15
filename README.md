@@ -76,11 +76,9 @@ fit <- run_itr(outcome = outcomes,
                algorithms = c("causal_forest"),
                plim = 0.2,
                ratio = 0.7)
-#> Evaluate ITR under sample splitting ...
 
 # evaluate ITR 
 est <- estimate_itr(fit)
-#> Cannot compute PAPDp
 ```
 
 The`summary()` function displays the following summary statistics: (1)
@@ -152,7 +150,6 @@ fit_cv <- run_itr(outcome = outcomes,
 
 # evaluate ITR 
 est_cv <- estimate_itr(fit_cv)
-#> Cannot compute PAPDp
 ```
 
 We present the results with 3-folds cross validation and plot the AUPEC.
