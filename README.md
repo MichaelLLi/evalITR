@@ -48,7 +48,7 @@ will identify the top 20% of units who benefit from the treatment most
 and assign them to with the treatment. We train the model through sample
 splitting, with the `ratio` between the train and test sets determined
 by the ratio argument. Specifically, we allocate 70% of the data to
-train the model, while the remaining 30% is used as testing data (ratio
+train the model, while the remaining 30% is used as testing data (`ratio`
 = 0.7).
 
 ``` r
@@ -81,7 +81,7 @@ fit <- run_itr(outcome = outcomes,
 est <- estimate_itr(fit)
 ```
 
-The`summary()` function displays the following summary statistics: (1)
+The `summary()` function displays the following summary statistics: (1)
 population average prescriptive effect `PAPE`; (2) population average
 prescriptive effect with a budget constraint `PAPEp`; (3) population
 average prescriptive effect difference with a budget constraint `PAPDp`.
