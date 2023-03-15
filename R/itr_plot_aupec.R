@@ -13,16 +13,18 @@ plot.itr <- function(x,outcome = TRUE,...){
 estimate = x
 fit = estimate$qoi
 cv = estimate$cv
-fit_outcome = estimate$outcome
-data = estimate$data
-algorithms = estimate$algorithms
-treatment = estimate$treatment
+fit_outcome = estimate$df$outcome
+data = estimate$df$data
+algorithms = estimate$df$algorithms
+treatment = estimate$df$treatment
 
 if(outcome != TRUE){
-  m = which(fit_outcome == outcome) # plot user selected outcome 
+  # plot user selected outcome 
+  m = which(fit_outcome == outcome) 
 }else {
-  m = 1 # plot the first outcome
-  outcome = fit_outcome
+  # plot the first outcome
+  m = 1 
+  outcome = fit_outcome[1]
 }
 
 ## -----------------------------------------
@@ -62,8 +64,8 @@ if(cv == FALSE){
       bind_rows() %>% 
       mutate(Pval = paste0("AUPEC = ", round(aupec, 2), " (s.e. = ", round(sd, 2), ")")) %>% pull(Pval))
 
-  Tcv = data %>% pull(treatment) %>% as.numeric()
-  Ycv = data %>% pull(outcome) %>% as.numeric()
+  Tcv = estimate$estimates[[1]][['Tcv']] %>% as.numeric()
+  Ycv = estimate$estimates[[1]][['Ycv']] %>% as.numeric()
   
   map(fit[[m]]$AUPEC, ~.x) %>% 
     bind_rows() %>%

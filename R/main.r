@@ -107,12 +107,6 @@ itr_single_outcome <- function(
   fit_ml <- lapply(1:params$n_alg, function(x) vector("list", length = params$n_folds))
   names(fit_ml) <- algorithms
 
-  Tcv <- dplyr::pull(data, "Treat")
-  Ycv <- dplyr::pull(data, "Y")
-  indcv <- rep(0, length(Ycv))
-
-
-  params$n_tb <- max(table(indcv))
 
 ## =================================
 ## sample splitting
@@ -132,6 +126,13 @@ itr_single_outcome <- function(
                                         list = FALSE)
     trainset = data[split,]
     testset = data[-split,]
+
+
+    Tcv <- dplyr::pull(testset, "Treat")
+    Ycv <- dplyr::pull(testset, "Y")
+    indcv <- rep(0, length(Ycv))
+
+    params$n_tb <- max(table(indcv))
 
     ## ---------------------------------
     ## run ML
@@ -270,6 +271,13 @@ itr_single_outcome <- function(
   if(params$cv == TRUE) {
 
     cat('Evaluate ITR with cross-validation ...')
+
+    Tcv <- dplyr::pull(data, "Treat")
+    Ycv <- dplyr::pull(data, "Y")
+    indcv <- rep(0, length(Ycv))
+
+    params$n_tb <- max(table(indcv))
+
 
     ## loop over j number of folds
 
@@ -431,10 +439,10 @@ estimate_itr <- function(fit, ...){
   
   estimates  <- fit$estimates
   cv         <- estimates[[1]]$params$cv
-  treatment  <- fit$df$treatment
-  data       <- fit$df$data
+  df         <- fit$df
   algorithms <- fit$df$algorithms
   outcome    <- fit$df$outcome
+  
   qoi        <- vector("list", length = length(outcome))
 
   ## loop over all outcomes
@@ -446,7 +454,7 @@ estimate_itr <- function(fit, ...){
   }
   
   out <- list(
-    qoi = qoi, algorithms = algorithms, cv = cv, outcome = outcome, data = data, treatment = treatment)   
+    qoi = qoi, cv = cv, df = df, estimates = estimates)   
 
   class(out) <- c("itr", class(out))
 

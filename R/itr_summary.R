@@ -1,14 +1,23 @@
 #' Summarize run_itr output
 #' @param object An object of \code{run_itr} class
-#' @param m A numeric value indicates which element to focus on from the vector of \code{outcomes}. The default is the first outcome in the vector \code{outcomes}.
+#' @param outcome Outcome variable. Can be different from the input of \code{run_itr}
 #' @param ... Other parameters. Currently not supported
 #' @importFrom stats pnorm
 #' @export
-summary.itr <- function(object, m = 1, ...) {
-  out <- list()
-  fit <- object$qoi[[m]]
-  algorithm <- object$algorithm
-  cv <- object$cv
+summary.itr <- function(object, outcome = TRUE, ...) {
+  out         <- list()
+  fit_outcome <- object$df$outcome
+  algorithm   <- object$df$algorithm
+  cv          <- object$cv
+
+  if(outcome != TRUE){
+    # plot user selected outcome
+    m = which(fit_outcome == outcome)
+    fit <- object$qoi[[m]]  
+  }else {
+    m = 1 # plot the first outcome
+    fit <- object$qoi[[1]]
+  }
 
   ## -----------------------------------------
   ## compute quantities under sample splitting

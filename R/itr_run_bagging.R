@@ -12,6 +12,9 @@ run_bagging <- function(
   plim
 ) {
   
+  # split/cross-validation
+  cv <- params$cv
+
   ## train 
   fit_train <- train_bagging(dat_train)
   
@@ -19,7 +22,7 @@ run_bagging <- function(
   ## test 
   fit_test <- test_bagging(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb, 
-    indcv, iter, plim
+    indcv, iter, plim, cv
   )
   
   return(fit_test)
@@ -49,7 +52,7 @@ train_bagging <- function(dat_train) {
 
 #'@importFrom stats predict runif
 test_bagging <- function(
-  fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, plim
+  fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, plim, cv
 ) {
   
   ## format data 
