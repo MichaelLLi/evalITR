@@ -93,7 +93,7 @@ For more information about these evaluation metrics, please refer to
 [Imai and Li (2021)](https://arxiv.org/abs/1905.05389); (5) Grouped
 Average Treatment Effects `GATEs`. The details of the methods for this
 design are given in [Imai and Li
-(2021)](https://arxiv.org/abs/2203.14511).
+(2022)](https://arxiv.org/abs/2203.14511).
 
 ``` r
 # summarize estimates
