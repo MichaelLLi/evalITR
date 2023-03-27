@@ -100,26 +100,26 @@ design are given in [Imai and Li
 summary(est)
 #> ── PAPE ────────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1      1.6           1.3 causal_forest       1.2    0.24
+#> 1     0.56           1.4 causal_forest       0.4    0.69
 #> 
 #> ── PAPEp ───────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1     0.85           1.2 causal_forest      0.72    0.47
+#> 1      1.4           1.2 causal_forest       1.1    0.25
 #> 
 #> ── PAPDp ───────────────────────────────────────────────────────────────────────
 #> data frame with 0 columns and 0 rows
 #> 
 #> ── AUPEC ───────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1     0.99             1 causal_forest      0.98    0.33
+#> 1      1.2           1.1 causal_forest       1.2    0.24
 #> 
 #> ── GATE ────────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm group statistic p.value upper lower
-#> 1     -102           108 causal_forest     1     -0.95    0.34  -170   184
-#> 2      -53           107 causal_forest     2     -0.50    0.62  -169   183
-#> 3      124           109 causal_forest     3      1.14    0.25  -172   186
-#> 4      147           108 causal_forest     4      1.36    0.17  -171   185
-#> 5      -81           106 causal_forest     5     -0.76    0.45  -168   182
+#> 1      -76           108 causal_forest     1     -0.70   0.483  -172   182
+#> 2     -219           107 causal_forest     2     -2.03   0.042  -171   182
+#> 3      160           108 causal_forest     3      1.49   0.137  -172   183
+#> 4      106           109 causal_forest     4      0.97   0.333  -175   185
+#> 5       55           107 causal_forest     5      0.51   0.608  -171   181
 ```
 
 We plot the estimated Area Under the Prescriptive Effect Curve for the
@@ -163,26 +163,26 @@ We present the results with 3-folds cross validation and plot the AUPEC.
 summary(est_cv)
 #> ── PAPE ────────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1      1.3          0.69 causal_forest       1.8   0.068
+#> 1      1.1           1.3 causal_forest      0.89    0.37
 #> 
 #> ── PAPEp ───────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1      2.2          0.97 causal_forest       2.3   0.021
+#> 1      1.3          0.69 causal_forest       1.9   0.062
 #> 
 #> ── PAPDp ───────────────────────────────────────────────────────────────────────
 #> data frame with 0 columns and 0 rows
 #> 
 #> ── AUPEC ───────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1      1.7          0.76 causal_forest       2.3   0.023
+#> 1      1.4          0.67 causal_forest       2.1   0.033
 #> 
 #> ── GATE ────────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm group statistic p.value upper lower
-#> 1      -43            59 causal_forest     1     -0.74    0.46   -93   100
-#> 2      104            59 causal_forest     2      1.75    0.08   -94   101
-#> 3      -58            59 causal_forest     3     -0.98    0.33   -94   101
-#> 4      -36            93 causal_forest     4     -0.39    0.70  -150   157
-#> 5       52            59 causal_forest     5      0.89    0.37   -93   100
+#> 1       12            59 causal_forest     1      0.21    0.84   -93   101
+#> 2      -47            85 causal_forest     2     -0.55    0.58  -135   143
+#> 3       18            59 causal_forest     3      0.31    0.76   -94   101
+#> 4      -61           101 causal_forest     4     -0.61    0.55  -162   169
+#> 5       95           100 causal_forest     5      0.95    0.34  -162   169
 ```
 
 ``` r
@@ -246,81 +246,81 @@ est_cv <- estimate_itr(fit_cv)
 summary(est_cv, outcome = "g3tlangss")
 #> ── PAPE ────────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1      2.0          1.31 causal_forest      1.56  0.1186
-#> 2      0.2          0.75         lasso      0.27  0.7906
-#> 3      2.3          0.85         boost      2.67  0.0076
-#> 4      2.4          1.30 random_forest      1.83  0.0679
-#> 5     -0.4          1.25          cart     -0.32  0.7499
-#> 6      1.5          1.13       bagging      1.29  0.1986
+#> 1     0.88          1.08 causal_forest      0.81  0.4155
+#> 2     0.25          0.84         lasso      0.29  0.7696
+#> 3     2.24          0.87         boost      2.57  0.0102
+#> 4     2.28          0.80 random_forest      2.86  0.0043
+#> 5     1.24          0.92          cart      1.34  0.1790
+#> 6     1.86          1.26       bagging      1.48  0.1383
 #> 
 #> ── PAPEp ───────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1    2.922          1.05 causal_forest     2.787  0.0053
-#> 2   -0.025          0.73         lasso    -0.034  0.9729
-#> 3    1.112          1.06         boost     1.054  0.2920
-#> 4    2.437          0.81 random_forest     3.002  0.0027
-#> 5    0.386          1.15          cart     0.337  0.7365
-#> 6    1.280          0.70       bagging     1.824  0.0682
+#> 1     3.17          0.74 causal_forest      4.29 1.8e-05
+#> 2     0.95          0.99         lasso      0.96 3.4e-01
+#> 3     1.67          0.79         boost      2.11 3.5e-02
+#> 4     1.93          0.78 random_forest      2.48 1.3e-02
+#> 5    -0.15          0.88          cart     -0.17 8.7e-01
+#> 6     1.41          0.78       bagging      1.80 7.1e-02
 #> 
 #> ── PAPDp ───────────────────────────────────────────────────────────────────────
 #>    estimate std.deviation                     algorithm statistic p.value
-#> 1      2.95          0.76         causal_forest x lasso      3.87 0.00011
-#> 2      1.81          1.27         causal_forest x boost      1.43 0.15315
-#> 3      0.49          1.02 causal_forest x random_forest      0.48 0.63450
-#> 4      2.54          1.53          causal_forest x cart      1.66 0.09656
-#> 5      1.64          0.77       causal_forest x bagging      2.13 0.03301
-#> 6     -1.14          0.68                 lasso x boost     -1.66 0.09677
-#> 7     -2.46          0.78         lasso x random_forest     -3.15 0.00161
-#> 8     -0.41          1.27                  lasso x cart     -0.32 0.74722
-#> 9     -1.30          1.38               lasso x bagging     -0.95 0.34444
-#> 10    -1.33          1.15         boost x random_forest     -1.15 0.24910
-#> 11     0.73          1.58                  boost x cart      0.46 0.64535
-#> 12    -0.17          0.72               boost x bagging     -0.23 0.81472
-#> 13     2.05          1.38          random_forest x cart      1.48 0.13859
-#> 14     1.16          0.52       random_forest x bagging      2.21 0.02690
-#> 15    -0.89          1.18                cart x bagging     -0.76 0.44894
+#> 1      2.22          0.93         causal_forest x lasso      2.38   0.017
+#> 2      1.50          0.75         causal_forest x boost      1.98   0.047
+#> 3      1.24          0.62 causal_forest x random_forest      2.00   0.045
+#> 4      3.31          1.35          causal_forest x cart      2.46   0.014
+#> 5      1.76          0.71       causal_forest x bagging      2.47   0.014
+#> 6     -0.72          0.73                 lasso x boost     -0.99   0.320
+#> 7     -0.98          1.20         lasso x random_forest     -0.82   0.411
+#> 8      1.09          1.02                  lasso x cart      1.07   0.283
+#> 9     -0.46          0.81               lasso x bagging     -0.57   0.570
+#> 10    -0.26          0.76         boost x random_forest     -0.34   0.732
+#> 11     1.82          1.57                  boost x cart      1.16   0.248
+#> 12     0.26          1.09               boost x bagging      0.24   0.810
+#> 13     2.08          0.96          random_forest x cart      2.16   0.031
+#> 14     0.52          0.50       random_forest x bagging      1.04   0.298
+#> 15    -1.55          1.21                cart x bagging     -1.29   0.197
 #> 
 #> ── AUPEC ───────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1     1.96           1.9 causal_forest      1.05    0.29
-#> 2     0.45           1.4         lasso      0.32    0.75
-#> 3     1.54           2.0         boost      0.78    0.43
-#> 4     1.52           1.7 random_forest      0.91    0.36
-#> 5    -0.66           1.5          cart     -0.44    0.66
-#> 6     0.80           1.7       bagging      0.49    0.63
+#> 1     1.63           2.1 causal_forest      0.77    0.44
+#> 2     0.21           2.1         lasso      0.10    0.92
+#> 3     1.58           1.4         boost      1.13    0.26
+#> 4     1.87           2.1 random_forest      0.91    0.36
+#> 5     0.32           1.3          cart      0.25    0.80
+#> 6     1.44           1.6       bagging      0.91    0.36
 #> 
 #> ── GATE ────────────────────────────────────────────────────────────────────────
 #>    estimate std.deviation     algorithm group statistic p.value upper lower
-#> 1     -5.02            76 causal_forest     1   -0.0657    0.95  -122   129
-#> 2    -75.44            84 causal_forest     2   -0.8972    0.37  -135   142
-#> 3     11.96           100 causal_forest     3    0.1201    0.90  -160   167
-#> 4     30.93            59 causal_forest     4    0.5229    0.60   -94   101
-#> 5     55.55            59 causal_forest     5    0.9487    0.34   -93   100
-#> 6      0.36            59         lasso     1    0.0061    1.00   -94   101
-#> 7    -31.02            69         lasso     2   -0.4521    0.65  -109   116
-#> 8     13.29           100         lasso     3    0.1323    0.89  -162   169
-#> 9     61.81           100         lasso     4    0.6178    0.54  -161   168
-#> 10   -26.46            81         lasso     5   -0.3273    0.74  -129   137
-#> 11   -68.58            85         boost     1   -0.8087    0.42  -136   143
-#> 12    -3.66            92         boost     2   -0.0397    0.97  -148   155
-#> 13    -2.06            87         boost     3   -0.0235    0.98  -140   147
-#> 14    45.29            59         boost     4    0.7623    0.45   -94   101
-#> 15    46.98           100         boost     5    0.4677    0.64  -162   169
-#> 16   -49.71            59 random_forest     1   -0.8397    0.40   -94   101
-#> 17    32.91            59 random_forest     2    0.5594    0.58   -93   100
-#> 18   -14.34            84 random_forest     3   -0.1705    0.86  -135   142
-#> 19     3.19            85 random_forest     4    0.0376    0.97  -136   143
-#> 20    45.94            79 random_forest     5    0.5809    0.56  -126   134
-#> 21   -39.93            94          cart     1   -0.4265    0.67  -150   158
-#> 22    17.30            59          cart     2    0.2930    0.77   -94   101
-#> 23    45.22            59          cart     3    0.7671    0.44   -93   101
-#> 24    40.16            69          cart     4    0.5850    0.56  -109   117
-#> 25   -44.77            59          cart     5   -0.7599    0.45   -93   100
-#> 26   -75.90            98       bagging     1   -0.7717    0.44  -158   165
-#> 27    -8.66            75       bagging     2   -0.1158    0.91  -119   127
-#> 28    73.38            72       bagging     3    1.0126    0.31  -116   123
-#> 29   -31.77            98       bagging     4   -0.3242    0.75  -158   165
-#> 30    60.93            82       bagging     5    0.7448    0.46  -131   138
+#> 1    -58.28           102 causal_forest     1   -0.5728    0.57  -164   171
+#> 2     25.77            65 causal_forest     2    0.3995    0.69  -103   110
+#> 3      0.42            96 causal_forest     3    0.0044    1.00  -154   161
+#> 4     13.23            91 causal_forest     4    0.1454    0.88  -146   153
+#> 5     36.75            82 causal_forest     5    0.4468    0.66  -132   139
+#> 6     70.69            60         lasso     1    1.1850    0.24   -95   102
+#> 7    -60.90            91         lasso     2   -0.6728    0.50  -145   152
+#> 8     31.06            82         lasso     3    0.3773    0.71  -132   139
+#> 9     18.39            70         lasso     4    0.2625    0.79  -112   119
+#> 10   -41.34            59         lasso     5   -0.7021    0.48   -93   100
+#> 11   -43.17           101         boost     1   -0.4263    0.67  -163   170
+#> 12    32.56            99         boost     2    0.3305    0.74  -158   166
+#> 13    24.62            61         boost     3    0.4046    0.69   -97   104
+#> 14   -18.88            74         boost     4   -0.2538    0.80  -119   126
+#> 15    22.75            71         boost     5    0.3195    0.75  -114   121
+#> 16    18.73           100 random_forest     1    0.1877    0.85  -160   168
+#> 17   -42.93           102 random_forest     2   -0.4212    0.67  -164   171
+#> 18   -43.44            97 random_forest     3   -0.4457    0.66  -157   164
+#> 19    34.48            59 random_forest     4    0.5846    0.56   -93   101
+#> 20    51.05            69 random_forest     5    0.7453    0.46  -109   116
+#> 21    11.35            70          cart     1    0.1615    0.87  -112   119
+#> 22    63.04            86          cart     2    0.7312    0.46  -138   145
+#> 23  -111.37            90          cart     3   -1.2328    0.22  -145   152
+#> 24   115.84            74          cart     4    1.5710    0.12  -118   125
+#> 25   -60.97            91          cart     5   -0.6721    0.50  -146   153
+#> 26   -40.71            92       bagging     1   -0.4436    0.66  -147   155
+#> 27    13.76            68       bagging     2    0.2027    0.84  -108   115
+#> 28   -23.53            81       bagging     3   -0.2905    0.77  -130   137
+#> 29    73.95           100       bagging     4    0.7364    0.46  -162   169
+#> 30    -5.58            65       bagging     5   -0.0865    0.93  -103   110
 ```
 
 We plot the estimated Area Under the Prescriptive Effect Curve for the

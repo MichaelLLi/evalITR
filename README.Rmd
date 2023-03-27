@@ -47,7 +47,7 @@ This is an example using the `star` dataset (for more information about the data
 We start with a simple example with one outcome variable (writing scores) and one machine learning algorithm (causal forest). Then we move to incoporate multiple outcomes and compare model performances with several machine learning algorithms. 
 
 
-To begin, we load the dataset and specify the outcome variable and covariates to be used in the model. Next, we utilize a random forest algorithm to develop an Individualized Treatment Rule (ITR) for estimating the varied impacts of small class sizes on students' writing scores.  Since the treatment is often costly for most policy programs, we consider a case with 20% budget constraint (`plim` = 0.2). The model will identify the top 20% of units who benefit from the treatment most and assign them to with the treatment. We train the model through sample splitting, with the `ratio` between the train and test sets determined by the ratio argument. Specifically, we allocate 70% of the data to train the model, while the remaining 30% is used as testing data (ratio = 0.7).
+To begin, we load the dataset and specify the outcome variable and covariates to be used in the model. Next, we utilize a random forest algorithm to develop an Individualized Treatment Rule (ITR) for estimating the varied impacts of small class sizes on students' writing scores.  Since the treatment is often costly for most policy programs, we consider a case with 20% budget constraint (`plim` = 0.2). The model will identify the top 20% of units who benefit from the treatment most and assign them to with the treatment. We train the model through sample splitting, with the `ratio` between the train and test sets determined by the ratio argument. Specifically, we allocate 70% of the data to train the model, while the remaining 30% is used as testing data (`ratio` = 0.7).
 
 
 ```{r estimate, message = FALSE}
@@ -68,6 +68,7 @@ covariates <-  star %>% dplyr::select(-c("g3tlangss",
                 colnames()
 
 # estimate ITR 
+set.seed(2021)
 fit <- run_itr(outcome = outcomes,
                treatment = treatment,
                covariates = covariates,
@@ -80,7 +81,7 @@ fit <- run_itr(outcome = outcomes,
 est <- estimate_itr(fit)
 ```
 
-The`summary()` function displays the following summary statistics: (1) population average prescriptive effect `PAPE`; (2) population average prescriptive effect with a budget constraint `PAPEp`; (3) population average prescriptive effect difference with a budget constraint `PAPDp`. This quantity will be computed with more than 2 machine learning algorithms); (4) and area under the prescriptive effect curve `AUPEC`. For more information about these evaluation metrics, please refer to [Imai and Li (2021)](https://arxiv.org/abs/1905.05389); (5) Grouped Average Treatment Effects `GATEs`.  The details of the methods for this design are given in [Imai and Li (2021)](https://arxiv.org/abs/2203.14511).
+The`summary()` function displays the following summary statistics: (1) population average prescriptive effect `PAPE`; (2) population average prescriptive effect with a budget constraint `PAPEp`; (3) population average prescriptive effect difference with a budget constraint `PAPDp`. This quantity will be computed with more than 2 machine learning algorithms); (4) and area under the prescriptive effect curve `AUPEC`. For more information about these evaluation metrics, please refer to [Imai and Li (2021)](https://arxiv.org/abs/1905.05389); (5) Grouped Average Treatment Effects `GATEs`.  The details of the methods for this design are given in [Imai and Li (2022)](https://arxiv.org/abs/2203.14511).
 
 
 ```{r sp_summary}
@@ -103,6 +104,7 @@ The package also allows estimate ITR with k-folds cross-validation. Instead of s
 
 ```{r cv_estimate, message = FALSE}
 # estimate ITR 
+set.seed(2021)
 fit_cv <- run_itr(outcome = outcomes,
                treatment = treatment,
                covariates = covariates,
@@ -147,6 +149,7 @@ outcomes <- c("g3tlangss","g3treadss","g3tmathss")
 covariates <-  star %>% dplyr::select(-c("g3tlangss","g3treadss","g3tmathss","treatment")) %>% colnames()
 
 # train the model
+set.seed(2021)
 fit_cv <- run_itr(outcome = outcomes,
                treatment = "treatment",
                covariates = covariates,

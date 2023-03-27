@@ -16,6 +16,17 @@
 #'   Split ratio between train and test set under sample splitting. Default is 0.
 #' @param ngates
 #'   The number of groups to separate the data into. The groups are determined by tau. Default is 5.
+#' @param trainControl_method caret parameter
+#' @param number caret parameter
+#' @param repeats caret parameter
+#' @param allowParallel caret parameter
+#' @param train_method caret parameter
+#' @param preProcess caret parameter
+#' @param weights caret parameter
+#' @param metric caret parameter
+#' @param maximize caret parameter
+#' @param tuneGrid caret parameter
+#' @param tuneLength caret parameter
 #' @import dplyr
 #' @importFrom rlang !! sym
 #' @export
@@ -29,8 +40,86 @@ run_itr <- function(
     plim,
     n_folds = 5,
     ratio = 0,
-    ngates = 5
+    ngates = 5,
+    trainControl_method = "boot",
+    number = ifelse(grepl("cv", method), 10, 25),
+    repeats = ifelse(grepl("[d_]cv$", method), 1, NA),
+    # p = 0.75,
+    # search = "grid",
+    # initialWindow = NULL,
+    # horizon = 1,
+    # fixedWindow = TRUE,
+    # skip = 0,
+    # verboseIter = FALSE,
+    # returnData = TRUE,
+    # returnResamp = "final",
+    # savePredictions = FALSE,
+    # classProbs = FALSE,
+    # # summaryFunction = caret::defaultSummary(), #might need to change this
+    # # selectionFunction = "best", 
+    # preProcOptions = list(
+    #   thresh = 0.95, ICAcomp = 3, k = 5, freqCut = 95/5, uniqueCut = 10, cutoff = 0.9),
+    # sampling = NULL,
+    # index = NULL,
+    # indexOut = NULL,
+    # indexFinal = NULL,
+    # timingSamps = 0,
+    # # predictionBounds = rep(FALSE, 2),
+    # seeds = NA,
+    # adaptive = list(min = 5, alpha = 0.05, method = "gls", complete = TRUE),
+    # trim = FALSE,
+    allowParallel = TRUE,
+    train_method = "rf",
+    preProcess = NULL,
+    weights = NULL,
+    metric = ifelse(is.factor(data[outcome]), "Accuracy", "RMSE"),
+    maximize = ifelse(metric %in% c("RMSE", "logLoss", "MAE", "logLoss"), FALSE, TRUE),
+    trControl = trainControl(),
+    tuneGrid = NULL,
+    tuneLength = 1
 ) {
+
+  ## caret parameters
+  trainControl_params <- list(    
+    trainControl_method = trainControl_method,
+    number = number,
+    repeats = repeats,
+    # p = p,
+    # search = search,
+    # initialWindow = initialWindow,
+    # horizon = horizon,
+    # fixedWindow = fixedWindow,
+    # skip = skip,
+    # verboseIter = verboseIter,
+    # returnData = returnData,
+    # returnResamp = returnResamp,
+    # # savePredictions = savePredictions,
+    # classProbs = classProbs,
+    # # summaryFunction = summaryFunction,
+    # # selectionFunction = selectionFunction,
+    # preProcOptions = preProcOptions,
+    # sampling = sampling,
+    # index = index,
+    # indexOut = indexOut,
+    # indexFinal = indexFinal,
+    # timingSamps = timingSamps,
+    # # predictionBounds = predictionBounds,
+    # seeds = seeds,
+    # adaptive = adaptive,
+    # trim = trim,
+    allowParalle = allowParallel)
+
+  # caret train parameters
+  train_params <- list(
+    train_method = train_method,
+    preProcess = preProcess,
+    weights = weights,
+    metric = metric,
+    maximize = maximize,
+    # trControl = trainControl(),
+    tuneGrid = tuneGrid,
+    tuneLength = tuneLength 
+  )
 
   ## number of algorithms
   n_alg <- length(algorithms)
@@ -42,7 +131,7 @@ run_itr <- function(
   cv <- ifelse(ratio > 0, FALSE, TRUE)
 
   params <- list(
-    n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio, ngates = ngates, cv = cv)
+    n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio, ngates = ngates, cv = cv, trainControl_params = trainControl_params, train_params = train_params)
 
   df <- list(algorithms = algorithms, outcome = outcome, data = data, treatment = treatment)  
 
@@ -114,7 +203,7 @@ itr_single_outcome <- function(
 
   if(params$cv == FALSE){
 
-    cat('Evaluate ITR under sample splitting ...')
+    cat('Evaluate ITR under sample splitting ...\n')
 
     ## ---------------------------------
     ## data split
@@ -261,7 +350,20 @@ itr_single_outcome <- function(
         iter      = 1,
         plim      = plim
       )
-}
+    }
+
+    if("caret" %in% algorithms){
+      fit_ml[["caret"]] <- run_caret(
+        dat_train = training_data_elements,
+        dat_test  = testing_data_elements,
+        dat_total = total_data_elements,
+        params    = params,
+        indcv     = 1,
+        iter      = 1,
+        plim      = plim
+      )
+    }   
+
   } 
 
 ## =================================
@@ -270,7 +372,7 @@ itr_single_outcome <- function(
 
   if(params$cv == TRUE) {
 
-    cat('Evaluate ITR with cross-validation ...')
+    cat('Evaluate ITR with cross-validation ...\n')
 
     Tcv <- dplyr::pull(data, "Treat")
     Ycv <- dplyr::pull(data, "Y")
@@ -411,6 +513,18 @@ itr_single_outcome <- function(
 
       if("cart" %in% algorithms){
         fit_ml[["cart"]][[j]] <- run_cart(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          indcv     = indcv,
+          iter      = j,
+          plim      = plim
+        )
+      }
+
+      if("caret" %in% algorithms){
+        fit_ml[["caret"]][[j]] <- run_caret(
           dat_train = training_data_elements,
           dat_test  = testing_data_elements,
           dat_total = total_data_elements,

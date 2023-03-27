@@ -246,6 +246,27 @@ create_ml_args_cart = function(data){
 }
 
 
+
+# Create arguments for caret
+create_ml_args_caret = function(data){
+
+  formula = data[["formula"]]
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat = data[["Treat"]]
+
+  data = cbind(Y, X, Treat)
+
+  # also needed for testing:
+  data0t = cbind(Y, X, Treat = 0)
+  data1t = cbind(Y, X, Treat = 1)
+
+  return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
+}
+
+
+
+
 # # Create arguments for neural net
 #
 # create_ml_args_neuralnet = function(training_data, create_ml_arguments_outputs){
