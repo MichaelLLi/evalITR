@@ -1,6 +1,8 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+<img src="man/figures/README-manual.png" width="100%" />
+
 # evalITR
 
 <!-- badges: start -->
@@ -68,31 +70,47 @@ covariates <-  star %>% dplyr::select(-c("g3tlangss",
                 "g3treadss","g3tmathss","treatment")) %>% 
                 colnames()
 
+# specifying the data
+star_data = star %>% dplyr::select(-c(g3treadss,g3tmathss))
+
 # estimate ITR 
 set.seed(2021)
 fit <- run_itr(outcome = outcomes,
                treatment = treatment,
                covariates = covariates,
-               data = star,
+               data = star_data,
                algorithms = c("causal_forest"),
                plim = 0.2,
                ratio = 0.7)
 #> Evaluate ITR under sample splitting ...
 
-# alternatively (with caret package)
-# fit <- run_itr(outcome = outcomes,
-#                treatment = treatment,
-#                covariates = covariates,
-#                data = star_df,
-#                algorithms = c("caret"),
-#                plim = 0.2,
-#                ratio = 0.7,
-#               trainControl_method = "repeatedcv",
-#               train_method = "gbm")
 
 # evaluate ITR 
 est <- estimate_itr(fit)
 #> Cannot compute PAPDp
+```
+
+Alternatively, we can train the model with the `caret` package (for
+further information about `caret`, see
+[caret](http://topepo.github.io/caret/index.html)).
+
+``` r
+# alternatively (with caret package)
+fit_caret <- run_itr(outcome = outcomes,
+               treatment = treatment,
+               covariates = covariates,
+               data = star_data,
+               algorithms = c("caret"),
+               plim = 0.2,
+               ratio = 0.7,
+               trainControl_method = "repeatedcv", # resampling method
+               train_method = "gbm", # model
+               preProcess = NULL, # pre-processing predictors
+               tuneGrid = NULL, # tuning values
+               tuneLength = 1, # granularity in tuning
+               number = 3, # number of folds/resampling iterations
+               repeats = 3)
+#> Evaluate ITR under sample splitting ...
 ```
 
 The`summary()` function displays the following summary statistics: (1)

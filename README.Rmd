@@ -12,6 +12,11 @@ knitr::opts_chunk$set(
   )
 ```
 
+
+```{r Workflow, echo=FALSE, out.width = '100%'}
+knitr::include_graphics("man/figures/README-manual.png")
+```
+
 # evalITR
 
 <!-- badges: start -->
@@ -67,29 +72,45 @@ covariates <-  star %>% dplyr::select(-c("g3tlangss",
                 "g3treadss","g3tmathss","treatment")) %>% 
                 colnames()
 
+# specifying the data
+star_data = star %>% dplyr::select(-c(g3treadss,g3tmathss))
+
 # estimate ITR 
 set.seed(2021)
 fit <- run_itr(outcome = outcomes,
                treatment = treatment,
                covariates = covariates,
-               data = star,
+               data = star_data,
                algorithms = c("causal_forest"),
                plim = 0.2,
                ratio = 0.7)
 
-# alternatively (with caret package)
-# fit <- run_itr(outcome = outcomes,
-#                treatment = treatment,
-#                covariates = covariates,
-#                data = star_df,
-#                algorithms = c("caret"),
-#                plim = 0.2,
-#                ratio = 0.7,
-#               trainControl_method = "repeatedcv",
-#               train_method = "gbm")
 
 # evaluate ITR 
 est <- estimate_itr(fit)
+```
+
+Alternatively, we can train the model with the `caret` package (for further information about `caret`, see [caret](http://topepo.github.io/caret/index.html)). 
+
+```{r caret estimate, message = FALSE}
+# alternatively (with caret package)
+fit_caret <- run_itr(outcome = outcomes,
+               treatment = treatment,
+               covariates = covariates,
+               data = star_data,
+               algorithms = c("caret"),
+               plim = 0.2,
+               ratio = 0.7,
+               trainControl_method = "repeatedcv", # resampling method
+               train_method = "gbm", # model
+               preProcess = NULL, # pre-processing predictors
+               tuneGrid = NULL, # tuning values
+               tuneLength = 1, # granularity in tuning
+               number = 3, # number of folds/resampling iterations
+               repeats = 3)
+
+
+
 ```
 
 The`summary()` function displays the following summary statistics: (1) population average prescriptive effect `PAPE`; (2) population average prescriptive effect with a budget constraint `PAPEp`; (3) population average prescriptive effect difference with a budget constraint `PAPDp`. This quantity will be computed with more than 2 machine learning algorithms); (4) and area under the prescriptive effect curve `AUPEC`. For more information about these evaluation metrics, please refer to [Imai and Li (2021)](https://arxiv.org/abs/1905.05389); (5) Grouped Average Treatment Effects `GATEs`.  The details of the methods for this design are given in [Imai and Li (2022)](https://arxiv.org/abs/2203.14511).
