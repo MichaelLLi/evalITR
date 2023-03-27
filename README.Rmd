@@ -77,6 +77,17 @@ fit <- run_itr(outcome = outcomes,
                plim = 0.2,
                ratio = 0.7)
 
+# alternatively (with caret package)
+# fit <- run_itr(outcome = outcomes,
+#                treatment = treatment,
+#                covariates = covariates,
+#                data = star_df,
+#                algorithms = c("caret"),
+#                plim = 0.2,
+#                ratio = 0.7,
+#               trainControl_method = "repeatedcv",
+#               train_method = "gbm")
+
 # evaluate ITR 
 est <- estimate_itr(fit)
 ```
