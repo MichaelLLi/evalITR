@@ -6,7 +6,7 @@
 #'   A data frame that contains \code{outcome} and \code{treatment}.
 #' @param algorithms
 #'   List of machine learning algorithms.
-#' @param plim
+#' @param budget
 #'   Proportion of treated units.
 #' @param n_folds
 #'   Number of cross-validation folds. Default is 5.
@@ -37,7 +37,7 @@ run_itr <- function(
     covariates,
     data,
     algorithms,
-    plim,
+    budget,
     n_folds = 5,
     ratio = 0,
     ngates = 5,
@@ -56,7 +56,7 @@ run_itr <- function(
     # savePredictions = FALSE,
     # classProbs = FALSE,
     # # summaryFunction = caret::defaultSummary(), #might need to change this
-    # # selectionFunction = "best", 
+    # # selectionFunction = "best",
     # preProcOptions = list(
     #   thresh = 0.95, ICAcomp = 3, k = 5, freqCut = 95/5, uniqueCut = 10, cutoff = 0.9),
     # sampling = NULL,
@@ -80,7 +80,7 @@ run_itr <- function(
 ) {
 
   ## caret parameters
-  trainControl_params <- list(    
+  trainControl_params <- list(
     trainControl_method = trainControl_method,
     number = number,
     repeats = repeats,
@@ -118,7 +118,7 @@ run_itr <- function(
     maximize = maximize,
     # trControl = trainControl(),
     tuneGrid = tuneGrid,
-    tuneLength = tuneLength 
+    tuneLength = tuneLength
   )
 
   ## number of algorithms
@@ -133,7 +133,7 @@ run_itr <- function(
   params <- list(
     n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio, ngates = ngates, cv = cv, trainControl_params = trainControl_params, train_params = train_params)
 
-  df <- list(algorithms = algorithms, outcome = outcome, data = data, treatment = treatment)  
+  df <- list(algorithms = algorithms, outcome = outcome, data = data, treatment = treatment)
 
   ## loop over all outcomes
   estimates <- vector("list", length = length(outcome))
@@ -143,32 +143,32 @@ run_itr <- function(
     ## rename outcome and treatment variable
     data_filtered <- data %>%
       select(Y = !!sym(outcome[m]), Treat = !!sym(treatment), all_of(covariates))
-    
-    ## cross-validation 
+
+    ## cross-validation
     if(cv == TRUE){
-      ## create folds 
+      ## create folds
       treatment_vec <- data_filtered %>% dplyr::pull(Treat)
       folds <- caret::createFolds(treatment_vec, k = n_folds)
     }
 
-    ## sample splitting 
+    ## sample splitting
     if(cv == FALSE){
       folds = n_folds
     }
 
-    ## run 
+    ## run
     estimates[[m]] <- itr_single_outcome(
-      data       = data_filtered, 
-      algorithms = algorithms, 
-      params     = params, 
+      data       = data_filtered,
+      algorithms = algorithms,
+      params     = params,
       folds      = folds,
-      plim       = plim
+      budget     = budget
     )
-    
+
   }
 
   out <- list(estimates = estimates, df = df)
-              
+
   class(out) <- c("itr", class(out))
 
   return(out)
@@ -182,14 +182,14 @@ run_itr <- function(
 #' @param algorithms Machine learning algorithms.
 #' @param params A list of parameters.
 #' @param folds Number of folds.
-#' @param plim The maximum percentage of population that can be treated under the budget constraint.
+#' @param budget The maximum percentage of population that can be treated under the budget constraint.
 
 itr_single_outcome <- function(
     data,
     algorithms,
     params,
     folds,
-    plim
+    budget
 ) {
 
   ## obj to store outputs
@@ -249,7 +249,7 @@ itr_single_outcome <- function(
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
         params    = params,
-        plim      = plim,
+        budget    = budget,
         indcv     = 1, #indcv and iter set to 1 for sample splitting
         iter      = 1
       )
@@ -263,7 +263,7 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = 1,
         iter      = 1,
-        plim      = plim
+        budget    = budget
       )
     }
 
@@ -275,7 +275,7 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = 1,
         iter      = 1,
-        plim      = plim
+        budget    = budget
       )
     }
 
@@ -288,7 +288,7 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = 1,
         iter      = 1,
-        plim      = plim
+        budget    = budget
       )
     }
 
@@ -300,7 +300,7 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = 1,
         iter      = 1,
-        plim      = plim
+        budget    = budget
       )
     }
 
@@ -312,7 +312,7 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = 1,
         iter      = 1,
-        plim      = plim
+        budget    = budget
       )
     }
 
@@ -324,7 +324,7 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = 1,
         iter      = 1,
-        plim      = plim
+        budget    = budget
       )
     }
 
@@ -336,7 +336,7 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = 1,
         iter      = 1,
-        plim      = plim
+        budget    = budget
       )
     }
 
@@ -348,7 +348,7 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = 1,
         iter      = 1,
-        plim      = plim
+        budget    = budget
       )
     }
 
@@ -360,14 +360,14 @@ itr_single_outcome <- function(
         params    = params,
         indcv     = 1,
         iter      = 1,
-        plim      = plim
+        budget    = budget
       )
-    }   
+    }
 
-  } 
+  }
 
 ## =================================
-## k-folds cross-validation  
+## k-folds cross-validation
 ## =================================
 
   if(params$cv == TRUE) {
@@ -422,7 +422,7 @@ itr_single_outcome <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          plim      = plim
+          budget    = budget
         )
       }
 
@@ -434,7 +434,7 @@ itr_single_outcome <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          plim      = plim
+          budget    = budget
         )
       }
 
@@ -446,7 +446,7 @@ itr_single_outcome <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          plim      = plim
+          budget    = budget
         )
       }
 
@@ -459,7 +459,7 @@ itr_single_outcome <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          plim      = plim
+          budget    = budget
         )
       }
 
@@ -471,7 +471,7 @@ itr_single_outcome <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          plim      = plim
+          budget    = budget
         )
       }
 
@@ -483,7 +483,7 @@ itr_single_outcome <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          plim      = plim
+          budget    = budget
         )
       }
 
@@ -495,7 +495,7 @@ itr_single_outcome <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          plim      = plim
+          budget    = budget
         )
       }
 
@@ -507,7 +507,7 @@ itr_single_outcome <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          plim      = plim
+          budget    = budget
         )
       }
 
@@ -519,7 +519,7 @@ itr_single_outcome <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          plim      = plim
+          budget    = budget
         )
       }
 
@@ -531,7 +531,7 @@ itr_single_outcome <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          plim      = plim
+          budget    = budget
         )
       }
 
@@ -541,22 +541,22 @@ itr_single_outcome <- function(
 
   return(list(
     params = params, fit_ml = fit_ml,
-    Ycv = Ycv, Tcv = Tcv, indcv = indcv, plim = plim
+    Ycv = Ycv, Tcv = Tcv, indcv = indcv, budget = budget
   ))
 }
 #' Estimate quantity of interests
 #' @param fit Fitted model. Usually an output from \code{run_itr}
 #' @param ... Further arguments passed to the function.
 #' @return An object of \code{itr} class
-#' @export 
+#' @export
 estimate_itr <- function(fit, ...){
-  
+
   estimates  <- fit$estimates
   cv         <- estimates[[1]]$params$cv
   df         <- fit$df
   algorithms <- fit$df$algorithms
   outcome    <- fit$df$outcome
-  
+
   qoi        <- vector("list", length = length(outcome))
 
   ## loop over all outcomes
@@ -564,11 +564,11 @@ estimate_itr <- function(fit, ...){
 
     ## compute qoi
     qoi[[m]] <- compute_qoi(estimates[[m]], algorithms)
-  
+
   }
-  
+
   out <- list(
-    qoi = qoi, cv = cv, df = df, estimates = estimates)   
+    qoi = qoi, cv = cv, df = df, estimates = estimates)
 
   class(out) <- c("itr", class(out))
 

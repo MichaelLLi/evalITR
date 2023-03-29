@@ -2,13 +2,13 @@
 ## caret package
 
 run_caret <- function(
-  dat_train, 
-  dat_test, 
+  dat_train,
+  dat_test,
   dat_total,
-  params, 
-  indcv, 
+  params,
+  indcv,
   iter,
-  plim
+  budget
 ) {
 
   # split/cross-validation
@@ -20,15 +20,15 @@ run_caret <- function(
   # caret train parameters
   train_params <- params$train_params
 
-  ## train 
+  ## train
   fit_train <- train_caret(dat_train, trainControl_params, train_params)
 
-  ## test 
+  ## test
   fit_test <- test_caret(
-    fit_train, dat_test, dat_total, params$n_df, params$n_tb, 
-    indcv, iter, plim, cv
+    fit_train, dat_test, dat_total, params$n_df, params$n_tb,
+    indcv, iter, budget, cv
   )
-  
+
   return(fit_test)
 }
 
@@ -73,9 +73,9 @@ train_caret <- function(dat_train, trainControl_params, train_params) {
     maximize = train_params$maximize
     # trControl = train_params$trainControl()
     tuneGrid = train_params$tuneGrid
-    tuneLength = train_params$tuneLength 
-  
-    ## format training data 
+    tuneLength = train_params$tuneLength
+
+    ## format training data
     training_data_elements_caret = create_ml_args_caret(dat_train)
 
     ## train formula
@@ -92,30 +92,30 @@ train_caret <- function(dat_train, trainControl_params, train_params) {
     #     repeats = 5)
 
     fitControl <- caret::trainControl(
-        trainControl_method, number, repeats, 
-        # p, search, initialWindow, horizon, fixedWindow, skip, verboseIter, returnData, returnResamp, 
-        # # savePredictions, 
-        # classProbs, 
-        # # summaryFunction, 
-        # # selectionFunction, 
-        # preProcOptions, sampling, index, indexOut, indexFinal, timingSamps, 
-        # # predictionBounds, 
-        # seeds, adaptive, trim, 
+        trainControl_method, number, repeats,
+        # p, search, initialWindow, horizon, fixedWindow, skip, verboseIter, returnData, returnResamp,
+        # # savePredictions,
+        # classProbs,
+        # # summaryFunction,
+        # # selectionFunction,
+        # preProcOptions, sampling, index, indexOut, indexFinal, timingSamps,
+        # # predictionBounds,
+        # seeds, adaptive, trim,
         allowParallel)
 
 
     ## fit
-    # fit <- caret::train(formula, 
-    #                 data = training_data_elements_caret[["data"]], 
-    #                 method = "gbm", 
+    # fit <- caret::train(formula,
+    #                 data = training_data_elements_caret[["data"]],
+    #                 method = "gbm",
     #                 trControl = fitControl,
     #                 ## This last option is actually one
     #                 ## for gbm() that passes through
     #                 verbose = FALSE)
 
-    fit <- caret::train(formula, 
-                    data = training_data_elements_caret[["data"]], 
-                    method = train_method, 
+    fit <- caret::train(formula,
+                    data = training_data_elements_caret[["data"]],
+                    method = train_method,
                     trControl = fitControl,
                     preProcess = preProcess,
                     weights = weights,
@@ -134,64 +134,64 @@ train_caret <- function(dat_train, trainControl_params, train_params) {
 
 #'@importFrom stats predict runif
 test_caret <- function(
-  fit_train, dat_test, dat_total, n_df, n_tb, indcv, 
-  iter, plim, cv
+  fit_train, dat_test, dat_total, n_df, n_tb, indcv,
+  iter, budget, cv
 ) {
-  
-  ## format data 
+
+  ## format data
   testing_data_elements_caret = create_ml_args_caret(dat_test)
   total_data_elements_caret   = create_ml_args_caret(dat_total)
-    
+
   if(cv == TRUE){
-    ## predict 
+    ## predict
     Y0t_total = predict(
-      fit_train, 
+      fit_train,
       as.data.frame(total_data_elements_caret[["data0t"]]),
       type = "raw")
     Y1t_total = predict(
-      fit_train, 
+      fit_train,
       as.data.frame(total_data_elements_caret[["data1t"]]),
       type = "raw")
 
     tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
 
-    ## compute quantities of interest 
-    tau_test <-  tau_total[indcv == iter] 
+    ## compute quantities of interest
+    tau_test <-  tau_total[indcv == iter]
     That     <-  as.numeric(tau_total > 0)
-    That_p   <- as.numeric(tau_total >= sort(tau_test, decreasing = TRUE)[floor(plim*length(tau_test))+1])
+    That_p   <- as.numeric(tau_total >= sort(tau_test, decreasing = TRUE)[floor(budget*length(tau_test))+1])
 
-    ## output 
+    ## output
     cf_output <- list(
       tau      = c(tau_test, rep(NA, length(tau_total) - length(tau_test))),
-      tau_cv   = tau_total, 
-      That_cv  = That, 
+      tau_cv   = tau_total,
+      That_cv  = That,
       That_pcv = That_p
       )
   }
-  
+
   if(cv == FALSE){
-    ## predict 
+    ## predict
     Y0t_test = predict(
-      fit_train, 
+      fit_train,
       as.data.frame(testing_data_elements_caret[["data0t"]]),
       type = "raw")
     Y1t_test = predict(
-      fit_train, 
+      fit_train,
       as.data.frame(testing_data_elements_caret[["data1t"]]),
       type = "raw")
 
     tau_test = Y1t_test - Y0t_test
 
-    ## compute quantities of interest 
+    ## compute quantities of interest
     That     =  as.numeric(tau_test > 0)
     That_p   = numeric(length(That))
-    That_p[sort(tau_test,decreasing =TRUE,index.return=TRUE)$ix[1:(floor(plim*length(tau_test))+1)]] = 1
+    That_p[sort(tau_test,decreasing =TRUE,index.return=TRUE)$ix[1:(floor(budget*length(tau_test))+1)]] = 1
 
-    ## output 
+    ## output
     cf_output <- list(
       tau      = tau_test,
-      tau_cv   = tau_test, 
-      That_cv  = That, 
+      tau_cv   = tau_test,
+      That_cv  = That,
       That_pcv = That_p
       )
   }
@@ -202,4 +202,4 @@ test_caret <- function(
 
 
 
-  
+
