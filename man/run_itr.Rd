@@ -13,8 +13,7 @@ run_itr(
   plim,
   n_folds = 5,
   ratio = 0,
-  ngates = 5,
-  quantities = c("PAPE", "PAPDp", "AUPEC", "GATE")
+  ngates = 5
 )
 }
 \arguments{
