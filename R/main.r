@@ -31,7 +31,7 @@
 #' @importFrom rlang !! sym
 #' @export
 #' @return An object of \code{itr} class
-run_itr <- function(
+estimate_itr <- function(
     outcome,
     treatment,
     covariates,
@@ -545,11 +545,11 @@ itr_single_outcome <- function(
   ))
 }
 #' Estimate quantity of interests
-#' @param fit Fitted model. Usually an output from \code{run_itr}
+#' @param fit Fitted model. Usually an output from \code{estimate_itr}
 #' @param ... Further arguments passed to the function.
 #' @return An object of \code{itr} class
 #' @export
-estimate_itr <- function(fit, ...){
+evaluate_itr <- function(fit, ...){
 
   estimates  <- fit$estimates
   cv         <- estimates[[1]]$params$cv
