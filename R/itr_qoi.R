@@ -12,7 +12,7 @@ compute_qoi <- function(fit_obj, algorithms) {
   Ycv    <- fit_obj$Ycv
   Tcv    <- fit_obj$Tcv
   indcv  <- fit_obj$indcv
-  plim   <- fit_obj$plim
+  budget   <- fit_obj$budget
   cv     <- fit_obj$params$cv
 
 
@@ -33,7 +33,7 @@ compute_qoi <- function(fit_obj, algorithms) {
       PAPE[[i]] <- PAPEcv(Tcv, That_cv_mat, Ycv, indcv)
 
       ## compute PAPEp
-      PAPEp[[i]] <- PAPEcv(Tcv, That_pcv_mat, Ycv, indcv, plim)
+      PAPEp[[i]] <- PAPEcv(Tcv, That_pcv_mat, Ycv, indcv, budget)
 
       ## name
       PAPE[[i]]$alg <-  PAPEp[[i]]$alg <- algorithms[i]
@@ -53,7 +53,7 @@ compute_qoi <- function(fit_obj, algorithms) {
           That_pcv_j <- furrr::future_map(fit_ml[[ algorithms[j] ]], ~.x$That_pcv) %>% do.call(cbind, .)
 
           PAPDp[[count]] <- PAPDcv(
-            Tcv, That_pcv_i, That_pcv_j, Ycv, indcv, plim
+            Tcv, That_pcv_i, That_pcv_j, Ycv, indcv, budget
           )
 
           PAPDp[[count]]$alg <- paste0(algorithms[i], " x ", algorithms[j])
@@ -86,7 +86,7 @@ compute_qoi <- function(fit_obj, algorithms) {
       tau_cv <- furrr::future_map(fit_ml[[i]], ~.x$tau_cv) %>% do.call(cbind, .)
 
       ## Compute GATE
-      GATE[[i]] <- GATEcv(Tcv, tau_cv, Ycv, indcv, params$ngates) 
+      GATE[[i]] <- GATEcv(Tcv, tau_cv, Ycv, indcv, params$ngates)
 
       ## indicate algorithm
       GATE[[i]]$alg <- algorithms[i]
@@ -95,8 +95,8 @@ compute_qoi <- function(fit_obj, algorithms) {
       GATE[[i]]$group <- seq_along(GATE[[i]]$gate)
     }
 
-  } 
-  
+  }
+
 
 
   ## -----------------------------------------
@@ -112,7 +112,7 @@ compute_qoi <- function(fit_obj, algorithms) {
       PAPE[[i]] <- PAPE(Tcv, fit_ml[[i]][["That_cv"]], Ycv, centered = TRUE)
 
       ## compute PAPEp: sp does not have papep, check PAPE.R
-      PAPEp[[i]] <- PAPE(Tcv, fit_ml[[i]][["That_pcv"]], Ycv, centered = TRUE, plim)
+      PAPEp[[i]] <- PAPE(Tcv, fit_ml[[i]][["That_pcv"]], Ycv, centered = TRUE, budget)
 
       ## name
       PAPE[[i]]$alg <-  PAPEp[[i]]$alg <- algorithms[i]
@@ -132,7 +132,7 @@ compute_qoi <- function(fit_obj, algorithms) {
           That_pcv_j <- fit_ml[[j]][["That_pcv"]]
 
           PAPDp[[count]] <- PAPD(
-            Tcv, That_pcv_i, That_pcv_j, Ycv, plim, centered = TRUE
+            Tcv, That_pcv_i, That_pcv_j, Ycv, budget, centered = TRUE
           )
 
           PAPDp[[count]]$alg <- paste0(algorithms[i], " x ", algorithms[j])

@@ -52,7 +52,7 @@ This is an example using the `star` dataset (for more information about the data
 We start with a simple example with one outcome variable (writing scores) and one machine learning algorithm (causal forest). Then we move to incoporate multiple outcomes and compare model performances with several machine learning algorithms. 
 
 
-To begin, we load the dataset and specify the outcome variable and covariates to be used in the model. Next, we utilize a random forest algorithm to develop an Individualized Treatment Rule (ITR) for estimating the varied impacts of small class sizes on students' writing scores.  Since the treatment is often costly for most policy programs, we consider a case with 20% budget constraint (`plim` = 0.2). The model will identify the top 20% of units who benefit from the treatment most and assign them to with the treatment. We train the model through sample splitting, with the `ratio` between the train and test sets determined by the ratio argument. Specifically, we allocate 70% of the data to train the model, while the remaining 30% is used as testing data (`ratio` = 0.7).
+To begin, we load the dataset and specify the outcome variable and covariates to be used in the model. Next, we utilize a random forest algorithm to develop an Individualized Treatment Rule (ITR) for estimating the varied impacts of small class sizes on students' writing scores.  Since the treatment is often costly for most policy programs, we consider a case with 20% budget constraint (`budget` = 0.2). The model will identify the top 20% of units who benefit from the treatment most and assign them to with the treatment. We train the model through sample splitting, with the `ratio` between the train and test sets determined by the ratio argument. Specifically, we allocate 70% of the data to train the model, while the remaining 30% is used as testing data (`ratio` = 0.7).
 
 
 ```{r estimate, message = FALSE}
@@ -82,7 +82,7 @@ fit <- run_itr(outcome = outcomes,
                covariates = covariates,
                data = star_data,
                algorithms = c("causal_forest"),
-               plim = 0.2,
+               budget = 0.2,
                ratio = 0.7)
 
 
@@ -99,7 +99,7 @@ fit_caret <- run_itr(outcome = outcomes,
                covariates = covariates,
                data = star_data,
                algorithms = c("caret"),
-               plim = 0.2,
+               budget = 0.2,
                ratio = 0.7,
                trainControl_method = "repeatedcv", # resampling method
                train_method = "gbm", # model
@@ -110,7 +110,7 @@ fit_caret <- run_itr(outcome = outcomes,
                repeats = 3)
 
 
-
+est_caret <- estimate_itr(fit_caret)
 ```
 
 The`summary()` function displays the following summary statistics: (1) population average prescriptive effect `PAPE`; (2) population average prescriptive effect with a budget constraint `PAPEp`; (3) population average prescriptive effect difference with a budget constraint `PAPDp`. This quantity will be computed with more than 2 machine learning algorithms); (4) and area under the prescriptive effect curve `AUPEC`. For more information about these evaluation metrics, please refer to [Imai and Li (2021)](https://arxiv.org/abs/1905.05389); (5) Grouped Average Treatment Effects `GATEs`.  The details of the methods for this design are given in [Imai and Li (2022)](https://arxiv.org/abs/2203.14511).
@@ -119,6 +119,9 @@ The`summary()` function displays the following summary statistics: (1) populatio
 ```{r sp_summary}
 # summarize estimates
 summary(est)
+
+# summarize estimates with model trained using caret
+summary(est_caret)
 ```
 
 
@@ -128,6 +131,8 @@ We plot the estimated Area Under the Prescriptive Effect Curve for the writing s
 # plot the AUPEC 
 plot(est)
 
+# plot the AUPEC for the model trained using caret
+plot(est_caret)
 ```
 
 ## Example under cross-validation
@@ -142,7 +147,7 @@ fit_cv <- run_itr(outcome = outcomes,
                covariates = covariates,
                data = star,
                algorithms = c("causal_forest"),
-               plim = 0.2,
+               budget = 0.2,
                n_folds = 3)
 
 # evaluate ITR 
@@ -195,7 +200,7 @@ fit_cv <- run_itr(outcome = outcomes,
                   "random_forest",
                   "cart",
                   "bagging"),
-               plim = 0.2,
+               budget = 0.2,
                n_folds = 3)
 ```
 

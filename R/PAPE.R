@@ -7,10 +7,10 @@
 #'
 #' @param T A vector of the unit-level binary treatment receipt variable for each sample.
 #' @param That A vector of the unit-level binary treatment that would have been assigned by the
-#' individualized treatment rule. If \code{plim} is specified, please ensure
+#' individualized treatment rule. If \code{budget} is specified, please ensure
 #' that the percentage of treatment units of That is lower than the budget constraint.
 #' @param Y A vector of the outcome variable of interest for each sample.
-#' @param plim The maximum percentage of population that can be treated under the
+#' @param budget The maximum percentage of population that can be treated under the
 #' budget constraint. Should be a decimal between 0 and 1. Default is NA which assumes
 #' no budget constraint.
 #' @param centered If \code{TRUE}, the outcome variables would be centered before processing. This minimizes
@@ -30,7 +30,7 @@
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
 #' @export PAPE
-PAPE <- function (T, That, Y, plim = NA, centered = TRUE) {
+PAPE <- function (T, That, Y, budget = NA, centered = TRUE) {
   if (!(identical(as.numeric(T),as.numeric(as.logical(T))))) {
     stop("T should be binary.")
   }
@@ -43,13 +43,13 @@ PAPE <- function (T, That, Y, plim = NA, centered = TRUE) {
   if (length(T)==0) {
     stop("The data should have positive length.")
   }
-  if (!is.na(plim) & (sum(That)>floor(length(T)*plim)+1)) {
-    stop("The number of treated units in That should be below or equal to plim.")
+  if (!is.na(budget) & (sum(That)>floor(length(T)*budget)+1)) {
+    stop("The number of treated units in That should be below or equal to budget")
   }
   if (!is.logical(centered)) {
     stop("The centered parameter should be TRUE or FALSE.")
   }
-  if (!is.na(plim) & ((plim<0) | (plim>1))) {
+  if (!is.na(budget) & ((budget<0) | (budget>1))) {
     stop("Budget constraint should be between 0 and 1")
   }
   T=as.numeric(T)
@@ -58,7 +58,7 @@ PAPE <- function (T, That, Y, plim = NA, centered = TRUE) {
   if (centered) {
     Y = Y - mean(Y)
   }
-  if (is.na(plim)) {
+  if (is.na(budget)) {
     n=length(Y)
     n1=sum(T)
     n0=n-n1
@@ -78,12 +78,12 @@ PAPE <- function (T, That, Y, plim = NA, centered = TRUE) {
     n0=n-n1
     n1h=sum(That)
     n0h=n-n1h
-    SAPEfp=1/n1*sum(T*That*Y)+1/n0*sum(Y*(1-T)*(1-That))-plim/n1*sum(Y*T)-(1-plim)/n0*sum(Y*(1-T))
-    Sfp1=var(((That-plim)*Y)[T==1])
-    Sfp0=var(((That-plim)*Y)[T==0])
+    SAPEfp=1/n1*sum(T*That*Y)+1/n0*sum(Y*(1-T)*(1-That))-budget/n1*sum(Y*T)-(1-budget)/n0*sum(Y*(1-T))
+    Sfp1=var(((That-budget)*Y)[T==1])
+    Sfp0=var(((That-budget)*Y)[T==0])
     kf1=mean(Y[T==1 & That==1])-mean(Y[T==0 & That==1])
     kf0=mean(Y[T==1 & That==0])-mean(Y[T==0 & That==0])
-    varfp=Sfp1/n1+Sfp0/n0+floor(n*plim)*(n-floor(n*plim))/(n^2*(n-1))*((2*plim-1)*kf1^2-2*plim*kf1*kf0)
+    varfp=Sfp1/n1+Sfp0/n0+floor(n*budget)*(n-floor(n*budget))/(n^2*(n-1))*((2*budget-1)*kf1^2-2*budget*kf1*kf0)
     return(list(pape=SAPEfp,sd=sqrt(max(varfp,0))))
   }
 }
