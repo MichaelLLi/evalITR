@@ -12,6 +12,9 @@ run_bagging <- function(
   plim
 ) {
   
+  # split/cross-validation
+  cv <- params$cv
+
   ## train 
   fit_train <- train_bagging(dat_train)
   
@@ -19,7 +22,7 @@ run_bagging <- function(
   ## test 
   fit_test <- test_bagging(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb, 
-    indcv, iter, plim
+    indcv, iter, plim, cv
   )
   
   return(fit_test)
@@ -40,7 +43,8 @@ train_bagging <- function(dat_train) {
   ## fit
   fit <- randomForest::randomForest(formula_bagging, 
                       data = training_data_elements_bagging[["data"]],
-                      mtry=tune_parameter, ntree = 500)
+                      mtry=tune_parameter, ntree = 500,
+                      norm.votes=TRUE)
   
   return(fit)
 
@@ -48,33 +52,99 @@ train_bagging <- function(dat_train) {
 
 #'@importFrom stats predict runif
 test_bagging <- function(
-  fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, plim
+  fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, plim, cv
 ) {
   
   ## format data 
   testing_data_elements_bagging = create_ml_args_bagging(dat_test)
   total_data_elements_bagging   = create_ml_args_bagging(dat_total)
-    
-  ## predict 
-  Y0t_total = predict(fit_train, newdata=total_data_elements_bagging[["data0t"]]) %>% as.numeric()
-  Y1t_total = predict(fit_train, newdata=total_data_elements_bagging[["data1t"]]) %>% as.numeric()
 
-  tau_total=Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
+  ## outcome
+  outcome = testing_data_elements_bagging[["data"]][["Y"]]
+
+  if(cv == TRUE){
+
+    if(length(unique(outcome)) > 2){
+      
+      ## predict 
+      Y0t_total = predict(
+        fit_train,
+        newdata = total_data_elements_bagging[["data0t"]])
+      Y1t_total = predict(
+        fit_train,
+        newdata = total_data_elements_bagging[["data1t"]])
+
+      }else{
+      
+      ## predict 
+      Y0t_total = predict(
+        fit_train,
+        newdata = total_data_elements_bagging[["data0t"]],
+        type = "prob")[, 2]
+      Y1t_total = predict(
+        fit_train,
+        newdata = total_data_elements_bagging[["data1t"]],
+        type = "prob")[, 2]
+        }
+
+      tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
 
 
-  ## compute quantities of interest 
-  tau_test <-  tau_total[indcv == iter] 
-  That     <-  as.numeric(tau_total > 0)
-  That_p   <- as.numeric(tau_total >= sort(tau_test, decreasing = TRUE)[floor(plim*length(tau_test))+1])
+      ## compute quantities of interest 
+      tau_test <-  tau_total[indcv == iter] 
+      That     <-  as.numeric(tau_total > 0)
+      That_p   <- as.numeric(tau_total >= sort(tau_test, decreasing = TRUE)[floor(plim*length(tau_test))+1])
+
+      ## output 
+      cf_output <- list(
+        tau      = c(tau_test, rep(NA, length(tau_total) - length(tau_test))),
+        tau_cv   = tau_total, 
+        That_cv  = That, 
+        That_pcv = That_p
+      )
+  }
   
-  
-  ## output 
-  cf_output <- list(
-    tau      = c(tau_test, rep(NA, length(tau_total) - length(tau_test))),
-    tau_cv   = tau_total, 
-    That_cv  = That, 
-    That_pcv = That_p
-  )
+  if(cv == FALSE){
+
+    if(length(unique(outcome)) > 2){
+      
+      ## predict 
+      Y0t_test = predict(
+        fit_train,
+        newdata = testing_data_elements_bagging[["data0t"]])
+      Y1t_test = predict(
+        fit_train,
+        newdata = testing_data_elements_bagging[["data1t"]])
+
+      }else{
+      
+      ## predict 
+      Y0t_test = predict(
+        fit_train,
+        newdata = testing_data_elements_bagging[["data0t"]],
+        type = "prob")[, 2]
+      Y1t_test = predict(
+        fit_train,
+        newdata = testing_data_elements_bagging[["data1t"]],
+        type = "prob")[, 2]
+        }
+
+      tau_test = Y1t_test - Y0t_test
+
+      ## compute quantities of interest 
+      That     =  as.numeric(tau_test > 0)
+      That_p   = numeric(length(That))
+      That_p[sort(tau_test,decreasing =TRUE,index.return=TRUE)$ix[1:(floor(plim*length(tau_test))+1)]] = 1
+
+      ## output 
+      cf_output <- list(
+        tau      = tau_test,
+        tau_cv   = tau_test, 
+        That_cv  = That, 
+        That_pcv = That_p
+      )
+
+  }
   
   return(cf_output)
 }

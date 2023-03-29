@@ -4,14 +4,12 @@
 \alias{compute_qoi}
 \title{Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv)}
 \usage{
-compute_qoi(fit_obj, algorithms, cv)
+compute_qoi(fit_obj, algorithms)
 }
 \arguments{
 \item{fit_obj}{An output object from \code{itr_single_outcome} function.}
 
 \item{algorithms}{Machine learning algorithms}
-
-\item{cv}{Indicate training method. Set \code{cv = TRUE} for cross validation and \code{FALSE} for sample splitting.}
 }
 \description{
 Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv)

@@ -4,12 +4,12 @@
 \alias{summary.itr}
 \title{Summarize run_itr output}
 \usage{
-\method{summary}{itr}(object, m = 1, ...)
+\method{summary}{itr}(object, outcome = TRUE, ...)
 }
 \arguments{
 \item{object}{An object of \code{run_itr} class}
 
-\item{m}{A numeric value indicates which element to focus on from the vector of \code{outcomes}. The default is the first outcome in the vector \code{outcomes}.}
+\item{outcome}{Outcome variable. Can be different from the input of \code{run_itr}}
 
 \item{...}{Other parameters. Currently not supported}
 }

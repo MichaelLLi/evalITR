@@ -246,6 +246,27 @@ create_ml_args_cart = function(data){
 }
 
 
+
+# Create arguments for caret
+create_ml_args_caret = function(data){
+
+  formula = data[["formula"]]
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat = data[["Treat"]]
+
+  data = cbind(Y, X, Treat)
+
+  # also needed for testing:
+  data0t = cbind(Y, X, Treat = 0)
+  data1t = cbind(Y, X, Treat = 1)
+
+  return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
+}
+
+
+
+
 # # Create arguments for neural net
 #
 # create_ml_args_neuralnet = function(training_data, create_ml_arguments_outputs){
@@ -289,20 +310,8 @@ create_ml_args_knn = function(create_ml_arguments_outputs){
   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
 }
 
-# convert predicted outcomes for CART
-convert_outcome <- function(x, predict_outcome){
-
-  outcome = c()
-
-  if(predict_outcome[x,1] >= 0.5){
-    outcome[x] = colnames(predict_outcome)[1] %>% as.numeric()
-  }else {
-    outcome[x] = colnames(predict_outcome)[2] %>% as.numeric()
-  }
-}
-
-# Re-organize cross-validation output to plot the AUPEC curve
-getAupecOutput_cv = function(
+# Re-organize cross-validation output to plot the AUPEC curve  
+getAupecOutput = function(
   tauML, taucvML, That_pcv_mat, MLname,
   NFOLDS, Ycv, Tcv, indcv
 ){
@@ -313,9 +322,6 @@ getAupecOutput_cv = function(
     tau = tauML[,j][!is.na(tauML[,j])]
     aupec_grid[[j]] = AUPEC(Tcv[indcv==j], tau,Ycv[indcv==j])
   }
-
-  ## use That_pcv_mat
-  # aupec_cv = AUPECcv(T = Tcv, tau = That_pcv_mat, Y = Ycv, ind = indcv)
 
   ## use taucv
   aupec_cv = AUPECcv(T = Tcv, tau = taucvML, Y = Ycv, ind = indcv)

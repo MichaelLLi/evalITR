@@ -1,6 +1,8 @@
 
 <!-- README.md is generated from README.Rmd. Please edit that file -->
 
+<img src="man/figures/README-manual.png" width="100%" />
+
 # evalITR
 
 <!-- badges: start -->
@@ -28,17 +30,28 @@ nworkers <- 4
 plan(multisession, workers =nworkers)
 ```
 
-## Example (cross-validation)
+## Example under sample splitting
 
 This is an example using the `star` dataset (for more information about
 the dataset, please use `?star`).
 
-We first load the dataset and specify both outcome variables (reading,
-math, and writing scores) and covariates we want to include in the
-model. Then we use a series of machine learning algorithms to estimate
-the heterogeneous effects of small classes on educational attainment. We
-use 20% as a budget constraint and tuned the model through through the
-3-fold cross validation.
+We start with a simple example with one outcome variable (writing
+scores) and one machine learning algorithm (causal forest). Then we move
+to incoporate multiple outcomes and compare model performances with
+several machine learning algorithms.
+
+To begin, we load the dataset and specify the outcome variable and
+covariates to be used in the model. Next, we utilize a random forest
+algorithm to develop an Individualized Treatment Rule (ITR) for
+estimating the varied impacts of small class sizes on students’ writing
+scores. Since the treatment is often costly for most policy programs, we
+consider a case with 20% budget constraint (`plim` = 0.2). The model
+will identify the top 20% of units who benefit from the treatment most
+and assign them to with the treatment. We train the model through sample
+splitting, with the `ratio` between the train and test sets determined
+by the ratio argument. Specifically, we allocate 70% of the data to
+train the model, while the remaining 30% is used as testing data
+(`ratio` = 0.7).
 
 ``` r
 library(tidyverse)
@@ -46,326 +59,310 @@ library(evalITR)
 
 load("data/star.rda")
 
-# specifying outcomes
-outcomes <- c("g3tlangss",
-                "g3treadss","g3tmathss")
+# specifying the outcome
+outcomes <- "g3tlangss"
 
+# specifying the treatment
+treatment <- "treatment"
 
 # specifying covariates
-covariates <-  star %>% 
-                dplyr::select(-c(all_of(outcomes),"treatment")) %>% 
+covariates <-  star %>% dplyr::select(-c("g3tlangss",
+                "g3treadss","g3tmathss","treatment")) %>% 
                 colnames()
 
+# specifying the data
+star_data = star %>% dplyr::select(-c(g3treadss,g3tmathss))
+
 # estimate ITR 
+set.seed(2021)
 fit <- run_itr(outcome = outcomes,
-               treatment = "treatment",
+               treatment = treatment,
                covariates = covariates,
-               data = star,
-               algorithms = c(
-                  "causal_forest", 
-                  "bart",
-                  "lasso",
-                  "boost", 
-                  "random_forest",
-                  "bagging",
-                  "cart"),
+               data = star_data,
+               algorithms = c("causal_forest"),
                plim = 0.2,
-               n_folds = 3)
+               ratio = 0.7)
+#> Evaluate ITR under sample splitting ...
+
+
+# evaluate ITR 
+est <- estimate_itr(fit)
+#> Cannot compute PAPDp
+```
+
+Alternatively, we can train the model with the `caret` package (for
+further information about `caret`, see
+[caret](http://topepo.github.io/caret/index.html)).
+
+``` r
+# alternatively (with caret package)
+fit_caret <- run_itr(outcome = outcomes,
+               treatment = treatment,
+               covariates = covariates,
+               data = star_data,
+               algorithms = c("caret"),
+               plim = 0.2,
+               ratio = 0.7,
+               trainControl_method = "repeatedcv", # resampling method
+               train_method = "gbm", # model
+               preProcess = NULL, # pre-processing predictors
+               tuneGrid = NULL, # tuning values
+               tuneLength = 1, # granularity in tuning
+               number = 3, # number of folds/resampling iterations
+               repeats = 3)
+#> Evaluate ITR under sample splitting ...
 ```
 
 The`summary()` function displays the following summary statistics: (1)
 population average prescriptive effect `PAPE`; (2) population average
 prescriptive effect with a budget constraint `PAPEp`; (3) population
-average prescriptive effect difference with a budget constraint `PAPDp`;
-(4) and area under the prescriptive effect curve `AUPEC`. For more
-information about these evaluation metrics, please refer to [this
-paper](https://arxiv.org/abs/1905.05389).
+average prescriptive effect difference with a budget constraint `PAPDp`.
+This quantity will be computed with more than 2 machine learning
+algorithms); (4) and area under the prescriptive effect curve `AUPEC`.
+For more information about these evaluation metrics, please refer to
+[Imai and Li (2021)](https://arxiv.org/abs/1905.05389); (5) Grouped
+Average Treatment Effects `GATEs`. The details of the methods for this
+design are given in [Imai and Li
+(2022)](https://arxiv.org/abs/2203.14511).
 
 ``` r
 # summarize estimates
-summary(fit)
+summary(est)
 #> ── PAPE ────────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1     0.65          1.69 causal_forest      0.38   0.702
-#> 2     1.80          1.09          bart      1.65   0.099
-#> 3     2.02          1.08         lasso      1.88   0.061
-#> 4     0.61          0.83         boost      0.74   0.462
-#> 5     1.97          1.28 random_forest      1.55   0.122
-#> 6     1.18          0.84       bagging      1.40   0.161
-#> 7     1.59          1.82          cart      0.88   0.381
+#> 1     0.78           1.4 causal_forest      0.57    0.57
 #> 
 #> ── PAPEp ───────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1     1.26          1.08 causal_forest      1.16   0.245
-#> 2     1.14          0.65          bart      1.77   0.077
-#> 3     0.74          1.07         lasso      0.69   0.487
-#> 4     1.67          0.66         boost      2.54   0.011
-#> 5     0.79          0.68 random_forest      1.17   0.243
-#> 6     0.46          0.69       bagging      0.67   0.501
-#> 7     0.87          0.66          cart      1.31   0.191
+#> 1      2.8           1.2 causal_forest       2.3   0.024
 #> 
 #> ── PAPDp ───────────────────────────────────────────────────────────────────────
-#>    estimate std.deviation                     algorithm statistic p.value
-#> 1     0.116          0.55          causal_forest x bart     0.211    0.83
-#> 2     0.515          1.30         causal_forest x lasso     0.396    0.69
-#> 3    -0.410          0.96         causal_forest x boost    -0.427    0.67
-#> 4     0.465          0.79 causal_forest x random_forest     0.593    0.55
-#> 5     0.794          0.85       causal_forest x bagging     0.930    0.35
-#> 6     0.391          1.19          causal_forest x cart     0.329    0.74
-#> 7     0.399          0.76                  bart x lasso     0.526    0.60
-#> 8    -0.526          1.46                  bart x boost    -0.361    0.72
-#> 9     0.350          1.13          bart x random_forest     0.310    0.76
-#> 10    0.678          1.42                bart x bagging     0.478    0.63
-#> 11    0.276          1.39                   bart x cart     0.199    0.84
-#> 12   -0.925          0.76                 lasso x boost    -1.209    0.23
-#> 13   -0.049          0.86         lasso x random_forest    -0.057    0.95
-#> 14    0.279          0.85               lasso x bagging     0.327    0.74
-#> 15   -0.123          1.16                  lasso x cart    -0.107    0.91
-#> 16    0.875          0.77         boost x random_forest     1.140    0.25
-#> 17    1.204          1.29               boost x bagging     0.935    0.35
-#> 18    0.801          1.47                  boost x cart     0.544    0.59
-#> 19    0.328          0.46       random_forest x bagging     0.708    0.48
-#> 20   -0.074          0.86          random_forest x cart    -0.086    0.93
-#> 21   -0.402          1.40                bagging x cart    -0.288    0.77
+#> data frame with 0 columns and 0 rows
 #> 
 #> ── AUPEC ───────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1     1.06           2.3 causal_forest      0.46    0.65
-#> 2     0.93           1.8          bart      0.51    0.61
-#> 3     0.89           2.4         lasso      0.37    0.71
-#> 4     0.39           1.6         boost      0.25    0.81
-#> 5     1.04           2.2 random_forest      0.47    0.64
-#> 6     0.47           2.5       bagging      0.19    0.85
-#> 7     0.91           1.8          cart      0.51    0.61
+#> 1     0.58             1 causal_forest      0.56    0.58
+#> 
+#> ── GATE ────────────────────────────────────────────────────────────────────────
+#>   estimate std.deviation     algorithm group statistic p.value upper lower
+#> 1     -192           106 causal_forest     1      -1.8   0.070  -168   182
+#> 2      184           109 causal_forest     2       1.7   0.092  -173   187
+#> 3      227           109 causal_forest     3       2.1   0.038  -172   186
+#> 4     -238           107 causal_forest     4      -2.2   0.026  -168   182
+#> 5       54           107 causal_forest     5       0.5   0.615  -170   184
 ```
 
 We plot the estimated Area Under the Prescriptive Effect Curve for the
-writing score across a range of budget constraints for different
-algorithms.
+writing score across a range of budget constraints for causal forest.
 
 ``` r
-# plot the AUPEC with different ML algorithms
-plot(x = fit, 
-      outcome = "g3tlangss",
-      treatment = "treatment",
-      data = star, 
-      algorithms = c(
-          "causal_forest",
-          "bart",
-          "lasso",
-          "boost", 
-          "random_forest",
-          "bagging", 
-          "cart"))
+# plot the AUPEC 
+plot(est)
 ```
 
-<img src="man/figures/README-plot-1.png" style="display: block; margin: auto;" />
+<img src="man/figures/README-sp_plot-1.png" style="display: block; margin: auto;" />
 
-## Example under sample splitting (under development)
+## Example under cross-validation
 
-Please set argument input of `n_folds` to 0 in order to train the models under sample splitting. The split ratio between train and test set is determined by the `ratio` argument. 
+The package also allows estimate ITR with k-folds cross-validation.
+Instead of specifying the `ratio` argument, we choose the number of
+folds (`n_folds`). The following code presents an example of estimating
+ITR with 3 folds cross-validation. In practice, we recommend using 10
+folds to get a more stable model performance.
 
-```r
-library(tidyverse)
-library(evalITR)
+``` r
+# estimate ITR 
+set.seed(2021)
+fit_cv <- run_itr(outcome = outcomes,
+               treatment = treatment,
+               covariates = covariates,
+               data = star,
+               algorithms = c("causal_forest"),
+               plim = 0.2,
+               n_folds = 3)
+#> Evaluate ITR with cross-validation ...
 
-load("data/star.rda")
+# evaluate ITR 
+est_cv <- estimate_itr(fit_cv)
+#> Cannot compute PAPDp
+```
 
+We present the results with 3-folds cross validation and plot the AUPEC.
+
+``` r
+# summarize estimates
+summary(est_cv)
+#> ── PAPE ────────────────────────────────────────────────────────────────────────
+#>   estimate std.deviation     algorithm statistic p.value
+#> 1     0.72          0.87 causal_forest      0.82    0.41
+#> 
+#> ── PAPEp ───────────────────────────────────────────────────────────────────────
+#>   estimate std.deviation     algorithm statistic p.value
+#> 1      2.9          0.65 causal_forest       4.4 8.6e-06
+#> 
+#> ── PAPDp ───────────────────────────────────────────────────────────────────────
+#> data frame with 0 columns and 0 rows
+#> 
+#> ── AUPEC ───────────────────────────────────────────────────────────────────────
+#>   estimate std.deviation     algorithm statistic p.value
+#> 1      1.4           1.5 causal_forest      0.92    0.36
+#> 
+#> ── GATE ────────────────────────────────────────────────────────────────────────
+#>   estimate std.deviation     algorithm group statistic p.value upper lower
+#> 1     -101            59 causal_forest     1     -1.71   0.087   -93   100
+#> 2       37            59 causal_forest     2      0.62   0.536   -94   101
+#> 3       39            59 causal_forest     3      0.67   0.506   -93   101
+#> 4       14            59 causal_forest     4      0.23   0.816   -94   101
+#> 5       29           101 causal_forest     5      0.29   0.773  -162   169
+```
+
+``` r
+# plot the AUPEC 
+plot(est_cv)
+```
+
+<img src="man/figures/README-sv_plot-1.png" style="display: block; margin: auto;" />
+
+## Example with multiple ML algorithms/outcomes
+
+We can estimate ITR with various machine learning algorithms and then
+compare the performance of each model. The package includes 8 different
+ML algorithms (causal forest, BART, lasso, boosting trees, random
+forest, CART, bagging trees, svm).
+
+The package also allows estimate heterogeneous treatment effects on the
+individual and group-level. On the individual-level, the summary
+statistics and the AUPEC plot show whether assigning individualized
+treatment rules may outperform complete random experiment. On the
+group-level, we specify the number of groups through `ngates` and
+estimating heterogeneous treatment effects across groups.
+
+If the original experiment has diverse outcome measures, we develop ITRs
+for each outcome and use them to estimate the heterogeneous effects
+across the different outcomes.
+
+``` r
 # specifying outcomes
-outcomes <- c("g3tlangss",
-              "g3treadss",
-              "g3tmathss")
-
+outcomes <- c("g3tlangss","g3treadss","g3tmathss")
 
 # specifying covariates
-covariates <-  star %>% 
-                dplyr::select(-c(all_of(outcomes),"treatment")) %>% 
-                colnames()
+covariates <-  star %>% dplyr::select(-c("g3tlangss","g3treadss","g3tmathss","treatment")) %>% colnames()
 
-# estimate ITR 
-fit <- run_itr(outcome = outcomes,
+# train the model
+set.seed(2021)
+fit_cv <- run_itr(outcome = outcomes,
                treatment = "treatment",
                covariates = covariates,
                data = star,
                algorithms = c(
                   "causal_forest", 
+                  # "bartc",
+                  # "svm",
                   "lasso",
                   "boost", 
                   "random_forest",
-                  "bagging",
-                  "cart"),
+                  "cart",
+                  "bagging"),
                plim = 0.2,
-               n_folds = 0, # train under sample splitting
-               ratio = 0.67) # set 0.67 as the split ratio between train and test set
-
-glimpse(fit$qoi)
-
-List of 6
-#> $ PAPE  :List of 6
-#>  ..$ :List of 3
-#>  .. ..$ pape: num 5.12
-#>  .. ..$ sd  : num 0.642
-#>  .. ..$ alg : chr "causal_forest"
-#>  ..$ :List of 3
-#>  .. ..$ pape: num 2.72
-#>  .. ..$ sd  : num 0.808
-#>  .. ..$ alg : chr "lasso"
-#>  ..$ :List of 3
-#>  .. ..$ pape: num 8.28
-#>  .. ..$ sd  : num 0.871
-#>  .. ..$ alg : chr "boost"
-#>  ..$ :List of 3
-#>  .. ..$ pape: num 13.6
-#>  .. ..$ sd  : num 0.835
-#>  .. ..$ alg : chr "random_forest"
-#>  ..$ :List of 3
-#>  .. ..$ pape: num 13.8
-#>  .. ..$ sd  : num 0.832
-#>  .. ..$ alg : chr "bagging"
-#>  ..$ :List of 3
-#>  .. ..$ pape: num 0.421
-#>  .. ..$ sd  : num 0.901
-#>  .. ..$ alg : chr "cart"
-#> $ PAPEp :List of 6
-#>  ..$ :List of 3
-#>  .. ..$ pape: num 5.04
-#>  .. ..$ sd  : num 0.711
-#>  .. ..$ alg : chr "causal_forest"
-#>  ..$ :List of 3
-#>  .. ..$ pape: num 2.79
-#>  .. ..$ sd  : num 0.72
-#>  .. ..$ alg : chr "lasso"
-#>  ..$ :List of 3
-#>  .. ..$ pape: num 5.51
-#>  .. ..$ sd  : num 0.712
-#>  .. ..$ alg : chr "boost"
-#>  ..$ :List of 3
-#>  .. ..$ pape: num 9.6
-#>  .. ..$ sd  : num 0.678
-#>  .. ..$ alg : chr "random_forest"
-#>  ..$ :List of 3
-#>  .. ..$ pape: num 9.53
-#>  .. ..$ sd  : num 0.675
-#>  .. ..$ alg : chr "bagging"
-#>  ..$ :List of 3
-#>  .. ..$ pape: num -0.148
-#>  .. ..$ sd  : num 0.709
-#>  .. ..$ alg : chr "cart"
-#> $ PAPDp :List of 15
-#>  ..$ :List of 3
-#>  .. ..$ papd: num 2.25
-#>  .. ..$ sd  : num 0.853
-#>  .. ..$ alg : chr "causal_forest x lasso"
-#>  ..$ :List of 3
-#>  .. ..$ papd: num -0.471
-#>  .. ..$ sd  : num 0.814
-#>  .. ..$ alg : chr "causal_forest x boost"
-#>  ..$ :List of 3
-#>  .. ..$ papd: num -4.56
-#>  .. ..$ sd  : num 0.706
-#>  .. ..$ alg : chr "causal_forest x random_forest"
-#>  ..$ :List of 3
-#>  .. ..$ papd: num -4.49
-#>  .. ..$ sd  : num 0.813
-#>  .. ..$ alg : chr "causal_forest x bagging"
-#>  ..$ :List of 3
-#>  .. ..$ papd: num 5.19
-#>  .. ..$ sd  : num 1.03
-#>  .. ..$ alg : chr "causal_forest x cart"
-#>  ..$ :List of 3
-#>  .. ..$ papd: num -2.72
-#>  .. ..$ sd  : num 0.866
-#>  .. ..$ alg : chr "lasso x boost"
-#>  ..$ :List of 3
-#>  .. ..$ papd: num -6.81
-#>  .. ..$ sd  : num 0.9
-#>  .. ..$ alg : chr "lasso x random_forest"
-#>  ..$ :List of 3
-#>  .. ..$ papd: num -6.74
-#>  .. ..$ sd  : num 0.898
-#>  .. ..$ alg : chr "lasso x bagging"
-#>  ..$ :List of 3
-#>  .. ..$ papd: num 2.94
-#>  .. ..$ sd  : num 1.04
-#>  .. ..$ alg : chr "lasso x cart"
-#>  ..$ :List of 3
-#>  .. ..$ papd: num -4.09
-#>  .. ..$ sd  : num 0.787
-#>  .. ..$ alg : chr "boost x random_forest"
-#>  ..$ :List of 3
-#>  .. ..$ papd: num -4.02
-#>  .. ..$ sd  : num 0.824
-#>  .. ..$ alg : chr "boost x bagging"
-#>  ..$ :List of 3
-#>  .. ..$ papd: num 5.66
-#>  .. ..$ sd  : num 1.02
-#>  .. ..$ alg : chr "boost x cart"
-#>  ..$ :List of 3
-#>  .. ..$ papd: num 0.0753
-#>  .. ..$ sd  : num 0.487
-#>  .. ..$ alg : chr "random_forest x bagging"
-#>  ..$ :List of 3
-#>  .. ..$ papd: num 9.75
-#>  .. ..$ sd  : num 0.954
-#>  .. ..$ alg : chr "random_forest x cart"
-#>  ..$ :List of 3
-#>  .. ..$ papd: num 9.68
-#>  .. ..$ sd  : num 0.977
-#>  .. ..$ alg : chr "bagging x cart"
-#> $ AUPEC :List of 6
-#>  ..$ :List of 3
-#>  .. ..$ aupec: num 5.65
-#>  .. ..$ sd   : num 0.583
-#>  .. ..$ vec  : num [1:1911] -2.69 -2.69 -2.63 -2.68 -2.68 ...
-#>  ..$ :List of 3
-#>  .. ..$ aupec: num 2.58
-#>  .. ..$ sd   : num 0.618
-#>  .. ..$ vec  : num [1:1911] -2.63 -2.69 -2.69 -2.71 -2.75 ...
-#>  ..$ :List of 3
-#>  .. ..$ aupec: num 6.38
-#>  .. ..$ sd   : num 0.705
-#>  .. ..$ vec  : num [1:1911] -2.63 -2.56 -2.6 -2.61 -2.59 ...
-#>  ..$ :List of 3
-#>  .. ..$ aupec: num 11.1
-#>  .. ..$ sd   : num 0.716
-#>  .. ..$ vec  : num [1:1911] -2.63 -2.56 -2.47 -2.42 -2.39 ...
-#>  ..$ :List of 3
-#>  .. ..$ aupec: num 11.4
-#>  .. ..$ sd   : num 0.716
-#>  .. ..$ vec  : num [1:1911] -2.63 -2.56 -2.52 -2.42 -2.39 ...
-#>  ..$ :List of 3
-#>  .. ..$ aupec: num -0.475
-#>  .. ..$ sd   : num 0.742
-#>  .. ..$ vec  : num [1:1911] -2.75 -2.74 -2.73 -2.67 -2.67 ...
-#> $ GATE  :List of 6
-#>  ..$ :List of 4
-#>  .. ..$ gate : num [1:5] -24.2 -81.8 79.6 -68.8 124
-#>  .. ..$ sd   : num [1:5] 57.6 57.4 57.8 57.3 58
-#>  .. ..$ alg  : chr "causal_forest"
-#>  .. ..$ group: int [1:5] 1 2 3 4 5
-#>  ..$ :List of 4
-#>  .. ..$ gate : num [1:5] 12.03 -6.65 6.99 94.71 -78.2
-#>  .. ..$ sd   : num [1:5] 57.5 57.8 57.9 57.6 57.5
-#>  .. ..$ alg  : chr "lasso"
-#>  .. ..$ group: int [1:5] 1 2 3 4 5
-#>  ..$ :List of 4
-#>  .. ..$ gate : num [1:5] -35.8 89.7 -48.7 55.6 -31.9
-#>  .. ..$ sd   : num [1:5] 57.5 57.5 57.5 57.8 57.9
-#>  .. ..$ alg  : chr "boost"
-#>  .. ..$ group: int [1:5] 1 2 3 4 5
-#>  ..$ :List of 4
-#>  .. ..$ gate : num [1:5] -21.7 -76.4 42.8 16.7 67.5
-#>  .. ..$ sd   : num [1:5] 57.6 57.2 57.4 57.4 58.5
-#>  .. ..$ alg  : chr "random_forest"
-#>  .. ..$ group: int [1:5] 1 2 3 4 5
-#>  ..$ :List of 4
-#>  .. ..$ gate : num [1:5] -58.1 -33.5 45.1 -24.5 99.9
-#>  .. ..$ sd   : num [1:5] 57.5 57.4 57.4 57.2 58.6
-#>  .. ..$ alg  : chr "bagging"
-#>  .. ..$ group: int [1:5] 1 2 3 4 5
-#>  ..$ :List of 4
-#>  .. ..$ gate : num [1:5] 42.9 48.91 41.89 -103.68 -1.14
-#>  .. ..$ sd   : num [1:5] 57.9 57.7 57.8 57.3 57.5
-#>  .. ..$ alg  : chr "cart"
-#>  .. ..$ group: int [1:5] 1 2 3 4 5
+               n_folds = 3)
+#> Evaluate ITR with cross-validation ...
+#> Evaluate ITR with cross-validation ...
+#> Evaluate ITR with cross-validation ...
 ```
+
+``` r
+# compute estimates
+est_cv <- estimate_itr(fit_cv)
+```
+
+``` r
+# summarize estimates
+summary(est_cv, outcome = "g3tlangss")
+#> ── PAPE ────────────────────────────────────────────────────────────────────────
+#>   estimate std.deviation     algorithm statistic p.value
+#> 1     0.24          1.02 causal_forest      0.24   0.812
+#> 2     0.17          1.07         lasso      0.16   0.871
+#> 3     0.30          1.35         boost      0.23   0.822
+#> 4     2.37          1.01 random_forest      2.34   0.019
+#> 5     0.85          0.98          cart      0.87   0.382
+#> 6     0.59          0.99       bagging      0.59   0.555
+#> 
+#> ── PAPEp ───────────────────────────────────────────────────────────────────────
+#>   estimate std.deviation     algorithm statistic p.value
+#> 1     2.62          0.65 causal_forest      4.05 5.1e-05
+#> 2    -0.20          0.63         lasso     -0.33 7.4e-01
+#> 3     1.18          0.63         boost      1.87 6.2e-02
+#> 4     0.58          0.84 random_forest      0.69 4.9e-01
+#> 5     0.27          0.62          cart      0.44 6.6e-01
+#> 6     0.22          1.15       bagging      0.19 8.5e-01
+#> 
+#> ── PAPDp ───────────────────────────────────────────────────────────────────────
+#>    estimate std.deviation                     algorithm statistic p.value
+#> 1     2.824          0.96         causal_forest x lasso     2.937 0.00331
+#> 2     1.437          0.75         causal_forest x boost     1.928 0.05391
+#> 3     2.045          0.87 causal_forest x random_forest     2.341 0.01925
+#> 4     2.347          0.88          causal_forest x cart     2.673 0.00752
+#> 5     2.400          0.70       causal_forest x bagging     3.409 0.00065
+#> 6    -1.387          1.09                 lasso x boost    -1.275 0.20220
+#> 7    -0.779          0.81         lasso x random_forest    -0.965 0.33472
+#> 8    -0.478          0.89                  lasso x cart    -0.536 0.59211
+#> 9    -0.424          0.88               lasso x bagging    -0.484 0.62841
+#> 10    0.608          0.74         boost x random_forest     0.817 0.41401
+#> 11    0.910          0.89                  boost x cart     1.024 0.30601
+#> 12    0.963          0.68               boost x bagging     1.409 0.15869
+#> 13    0.302          0.94          random_forest x cart     0.322 0.74776
+#> 14    0.355          0.51       random_forest x bagging     0.695 0.48723
+#> 15    0.054          1.19                cart x bagging     0.045 0.96388
+#> 
+#> ── AUPEC ───────────────────────────────────────────────────────────────────────
+#>   estimate std.deviation     algorithm statistic p.value
+#> 1    1.238           1.5 causal_forest      0.84    0.40
+#> 2    0.178           1.4         lasso      0.13    0.90
+#> 3    0.309           1.5         boost      0.21    0.83
+#> 4    1.294           1.5 random_forest      0.85    0.40
+#> 5    0.076           0.7          cart      0.11    0.91
+#> 6    0.163           1.4       bagging      0.12    0.91
+#> 
+#> ── GATE ────────────────────────────────────────────────────────────────────────
+#>    estimate std.deviation     algorithm group statistic p.value upper lower
+#> 1    -90.56            59 causal_forest     1   -1.5372   0.124   -93   101
+#> 2     60.95            59 causal_forest     2    1.0267   0.305   -94   101
+#> 3     -7.06            59 causal_forest     3   -0.1196   0.905   -93   101
+#> 4     34.23            68 causal_forest     4    0.5066   0.612  -108   115
+#> 5     20.65            97 causal_forest     5    0.2125   0.832  -156   164
+#> 6    -14.41            94         lasso     1   -0.1539   0.878  -150   158
+#> 7    -87.34            88         lasso     2   -0.9943   0.320  -141   148
+#> 8     80.72            98         lasso     3    0.8251   0.409  -157   165
+#> 9     12.60            59         lasso     4    0.2145   0.830   -93   100
+#> 10    26.64            59         lasso     5    0.4512   0.652   -93   101
+#> 11     0.73            82         boost     1    0.0089   0.993  -132   139
+#> 12   -33.78            59         boost     2   -0.5691   0.569   -94   101
+#> 13   -44.09            84         boost     3   -0.5231   0.601  -135   142
+#> 14    81.86            96         boost     4    0.8510   0.395  -155   162
+#> 15    13.48            59         boost     5    0.2279   0.820   -94   101
+#> 16   -12.61            59 random_forest     1   -0.2134   0.831   -94   101
+#> 17    36.26            87 random_forest     2    0.4161   0.677  -140   147
+#> 18   -94.79            97 random_forest     3   -0.9807   0.327  -155   163
+#> 19    78.42            59 random_forest     4    1.3344   0.182   -93   100
+#> 20    10.94            59 random_forest     5    0.1844   0.854   -94   101
+#> 21    38.85            78          cart     1    0.4951   0.621  -125   133
+#> 22    21.94            59          cart     2    0.3724   0.710   -93   101
+#> 23   -77.78            92          cart     3   -0.8433   0.399  -148   155
+#> 24   -20.95            92          cart     4   -0.2278   0.820  -148   155
+#> 25    56.15            98          cart     5    0.5746   0.566  -157   164
+#> 26    63.37            59       bagging     1    1.0694   0.285   -94   101
+#> 27   -43.95            94       bagging     2   -0.4679   0.640  -151   158
+#> 28   -39.78           102       bagging     3   -0.3895   0.697  -164   172
+#> 29    97.10            59       bagging     4    1.6551   0.098   -93   100
+#> 30   -58.53            59       bagging     5   -0.9882   0.323   -94   101
+```
+
+We plot the estimated Area Under the Prescriptive Effect Curve for the
+writing score across different ML algorithms.
+
+``` r
+# plot the AUPEC with different ML algorithms
+plot(est_cv, outcome = "g3tlangss")
+```
+
+<img src="man/figures/README-multiple_plot-1.png" style="display: block; margin: auto;" />
