@@ -10,7 +10,7 @@ run_itr(
   covariates,
   data,
   algorithms,
-  plim,
+  budget,
   n_folds = 5,
   ratio = 0,
   ngates = 5,
@@ -39,7 +39,7 @@ run_itr(
 
 \item{algorithms}{List of machine learning algorithms.}
 
-\item{plim}{Proportion of treated units.}
+\item{budget}{Proportion of treated units.}
 
 \item{n_folds}{Number of cross-validation folds. Default is 5.}
 
