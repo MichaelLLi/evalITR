@@ -19,16 +19,38 @@ summary.itr <- function(object, m = 1, ...){
           std.deviation = sd,
           algorithm = alg)
 
+    # out[["PAPEp"]] <- object$qoi[[m]]$PAPEp %>%
+    #     map(.,~as_tibble(.)) %>%
+    #     bind_rows() %>%
+    #     mutate(
+    #       statistic = papep/sd,
+    #       p.value = 2*pnorm(abs(papep/sd), lower.tail = FALSE)) %>%
+    #     rename(
+    #       estimate = papep,
+    #       std.deviation = sd,
+    #       algorithm = alg)
+
     out[["PAPEp"]] <- object$qoi[[m]]$PAPEp %>%
         map(.,~as_tibble(.)) %>%
         bind_rows() %>%
         mutate(
-          statistic = papep/sd,
-          p.value = 2*pnorm(abs(papep/sd), lower.tail = FALSE)) %>%
+            statistic = pape/sd,
+            p.value = 2*pnorm(abs(pape/sd), lower.tail = FALSE)) %>%
         rename(
-          estimate = papep,
-          std.deviation = sd,
-          algorithm = alg)
+            estimate = pape,
+            std.deviation = sd,
+            algorithm = alg)
+
+    # out[["PAPEp"]] <- object$qoi[[m]]$PAPEp %>%
+    #     map(.,~as_tibble(.)) %>%
+    #     bind_rows() %>%
+    #     mutate(
+    #         statistic = papep/sd,
+    #         p.value = 2*pnorm(abs(papep/sd), lower.tail = FALSE)) %>%
+    #     rename(
+    #         estimate = papep,
+    #         std.deviation = sd,
+    #         algorithm = alg)
 
     out[["PAPDp"]] <- object$qoi[[m]]$PAPDp %>%
         map(.,~as_tibble(.)) %>%
@@ -42,20 +64,46 @@ summary.itr <- function(object, m = 1, ...){
           algorithm = alg)
 
     temp <- object$qoi[[m]]$AUPEC
+#
+#     out[["AUPEC"]] <- temp %>%
+#         map(., ~.x$aupec_cv) %>%
+#         bind_rows() %>%
+#         mutate(
+#             algorithm = temp %>% map(., ~.x$outputdf$type %>% unique) %>% unlist) %>%
+#         mutate(
+#           statistic = aupec/sd,
+#           p.value = 2*pnorm(abs(aupec/sd), lower.tail = FALSE)) %>%
+#         rename(
+#           estimate = aupec,
+#           std.deviation = sd)
 
     out[["AUPEC"]] <- temp %>%
-        map(., ~.x$aupec_cv) %>%
-        bind_rows() %>%
+        map(., ~.x$aupec) %>%
+        rbind() %>%
         mutate(
             algorithm = temp %>% map(., ~.x$outputdf$type %>% unique) %>% unlist) %>%
         mutate(
-          statistic = aupec/sd,
-          p.value = 2*pnorm(abs(aupec/sd), lower.tail = FALSE)) %>%
+            statistic = aupec/sd,
+            p.value = 2*pnorm(abs(aupec/sd), lower.tail = FALSE)) %>%
         rename(
-          estimate = aupec,
-          std.deviation = sd)
+            estimate = aupec,
+            std.deviation = sd)
 
-    out[["GATEcv"]] <- object$qoi[[m]]$GATEcv %>%
+    # out[["GATEcv"]] <- object$qoi[[m]]$GATEcv %>%
+    #     map(.,~as_tibble(.)) %>%
+    #     bind_rows() %>%
+    #     mutate(
+    #         statistic = gate/sd,
+    #         p.value = 2*pnorm(abs(gate/sd), lower.tail = FALSE),
+    #         upper = c(mean(gate) - qnorm(0.95)*sd),
+    #         lower = c(mean(gate) + qnorm(0.95)*sd)) %>%
+    #     rename(
+    #         estimate = gate,
+    #         std.deviation = sd,
+    #         algorithm = alg,
+    #         group = group)
+
+    out[["GATE"]] <- object$qoi[[m]]$GATE %>%
         map(.,~as_tibble(.)) %>%
         bind_rows() %>%
         mutate(
@@ -85,17 +133,17 @@ print.summary.itr <- function(x, ...) {
     print(as.data.frame(x[["PAPE"]]), digits = 2)
     cli::cat_line("")
 
-    # PAPE
+    # PAPEp
     cli::cat_rule(left = "PAPEp")
     print(as.data.frame(x[["PAPEp"]]), digits = 2)
     cli::cat_line("")
 
-    # PAPE
+    # PAPDp
     cli::cat_rule(left = "PAPDp")
     print(as.data.frame(x[["PAPDp"]]), digits = 2)
     cli::cat_line("")
 
-    # PAPE
+    # AUPEC
     cli::cat_rule(left = "AUPEC")
     print(as.data.frame(x[["AUPEC"]]), digits = 2)
     cli::cat_line("")
@@ -103,5 +151,10 @@ print.summary.itr <- function(x, ...) {
     # GATEcv
     cli::cat_rule(left = "GATEcv")
     print(as.data.frame(x[["GATEcv"]]), digits = 2)
+    cli::cat_line("")
+
+    # GATE
+    cli::cat_rule(left = "GATE")
+    print(as.data.frame(x[["GATE"]]), digits = 2)
     cli::cat_line("")
 }

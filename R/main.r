@@ -29,7 +29,8 @@ run_itr <- function(
     plim,
     n_folds = 5,
     ratio = 0,
-    ngates = 5
+    ngates = 5,
+    quantities = c("PAPE", "PAPDp", "AUPEC", "GATE")
 ) {
 
 
@@ -75,7 +76,7 @@ run_itr <- function(
       )
 
       ## format output
-      qoi[[m]] <- compute_qoi(estimates[[m]], algorithms, cv = FALSE)
+      qoi[[m]] <- compute_qoi(estimates[[m]], algorithms, cv = FALSE, quantities)
 
     } else {
 
@@ -96,7 +97,7 @@ run_itr <- function(
       )
 
       ## format output
-      qoi[[m]] <- compute_qoi(estimates[[m]], algorithms, cv = TRUE)
+      qoi[[m]] <- compute_qoi(estimates[[m]], algorithms, cv = TRUE, quantities)
 
     }
   }
