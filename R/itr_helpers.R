@@ -310,7 +310,7 @@ create_ml_args_knn = function(create_ml_arguments_outputs){
   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
 }
 
-# Re-organize cross-validation output to plot the AUPEC curve  
+# Re-organize cross-validation output to plot the AUPEC curve
 getAupecOutput = function(
   tauML, taucvML, That_pcv_mat, MLname,
   NFOLDS, Ycv, Tcv, indcv
@@ -340,3 +340,27 @@ getAupecOutput = function(
               aupec_vec = aupec_vec,
               outputdf = outputdf))
 }
+
+# transformation function for taucv matrix
+gettaucv <- function(
+    fit,
+    ...
+){
+  estimates <- fit$estimates
+  fit_ml <- estimates[[1]]$fit_ml
+  n_folds <- estimates[[1]]$params$n_folds
+  tau_cv <- list()
+
+  # for one model
+  for (k in seq(n_folds)) {
+    tau_cv[[k]] <- fit_ml[["causal_forest"]][[k]][["tau_cv"]]
+  }
+
+  # convert to a single matrix
+  tau_cv <- do.call(cbind, tau_cv)
+
+  return(tau_cv)
+
+}
+
+length(gettaucv(fit_cv))

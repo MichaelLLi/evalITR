@@ -574,7 +574,125 @@ evaluate_itr <- function(fit, ...){
 
   return(out)
 
+}
+
+#' Conduct hypothesis tests
+#' @param fit Fitted model. Usually an output from \code{estimate_itr}
+#' @param ngates The number of groups to separate the data into. The groups are determined by \code{tau}. Default is 5.
+#' @param nsim Number of Monte Carlo simulations used to simulate the null distributions. Default is 10000.
+#' @param ... Further arguments passed to the function.
+#' @return An object of \code{itr} class
+#' @export
+test_itr <- function(
+    fit,
+    nsim = 10000,
+    ...
+) {
+
+  # test parameters
+  estimates  <- fit$estimates
+  cv         <- estimates[[1]]$params$cv
+  fit_ml     <- estimates[[1]]$fit_ml
+  Tcv        <- estimates[[1]]$Tcv
+  Ycv        <- estimates[[1]]$Ycv
+  indcv      <- estimates[[1]]$indcv
+  n_folds    <- estimates[[1]]$params$n_folds
+  ngates     <- estimates[[1]]$params$ngates
+  algorithms <- fit$df$algorithms
+  outcome    <- fit$df$outcome
+  # run tests
+
+  ## =================================
+  ## sample splitting
+  ## =================================
+
+  if(cv == FALSE){
+    cat('Conduct hypothesis tests for GATEs unde sample splitting ...\n')
+
+    ## create empty lists to for consistcv and hetcv
+    consist <- list()
+    het <- list()
+
+      # model with a single outcome
+      ## run consistency tests for each model
+      if ("causal_forest" %in% algorithms) {
+        consist[["causal_forest"]] <- consist.test(
+          T   = Tcv,
+          tau = fit_ml$causal_forest$tau,
+          Y   = Ycv,
+          ngates = ngates)
+
+        het[["causal_forest"]] <- het.test(
+          T   = Tcv,
+          tau = fit_ml$causal_forest$tau,
+          Y   = Ycv,
+          ngates = ngates)
+      }
+
+      if ("lasso" %in% algorithms) {
+        consist[["lasso"]] <- consist.test(
+          T   = Tcv,
+          tau = fit_ml$lasso$tau,
+          Y   = Ycv,
+          ngates = ngates)
+
+        het[["lasso"]] <- het.test(
+          T   = Tcv,
+          tau = fit_ml$lasso$tau,
+          Y   = Ycv,
+          ngates = ngates)
+      }
+
   }
+
+  ## =================================
+  ## cross validation
+  ## =================================
+
+  if(cv == TRUE){
+    cat('Conduct hypothesis tests for GATEs unde cross-validation ...\n')
+
+      ## create empty lists to for consistcv and hetcv
+    consistcv <- list()
+    hetcv <- list()
+
+      ## run consistency tests for each model
+
+      if ("causal_forest" %in% algorithms) {
+        consistcv[["causal_forest"]] <- consistcv.test(
+          T   = Tcv,
+          tau = gettaucv(fit),
+          Y   = Ycv,
+          ind = indcv,
+          ngates = ngates)
+      }
+
+      ## run heterogeneity tests for each model
+      if ("causal_forest" %in% algorithms) {
+        hetcv[["causal_forest"]] <- hetcv.test(
+          T   = Tcv,
+          tau = gettaucv(fit), # a matrix of length(total sample size) x n_folds
+          Y   = Ycv,
+          ind = indcv,
+          ngates = ngates)
+      }
+
+  }
+
+  # formulate and return output
+  if(cv == FALSE){
+    tests <- list(consist = consist,
+                  het = het)
+    return(tests)
+  }
+  if(cv == TRUE){
+    tests_cv <- list(consistcv = consistcv,
+                    hetcv = hetcv)
+    return(tests_cv)
+  }
+
+}
+
 
 utils::globalVariables(c("Treat", "aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm", "vec"))
 
