@@ -15,7 +15,7 @@ estimate_itr(
   ngates = 5,
   preProcess = NULL,
   weights = NULL,
-  trControl = fitControl,
+  trControl = caret::trainControl(method = "none"),
   tuneGrid = NULL,
   tuneLength = ifelse(trControl$method == "none", 1, 3),
   ...
@@ -42,23 +42,13 @@ estimate_itr(
 
 \item{weights}{caret parameter}
 
+\item{trControl}{caret parameter}
+
 \item{tuneGrid}{caret parameter}
 
 \item{tuneLength}{caret parameter}
 
-\item{covariates}{Covariates included in the model.}
-
-\item{trainControl_method}{caret parameter}
-
-\item{number}{caret parameter}
-
-\item{repeats}{caret parameter}
-
-\item{allowParallel}{caret parameter}
-
-\item{metric}{caret parameter}
-
-\item{maximize}{caret parameter}
+\item{...}{Additional arguments passed to \code{caret::train}}
 }
 \value{
 An object of \code{itr} class

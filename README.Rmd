@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r Workflow, echo=FALSE, out.width = '100%'}
+```{r pic1, echo=FALSE, out.width = '100%'}
 knitr::include_graphics("man/figures/README-manual.png")
 ```
 
@@ -75,16 +75,18 @@ covariates <-  star %>% dplyr::select(-c("g3tlangss",
 # specifying the data
 star_data = star %>% dplyr::select(-c(g3treadss,g3tmathss))
 
+# specifying the formula
+user_formula <- as.formula(paste(paste0(outcomes)," ~ ", paste0(covariates, collapse = "+"), " + treatment"))
+
+
 # estimate ITR 
-set.seed(2021)
-fit <- estimate_itr(outcome = outcomes,
+fit <- estimate_itr(
                treatment = treatment,
-               covariates = covariates,
+               form = user_formula,
                data = star_data,
                algorithms = c("causal_forest"),
                budget = 0.2,
-               ratio = 0.7,
-               n_folds = 7)
+               ratio = 0.7)
 
 
 # evaluate ITR 
@@ -93,22 +95,29 @@ est <- evaluate_itr(fit)
 
 Alternatively, we can train the model with the `caret` package (for further information about `caret`, see [caret](http://topepo.github.io/caret/index.html)). 
 
-```{r caret estimate, message = FALSE}
+```{r caret estimate, message = FALSE, eval = FALSE}
 # alternatively (with caret package)
-fit_caret <- estimate_itr(outcome = outcomes,
+
+# specify the trainControl method
+fitControl <- caret::trainControl(## 10-fold CV
+                           method = "repeatedcv",
+                           number = 3,
+                           ## repeated ten times
+                           repeats = 3)
+
+# estimate ITR
+fit_caret <- estimate_itr(
                treatment = treatment,
-               covariates = covariates,
+                form = user_formula,
                data = star_data,
-               algorithms = c("caret"),
+               algorithms = c("rf"),
                budget = 0.2,
                ratio = 0.7,
-               trainControl_method = "repeatedcv", # resampling method
-               train_method = "gbm", # model
                preProcess = NULL, # pre-processing predictors
                tuneGrid = NULL, # tuning values
                tuneLength = 1, # granularity in tuning
-               number = 3, # number of folds/resampling iterations
-               repeats = 3)
+               trControl = fitControl # trainControl method)
+                )
 
 
 est_caret <- evaluate_itr(fit_caret)
@@ -122,7 +131,7 @@ The`summary()` function displays the following summary statistics: (1) populatio
 summary(est)
 
 # summarize estimates with model trained using caret
-summary(est_caret)
+# summary(est_caret)
 ```
 
 
@@ -133,7 +142,7 @@ We plot the estimated Area Under the Prescriptive Effect Curve for the writing s
 plot(est)
 
 # plot the AUPEC for the model trained using caret
-plot(est_caret)
+# plot(est_caret)
 ```
 
 ## Example under cross-validation
@@ -143,10 +152,11 @@ The package also allows estimate ITR with k-folds cross-validation. Instead of s
 ```{r cv_estimate, message = FALSE}
 # estimate ITR 
 set.seed(2021)
-fit_cv <- estimate_itr(outcome = outcomes,
+fit_cv <- estimate_itr(
                treatment = treatment,
-               covariates = covariates,
-               data = star,
+               form = user_formula,
+               data = star_data,
+               trcontrol = fitControl,
                algorithms = c("causal_forest"),
                budget = 0.2,
                n_folds = 3)
@@ -154,65 +164,48 @@ fit_cv <- estimate_itr(outcome = outcomes,
 # evaluate ITR 
 est_cv <- evaluate_itr(fit_cv)
 
-```
-
-We present the results with 3-folds cross validation and plot the AUPEC. 
-
-```{r cv_summary}
 # summarize estimates
 summary(est_cv)
-```
 
-
-```{r sv_plot, fig.width=4, fig.height=3,fig.align = "center"}
 # plot the AUPEC 
 plot(est_cv)
 ```
 
 
-## Example with multiple ML algorithms/outcomes
+## Example with multiple ML algorithms
 
-We can estimate ITR with various machine learning algorithms and then compare the performance of each model. The package includes 8 different ML algorithms (causal forest, BART, lasso, boosting trees, random forest, CART, bagging trees, svm).
+We can estimate ITR with various machine learning algorithms and then compare the performance of each model. The package includes all ML algorithms in the  `caret` package and 2 additional algorithms ([causal forest](https://grf-labs.github.io/grf/reference/causal_forest.html) and [bartCause](https://cran.r-project.org/web/packages/bartCause/index.html)).
 
 The package also allows estimate heterogeneous treatment effects on the individual and group-level. On the individual-level, the summary statistics and the AUPEC plot show whether assigning individualized treatment rules may outperform complete random experiment. On the group-level, we specify the number of groups through `ngates` and estimating heterogeneous treatment effects across groups. 
 
-If the original experiment has diverse outcome measures, we develop ITRs for each outcome and use them to estimate the heterogeneous effects across the different outcomes.
-
 
 ```{r multiple, message = FALSE}
-# specifying outcomes
-outcomes <- c("g3tlangss","g3treadss","g3tmathss")
-
-# specifying covariates
-covariates <-  star %>% dplyr::select(-c("g3tlangss","g3treadss","g3tmathss","treatment")) %>% colnames()
-
-# train the model
+# specify the trainControl method
+fitControl <- caret::trainControl(## 10-fold CV
+                           method = "repeatedcv",
+                           number = 3,
+                           ## repeated ten times
+                           repeats = 3)
+# estimate ITR
 set.seed(2021)
-fit_cv <- estimate_itr(outcome = outcomes,
+fit_cv <- estimate_itr(
                treatment = "treatment",
-               covariates = covariates,
-               data = star,
+               form = user_formula,
+               data = star_data,
+               trcontrol = fitControl,
                algorithms = c(
                   "causal_forest", 
-                  # "bartc",
-                  # "svm",
+                  "bartc",
                   "lasso",
-                  "boost", 
-                  "random_forest",
-                  "cart",
-                  "bagging"),
+                  "rf"), # from caret package
                budget = 0.2,
                n_folds = 3)
-```
 
-```{r multiple_estimates}
-# compute estimates
+# evaluate ITR
 est_cv <- evaluate_itr(fit_cv)
-```
 
-```{r multiple_summary}
 # summarize estimates
-summary(est_cv, outcome = "g3tlangss")
+summary(est_cv)
 ```
 
 We plot the estimated Area Under the Prescriptive Effect Curve for the writing score across different ML algorithms.
@@ -220,7 +213,18 @@ We plot the estimated Area Under the Prescriptive Effect Curve for the writing s
 
 ```{r multiple_plot, fig.width=8, fig.height=6,fig.align = "center"}
 # plot the AUPEC with different ML algorithms
-plot(est_cv, outcome = "g3tlangss")
+plot(est_cv)
+```
 
 
+For caret models, we can extract the training model and check the model performance. 
+
+```{r caret_model, eval = FALSE}
+# extract the caret model
+fit$estimates$models$rf %>% 
+  ggplot() + theme_bw() 
+```
+
+```{r pic2, echo=FALSE, out.width = '100%'}
+knitr::include_graphics("man/figures/rf.png")
 ```

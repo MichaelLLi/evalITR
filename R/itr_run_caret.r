@@ -28,7 +28,7 @@ run_caret <- function(
     indcv, iter, budget, cv
   )
 
-  return(fit_test)
+  return(list(test = fit_test, train = fit_train))
 }
 
 
@@ -52,15 +52,7 @@ train_caret <- function(dat_train, train_params, train_method, ...) {
 
     formula = as.formula(paste("Y ~ (", paste0(covariates, collapse = "+"), ")*Treat"))
 
-    ## fit
-    # fit <- caret::train(formula,
-    #                 data = training_data_elements_caret[["data"]],
-    #                 method = "gbm",
-    #                 trControl = fitControl,
-    #                 ## This last option is actually one
-    #                 ## for gbm() that passes through
-    #                 verbose = FALSE)
-
+    ## train
     fit <- caret::train(formula,
                     data = training_data_elements_caret[["data"]],
                     method = train_method,
@@ -68,7 +60,7 @@ train_caret <- function(dat_train, train_params, train_method, ...) {
                     weights = weights,
                     metric = metric,
                     maximize = maximize,
-                    trControl = fitControl,
+                    trControl = trControl,
                     tuneGrid = tuneGrid,
                     tuneLength = tuneLength)
                     ## This last option is actually one

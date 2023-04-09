@@ -23,7 +23,7 @@ run_boost <- function(
     indcv, iter, budget, cv
   )
 
-  return(fit_test)
+  return(list(test = fit_test, train = fit_train))
 }
 
 

@@ -16,6 +16,11 @@ itr_single_outcome(data, algorithms, params, folds, budget, ...)
 \item{folds}{Number of folds.}
 
 \item{budget}{The maximum percentage of population that can be treated under the budget constraint.}
+
+\item{...}{Additional arguments passed to \code{caret::train}}
+}
+\value{
+A list of estimates.
 }
 \description{
 Evaluate ITR for Single Outcome

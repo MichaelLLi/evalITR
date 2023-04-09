@@ -12,8 +12,6 @@ test_itr(fit, nsim = 10000, ...)
 \item{nsim}{Number of Monte Carlo simulations used to simulate the null distributions. Default is 10000.}
 
 \item{...}{Further arguments passed to the function.}
-
-\item{ngates}{The number of groups to separate the data into. The groups are determined by \code{tau}. Default is 5.}
 }
 \value{
 An object of \code{itr} class
