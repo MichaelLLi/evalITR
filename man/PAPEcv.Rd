@@ -4,20 +4,20 @@
 \alias{PAPEcv}
 \title{Estimation of the Population Average Prescription Effect in Randomized Experiments Under Cross Validation}
 \usage{
-PAPEcv(T, That, Y, ind, plim = NA, centered = TRUE)
+PAPEcv(T, That, Y, ind, budget = NA, centered = TRUE)
 }
 \arguments{
 \item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
 
 \item{That}{A matrix where the \code{i}th column is the unit-level binary treatment that would have been assigned by the
-individualized treatment rule generated in the \code{i}th fold. If \code{plim} is specified, please ensure
+individualized treatment rule generated in the \code{i}th fold. If \code{budget} is specified, please ensure
 that the percentage of treatment units of That is lower than the budget constraint.}
 
 \item{Y}{The outcome variable of interest.}
 
 \item{ind}{A vector of integers (between 1 and number of folds inclusive) indicating which testing set does each sample belong to.}
 
-\item{plim}{The maximum percentage of population that can be treated under the
+\item{budget}{The maximum percentage of population that can be treated under the
 budget constraint. Should be a decimal between 0 and 1. Default is NA which assumes
 no budget constraint.}
 

@@ -4,7 +4,7 @@
 \alias{PAPDcv}
 \title{Estimation of the Population Average Prescription Difference in Randomized Experiments Under Cross Validation}
 \usage{
-PAPDcv(T, Thatfp, Thatgp, Y, ind, plim, centered = TRUE)
+PAPDcv(T, Thatfp, Thatgp, Y, ind, budget, centered = TRUE)
 }
 \arguments{
 \item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
@@ -21,7 +21,7 @@ that the percentage of treatment units of That is lower than the budget constrai
 
 \item{ind}{A vector of integers (between 1 and number of folds inclusive) indicating which testing set does each sample belong to.}
 
-\item{plim}{The maximum percentage of population that can be treated under the
+\item{budget}{The maximum percentage of population that can be treated under the
 budget constraint. Should be a decimal between 0 and 1.}
 
 \item{centered}{If \code{TRUE}, the outcome variables would be centered before processing. This minimizes
@@ -41,7 +41,7 @@ That = matrix(c(0,1,1,0,0,1,1,0,1,0,0,1,1,0,0,1), nrow = 8, ncol = 2)
 That2 = matrix(c(0,0,1,1,0,0,1,1,1,1,0,0,1,1,0,0), nrow = 8, ncol = 2)
 Y = c(4,5,0,2,4,1,-4,3)
 ind = c(rep(1,4),rep(2,4))
-papdlist <- PAPDcv(T, That, That2, Y, ind, plim = 0.5)
+papdlist <- PAPDcv(T, That, That2, Y, ind, budget = 0.5)
 papdlist$papd
 papdlist$sd
 }

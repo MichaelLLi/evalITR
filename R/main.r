@@ -1,11 +1,11 @@
-#' Evaluate ITR
+#' Estimate individual treatment rules (ITR)
 #'
-#' @param outcome Outcome variable (or a list of outcome variables). Only takes in numeric values for both continous outcomes and binary outcomes (0 or 1).
 #' @param treatment Treatment variable
+#' @param form a formula object that takes the form \code{y ~ T + x1 + x2 + ...}. 
 #' @param data
-#'   A data frame that contains \code{outcome} and \code{treatment}.
+#'   A data frame that contains the outcome \code{y} and the treatment \code{T}. 
 #' @param algorithms
-#'   List of machine learning algorithms.
+#'   List of machine learning algorithms to be used. 
 #' @param budget
 #'   Proportion of treated units.
 #' @param n_folds
@@ -32,9 +32,10 @@
 #' @export
 #' @return An object of \code{itr} class
 estimate_itr <- function(
-    outcome,
+    # outcome,
     treatment,
-    covariates,
+    # covariates,
+    form,
     data,
     algorithms,
     budget,
@@ -72,14 +73,23 @@ estimate_itr <- function(
     train_method = "rf",
     preProcess = NULL,
     weights = NULL,
-    metric = ifelse(is.factor(data[outcome]), "Accuracy", "RMSE"),
-    maximize = ifelse(metric %in% c("RMSE", "logLoss", "MAE", "logLoss"), FALSE, TRUE),
     trControl = trainControl(),
     tuneGrid = NULL,
     tuneLength = 1
 ) {
 
+  # specify the outcome and covariates
+  convert_data <- convert_formula(form, data, treatment)
+
+  outcome <- convert_data$outcome
+  covariates <- convert_data$covariates
+  data <- convert_data$data
+
   ## caret parameters
+  metric = ifelse(is.factor(data[outcome]), "Accuracy", "RMSE")
+  maximize = ifelse(metric %in% c("RMSE", "logLoss", "MAE", "logLoss"), FALSE, TRUE)
+
+  # trainControl parameters
   trainControl_params <- list(
     trainControl_method = trainControl_method,
     number = number,
@@ -544,7 +554,7 @@ itr_single_outcome <- function(
     Ycv = Ycv, Tcv = Tcv, indcv = indcv, budget = budget
   ))
 }
-#' Estimate quantity of interests
+#' Evaluate ITR
 #' @param fit Fitted model. Usually an output from \code{estimate_itr}
 #' @param ... Further arguments passed to the function.
 #' @return An object of \code{itr} class

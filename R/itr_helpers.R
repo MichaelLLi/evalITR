@@ -363,4 +363,38 @@ gettaucv <- function(
 
 }
 
-length(gettaucv(fit_cv))
+
+
+# rename the columns of the data frame with the interaction terms
+rename_interaction_terms <- function(interaction_df){
+  colnames(interaction_df) <- gsub(":", "_", colnames(interaction_df))
+  colnames(interaction_df) <- gsub("\\*", "_", colnames(interaction_df))
+  colnames(interaction_df) <- gsub("\\(", "", colnames(interaction_df))
+  colnames(interaction_df) <- gsub("\\)", "", colnames(interaction_df))
+  colnames(interaction_df) <- gsub("\\+", "_", colnames(interaction_df))
+  return(interaction_df)
+}
+
+
+
+# function to convert formula and create new variables
+convert_formula <- function(user_formula, data, treatment){
+
+  # get the outcome variable name from the formula
+  outcome <- all.vars(user_formula)[1]
+
+  # get the covariates from the formula
+  interaction_df <- model.matrix(user_formula, data)
+  interaction_df <- rename_interaction_terms(interaction_df)
+
+  # remove variable Intercept from covariates list by name
+  covariates_vec <- colnames(interaction_df)
+  covariates_vec <- covariates_vec[!covariates_vec %in% c("Intercept", paste0(treatment))]
+  
+  # combine the interaction_df with the original data frame
+  new_data = data %>% dplyr::select(c(outcome)) 
+  combined_data <- bind_cols(new_data, interaction_df)
+
+  return(list(data = combined_data, covariates = covariates_vec, outcome = outcome))
+}
+

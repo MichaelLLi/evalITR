@@ -4,7 +4,7 @@
 \alias{PAPD}
 \title{Estimation of the Population Average Prescription Difference in Randomized Experiments}
 \usage{
-PAPD(T, Thatfp, Thatgp, Y, plim, centered = TRUE)
+PAPD(T, Thatfp, Thatgp, Y, budget, centered = TRUE)
 }
 \arguments{
 \item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
@@ -17,7 +17,7 @@ second individualized treatment rule. Please ensure that the percentage of treat
 
 \item{Y}{A vector of the outcome variable of interest for each sample.}
 
-\item{plim}{The maximum percentage of population that can be treated under the
+\item{budget}{The maximum percentage of population that can be treated under the
 budget constraint. Should be a decimal between 0 and 1.}
 
 \item{centered}{If \code{TRUE}, the outcome variables would be centered before processing. This minimizes
@@ -37,7 +37,7 @@ T = c(1,0,1,0,1,0,1,0)
 That = c(0,1,1,0,0,1,1,0)
 That2 = c(1,0,0,1,1,0,0,1)
 Y = c(4,5,0,2,4,1,-4,3)
-papdlist <- PAPD(T,That,That2,Y,plim = 0.5)
+papdlist <- PAPD(T,That,That2,Y,budget = 0.5)
 papdlist$papd
 papdlist$sd
 }

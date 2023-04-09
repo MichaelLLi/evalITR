@@ -2,18 +2,73 @@
 % Please edit documentation in R/main.r
 \name{estimate_itr}
 \alias{estimate_itr}
-\title{Estimate quantity of interests}
+\title{Evaluate ITR}
 \usage{
-estimate_itr(fit, ...)
+estimate_itr(
+  treatment,
+  form,
+  data,
+  algorithms,
+  budget,
+  n_folds = 5,
+  ratio = 0,
+  ngates = 5,
+  trainControl_method = "boot",
+  number = ifelse(grepl("cv", trainControl_method), 10, 25),
+  repeats = ifelse(grepl("[d_]cv$", trainControl_method), 1, NA),
+  allowParallel = TRUE,
+  train_method = "rf",
+  preProcess = NULL,
+  weights = NULL,
+  trControl = trainControl(),
+  tuneGrid = NULL,
+  tuneLength = 1
+)
 }
 \arguments{
-\item{fit}{Fitted model. Usually an output from \code{run_itr}}
+\item{treatment}{Treatment variable}
 
-\item{...}{Further arguments passed to the function.}
+\item{form}{a formula object}
+
+\item{data}{A data frame that contains \code{outcome} and \code{treatment}.}
+
+\item{algorithms}{List of machine learning algorithms.}
+
+\item{budget}{Proportion of treated units.}
+
+\item{n_folds}{Number of cross-validation folds. Default is 5.}
+
+\item{ratio}{Split ratio between train and test set under sample splitting. Default is 0.}
+
+\item{ngates}{The number of groups to separate the data into. The groups are determined by tau. Default is 5.}
+
+\item{trainControl_method}{caret parameter}
+
+\item{number}{caret parameter}
+
+\item{repeats}{caret parameter}
+
+\item{allowParallel}{caret parameter}
+
+\item{train_method}{caret parameter}
+
+\item{preProcess}{caret parameter}
+
+\item{weights}{caret parameter}
+
+\item{tuneGrid}{caret parameter}
+
+\item{tuneLength}{caret parameter}
+
+\item{covariates}{Covariates included in the model.}
+
+\item{metric}{caret parameter}
+
+\item{maximize}{caret parameter}
 }
 \value{
 An object of \code{itr} class
 }
 \description{
-Estimate quantity of interests
+Evaluate ITR
 }
