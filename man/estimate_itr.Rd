@@ -13,16 +13,12 @@ estimate_itr(
   n_folds = 5,
   ratio = 0,
   ngates = 5,
-  trainControl_method = "boot",
-  number = ifelse(grepl("cv", trainControl_method), 10, 25),
-  repeats = ifelse(grepl("[d_]cv$", trainControl_method), 1, NA),
-  allowParallel = TRUE,
-  train_method = "rf",
   preProcess = NULL,
   weights = NULL,
-  trControl = trainControl(),
+  trControl = fitControl,
   tuneGrid = NULL,
-  tuneLength = 1
+  tuneLength = ifelse(trControl$method == "none", 1, 3),
+  ...
 )
 }
 \arguments{
@@ -42,16 +38,6 @@ estimate_itr(
 
 \item{ngates}{The number of groups to separate the data into. The groups are determined by tau. Default is 5.}
 
-\item{trainControl_method}{caret parameter}
-
-\item{number}{caret parameter}
-
-\item{repeats}{caret parameter}
-
-\item{allowParallel}{caret parameter}
-
-\item{train_method}{caret parameter}
-
 \item{preProcess}{caret parameter}
 
 \item{weights}{caret parameter}
@@ -61,6 +47,14 @@ estimate_itr(
 \item{tuneLength}{caret parameter}
 
 \item{covariates}{Covariates included in the model.}
+
+\item{trainControl_method}{caret parameter}
+
+\item{number}{caret parameter}
+
+\item{repeats}{caret parameter}
+
+\item{allowParallel}{caret parameter}
 
 \item{metric}{caret parameter}
 

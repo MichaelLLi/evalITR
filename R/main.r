@@ -20,7 +20,6 @@
 #' @param number caret parameter
 #' @param repeats caret parameter
 #' @param allowParallel caret parameter
-#' @param train_method caret parameter
 #' @param preProcess caret parameter
 #' @param weights caret parameter
 #' @param metric caret parameter
@@ -42,40 +41,12 @@ estimate_itr <- function(
     n_folds = 5,
     ratio = 0,
     ngates = 5,
-    trainControl_method = "boot",
-    number = ifelse(grepl("cv", trainControl_method), 10, 25),
-    repeats = ifelse(grepl("[d_]cv$", trainControl_method), 1, NA),
-    # p = 0.75,
-    # search = "grid",
-    # initialWindow = NULL,
-    # horizon = 1,
-    # fixedWindow = TRUE,
-    # skip = 0,
-    # verboseIter = FALSE,
-    # returnData = TRUE,
-    # returnResamp = "final",
-    # savePredictions = FALSE,
-    # classProbs = FALSE,
-    # # summaryFunction = caret::defaultSummary(), #might need to change this
-    # # selectionFunction = "best",
-    # preProcOptions = list(
-    #   thresh = 0.95, ICAcomp = 3, k = 5, freqCut = 95/5, uniqueCut = 10, cutoff = 0.9),
-    # sampling = NULL,
-    # index = NULL,
-    # indexOut = NULL,
-    # indexFinal = NULL,
-    # timingSamps = 0,
-    # # predictionBounds = rep(FALSE, 2),
-    # seeds = NA,
-    # adaptive = list(min = 5, alpha = 0.05, method = "gls", complete = TRUE),
-    # trim = FALSE,
-    allowParallel = TRUE,
-    train_method = "rf",
     preProcess = NULL,
     weights = NULL,
-    trControl = trainControl(),
+    trControl = fitControl,
     tuneGrid = NULL,
-    tuneLength = 1
+    tuneLength = ifelse(trControl$method == "none", 1, 3),
+    ...
 ) {
 
   # specify the outcome and covariates
@@ -89,44 +60,16 @@ estimate_itr <- function(
   metric = ifelse(is.factor(data[outcome]), "Accuracy", "RMSE")
   maximize = ifelse(metric %in% c("RMSE", "logLoss", "MAE", "logLoss"), FALSE, TRUE)
 
-  # trainControl parameters
-  trainControl_params <- list(
-    trainControl_method = trainControl_method,
-    number = number,
-    repeats = repeats,
-    # p = p,
-    # search = search,
-    # initialWindow = initialWindow,
-    # horizon = horizon,
-    # fixedWindow = fixedWindow,
-    # skip = skip,
-    # verboseIter = verboseIter,
-    # returnData = returnData,
-    # returnResamp = returnResamp,
-    # # savePredictions = savePredictions,
-    # classProbs = classProbs,
-    # # summaryFunction = summaryFunction,
-    # # selectionFunction = selectionFunction,
-    # preProcOptions = preProcOptions,
-    # sampling = sampling,
-    # index = index,
-    # indexOut = indexOut,
-    # indexFinal = indexFinal,
-    # timingSamps = timingSamps,
-    # # predictionBounds = predictionBounds,
-    # seeds = seeds,
-    # adaptive = adaptive,
-    # trim = trim,
-    allowParalle = allowParallel)
+  caret_algorithms <- names(caret::getModelInfo())
 
   # caret train parameters
   train_params <- list(
-    train_method = train_method,
+    # train_method = train_method,
     preProcess = preProcess,
     weights = weights,
     metric = metric,
     maximize = maximize,
-    # trControl = trainControl(),
+    trControl = fitControl,
     tuneGrid = tuneGrid,
     tuneLength = tuneLength
   )
@@ -141,7 +84,8 @@ estimate_itr <- function(
   cv <- ifelse(ratio > 0, FALSE, TRUE)
 
   params <- list(
-    n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio, ngates = ngates, cv = cv, trainControl_params = trainControl_params, train_params = train_params)
+    n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio, ngates = ngates, cv = cv, 
+    train_params = train_params, caret_algorithms = caret_algorithms)
 
   df <- list(algorithms = algorithms, outcome = outcome, data = data, treatment = treatment)
 
@@ -171,7 +115,8 @@ estimate_itr <- function(
     algorithms = algorithms,
     params     = params,
     folds      = folds,
-    budget     = budget
+    budget     = budget,
+    ...
   )
 
   out <- list(estimates = estimates, df = df)
@@ -196,13 +141,16 @@ itr_single_outcome <- function(
     algorithms,
     params,
     folds,
-    budget
+    budget,
+    ...
 ) {
 
   ## obj to store outputs
   fit_ml <- lapply(1:params$n_alg, function(x) vector("list", length = params$n_folds))
   names(fit_ml) <- algorithms
 
+  ## caret parameters
+  caret_algorithms = params$caret_algorithms
 
 ## =================================
 ## sample splitting
@@ -250,6 +198,28 @@ itr_single_outcome <- function(
     ##
     ## run each ML algorithm
     ##
+
+    # loop over all algorithms, if algorithm is in the caret_algorithms list, run caret
+    for (i in seq_along(algorithms)) {
+      if (algorithms[i] %in% caret_algorithms) {
+        
+        # set the train_method to the algorithm
+        train_method = algorithms[i]
+
+        fit_ml[[algorithms[i]]] <- run_caret(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          budget    = budget,
+          indcv     = 1,
+          iter      = 1,
+          train_method = train_method,
+          ...
+        )
+      }
+    }
+
     if ("causal_forest" %in% algorithms) {
       fit_ml[["causal_forest"]] <- run_causal_forest(
         dat_train = training_data_elements,
@@ -299,41 +269,41 @@ itr_single_outcome <- function(
       )
     }
 
-    if("bart" %in% algorithms){
-      fit_ml[["bart"]] <- run_bartmachine(
-        dat_train = training_data_elements,
-        dat_test  = testing_data_elements,
-        dat_total = total_data_elements,
-        params    = params,
-        indcv     = 1,
-        iter      = 1,
-        budget    = budget
-      )
-    }
+    # if("bart" %in% algorithms){
+    #   fit_ml[["bart"]] <- run_bartmachine(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    # }
 
-    if("boost" %in% algorithms){
-      fit_ml[["boost"]] <- run_boost(
-        dat_train = training_data_elements,
-        dat_test  = testing_data_elements,
-        dat_total = total_data_elements,
-        params    = params,
-        indcv     = 1,
-        iter      = 1,
-        budget    = budget
-      )
-    }
+    # if("boost" %in% algorithms){
+    #   fit_ml[["boost"]] <- run_boost(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    # }
 
-    if("random_forest" %in% algorithms){
-      fit_ml[["random_forest"]] <- run_random_forest(
-        dat_train = training_data_elements,
-        dat_test  = testing_data_elements,
-        dat_total = total_data_elements,
-        params    = params,
-        indcv     = 1,
-        iter      = 1,
-        budget    = budget
-      )
-    }
+    # if("random_forest" %in% algorithms){
+    #   fit_ml[["random_forest"]] <- run_random_forest(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    # }
 
     if("bagging" %in% algorithms){
       fit_ml[["bagging"]] <- run_bagging(
@@ -359,17 +329,17 @@ itr_single_outcome <- function(
       )
     }
 
-    if("caret" %in% algorithms){
-      fit_ml[["caret"]] <- run_caret(
-        dat_train = training_data_elements,
-        dat_test  = testing_data_elements,
-        dat_total = total_data_elements,
-        params    = params,
-        indcv     = 1,
-        iter      = 1,
-        budget    = budget
-      )
-    }
+    # if("caret" %in% algorithms){
+    #   fit_ml[["caret"]] <- run_caret(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    # }
 
   }
 
@@ -421,6 +391,30 @@ itr_single_outcome <- function(
       ##
       ## run each ML algorithm
       ##
+      
+      # loop over all algorithms
+      for (i in seq_along(algorithms)) {
+
+        # check if algorithm is in the caret package
+        if (algorithms[i] %in% caret_algorithms) {
+          
+          # set the train_method to the algorithm
+          train_method = algorithms[i]
+
+          fit_ml[[algorithms[i]]][[j]] <- run_caret(
+            dat_train     = training_data_elements,
+            dat_test      = testing_data_elements,
+            dat_total     = total_data_elements,
+            train_method  = train_method,
+            params        = params,
+            indcv         = indcv,
+            iter          = j,
+            budget        = budget,
+            ...
+          )
+        }
+      }
+
       if ("causal_forest" %in% algorithms) {
         fit_ml[["causal_forest"]][[j]] <- run_causal_forest(
           dat_train = training_data_elements,
@@ -470,41 +464,41 @@ itr_single_outcome <- function(
         )
       }
 
-      if("bart" %in% algorithms){
-        fit_ml[["bart"]][[j]] <- run_bartmachine(
-          dat_train = training_data_elements,
-          dat_test  = testing_data_elements,
-          dat_total = total_data_elements,
-          params    = params,
-          indcv     = indcv,
-          iter      = j,
-          budget    = budget
-        )
-      }
+      # if("bart" %in% algorithms){
+      #   fit_ml[["bart"]][[j]] <- run_bartmachine(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      # }
 
-      if("boost" %in% algorithms){
-        fit_ml[["boost"]][[j]] <- run_boost(
-          dat_train = training_data_elements,
-          dat_test  = testing_data_elements,
-          dat_total = total_data_elements,
-          params    = params,
-          indcv     = indcv,
-          iter      = j,
-          budget    = budget
-        )
-      }
+      # if("boost" %in% algorithms){
+      #   fit_ml[["boost"]][[j]] <- run_boost(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      # }
 
-      if("random_forest" %in% algorithms){
-        fit_ml[["random_forest"]][[j]] <- run_random_forest(
-          dat_train = training_data_elements,
-          dat_test  = testing_data_elements,
-          dat_total = total_data_elements,
-          params    = params,
-          indcv     = indcv,
-          iter      = j,
-          budget    = budget
-        )
-      }
+      # if("random_forest" %in% algorithms){
+      #   fit_ml[["random_forest"]][[j]] <- run_random_forest(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      # }
 
       if("bagging" %in% algorithms){
         fit_ml[["bagging"]][[j]] <- run_bagging(
@@ -530,17 +524,17 @@ itr_single_outcome <- function(
         )
       }
 
-      if("caret" %in% algorithms){
-        fit_ml[["caret"]][[j]] <- run_caret(
-          dat_train = training_data_elements,
-          dat_test  = testing_data_elements,
-          dat_total = total_data_elements,
-          params    = params,
-          indcv     = indcv,
-          iter      = j,
-          budget    = budget
-        )
-      }
+      # if("caret" %in% algorithms){
+      #   fit_ml[["caret"]][[j]] <- run_caret(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      # }
 
     } ## end of fold
 
@@ -567,8 +561,6 @@ evaluate_itr <- function(fit, ...){
   ## compute qoi
   qoi      <- vector("list", length = length(outcome))
   qoi <- compute_qoi(estimates, algorithms)
-
-  
 
   out <- list(
     qoi = qoi, cv = cv, df = df, estimates = estimates)
