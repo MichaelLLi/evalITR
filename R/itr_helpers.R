@@ -347,8 +347,8 @@ gettaucv <- function(
     ...
 ){
   estimates <- fit$estimates
-  fit_ml <- estimates[[1]]$fit_ml
-  n_folds <- estimates[[1]]$params$n_folds
+  fit_ml <- estimates$fit_ml
+  n_folds <- estimates$params$n_folds
   tau_cv <- list()
 
   # for one model

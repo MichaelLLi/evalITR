@@ -1,23 +1,23 @@
-#' Summarize run_itr output
-#' @param object An object of \code{run_itr} class
-#' @param outcome Outcome variable. Can be different from the input of \code{run_itr}
+#' Summarize estimate_itr output 
+#' @param object An object of \code{estimate_itr} class (typically an output of \code{estimate_itr()} function).
 #' @param ... Other parameters. Currently not supported
 #' @importFrom stats pnorm
 #' @export
-summary.itr <- function(object, outcome = TRUE, ...) {
+summary.itr <- function(object, ...) {
   out         <- list()
   fit_outcome <- object$df$outcome
   algorithm   <- object$df$algorithm
   cv          <- object$cv
 
-  if(outcome != TRUE){
-    # plot user selected outcome
-    m = which(fit_outcome == outcome)
-    fit <- object$qoi[[m]]  
-  }else {
-    m = 1 # plot the first outcome
-    fit <- object$qoi[[1]]
-  }
+  # if(outcome != TRUE){
+  #   # plot user selected outcome
+  #   m = which(fit_outcome == outcome)
+  #   fit <- object$qoi[[m]]  
+  # }else {
+  #   m = 1 # plot the first outcome
+  #   fit <- object$qoi[[1]]
+  # }
+  fit <- object$qoi
 
   ## -----------------------------------------
   ## compute quantities under sample splitting

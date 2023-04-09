@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.r
 \name{evaluate_itr}
 \alias{evaluate_itr}
-\title{Estimate quantity of interests}
+\title{Evaluate ITR}
 \usage{
 evaluate_itr(fit, ...)
 }
@@ -15,5 +15,5 @@ evaluate_itr(fit, ...)
 An object of \code{itr} class
 }
 \description{
-Estimate quantity of interests
+Evaluate ITR
 }

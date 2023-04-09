@@ -2,17 +2,15 @@
 % Please edit documentation in R/itr_summary.R
 \name{summary.itr}
 \alias{summary.itr}
-\title{Summarize run_itr output}
+\title{Summarize estimate_itr output}
 \usage{
-\method{summary}{itr}(object, outcome = TRUE, ...)
+\method{summary}{itr}(object, ...)
 }
 \arguments{
-\item{object}{An object of \code{run_itr} class}
-
-\item{outcome}{Outcome variable. Can be different from the input of \code{run_itr}}
+\item{object}{An object of \code{estimate_itr} class (typically an output of \code{estimate_itr()} function).}
 
 \item{...}{Other parameters. Currently not supported}
 }
 \description{
-Summarize run_itr output
+Summarize estimate_itr output
 }

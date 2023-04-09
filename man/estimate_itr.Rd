@@ -2,7 +2,7 @@
 % Please edit documentation in R/main.r
 \name{estimate_itr}
 \alias{estimate_itr}
-\title{Evaluate ITR}
+\title{Estimate individual treatment rules (ITR)}
 \usage{
 estimate_itr(
   treatment,
@@ -28,11 +28,11 @@ estimate_itr(
 \arguments{
 \item{treatment}{Treatment variable}
 
-\item{form}{a formula object}
+\item{form}{a formula object that takes the form \code{y ~ T + x1 + x2 + ...}.}
 
-\item{data}{A data frame that contains \code{outcome} and \code{treatment}.}
+\item{data}{A data frame that contains the outcome \code{y} and the treatment \code{T}.}
 
-\item{algorithms}{List of machine learning algorithms.}
+\item{algorithms}{List of machine learning algorithms to be used.}
 
 \item{budget}{Proportion of treated units.}
 
@@ -70,5 +70,5 @@ estimate_itr(
 An object of \code{itr} class
 }
 \description{
-Evaluate ITR
+Estimate individual treatment rules (ITR)
 }

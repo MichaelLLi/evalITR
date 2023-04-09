@@ -147,35 +147,32 @@ estimate_itr <- function(
 
   ## loop over all outcomes
   estimates <- vector("list", length = length(outcome))
-  for (m in 1:length(outcome)) {
+  
+  ## data to use
+  ## rename outcome and treatment variable
+  data_filtered <- data %>%
+    select(Y = !!sym(outcome), Treat = !!sym(treatment), all_of(covariates))
 
-    ## data to use
-    ## rename outcome and treatment variable
-    data_filtered <- data %>%
-      select(Y = !!sym(outcome[m]), Treat = !!sym(treatment), all_of(covariates))
-
-    ## cross-validation
-    if(cv == TRUE){
-      ## create folds
-      treatment_vec <- data_filtered %>% dplyr::pull(Treat)
-      folds <- caret::createFolds(treatment_vec, k = n_folds)
-    }
-
-    ## sample splitting
-    if(cv == FALSE){
-      folds = n_folds
-    }
-
-    ## run
-    estimates[[m]] <- itr_single_outcome(
-      data       = data_filtered,
-      algorithms = algorithms,
-      params     = params,
-      folds      = folds,
-      budget     = budget
-    )
-
+  ## cross-validation
+  if(cv == TRUE){
+    ## create folds
+    treatment_vec <- data_filtered %>% dplyr::pull(Treat)
+    folds <- caret::createFolds(treatment_vec, k = n_folds)
   }
+
+  ## sample splitting
+  if(cv == FALSE){
+    folds = n_folds
+  }
+
+  ## run
+  estimates <- itr_single_outcome(
+    data       = data_filtered,
+    algorithms = algorithms,
+    params     = params,
+    folds      = folds,
+    budget     = budget
+  )
 
   out <- list(estimates = estimates, df = df)
 
@@ -277,17 +274,17 @@ itr_single_outcome <- function(
       )
     }
 
-    if("svm" %in% algorithms){
-      fit_ml[["svm"]] <- run_svm(
-        dat_train = training_data_elements,
-        dat_test  = testing_data_elements,
-        dat_total = total_data_elements,
-        params    = params,
-        indcv     = 1,
-        iter      = 1,
-        budget    = budget
-      )
-    }
+    # if("svm" %in% algorithms){
+    #   fit_ml[["svm"]] <- run_svm(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    # }
 
 
     if("bartc" %in% algorithms){
@@ -448,17 +445,17 @@ itr_single_outcome <- function(
         )
       }
 
-      if("svm" %in% algorithms){
-        fit_ml[["svm"]][[j]] <- run_svm(
-          dat_train = training_data_elements,
-          dat_test  = testing_data_elements,
-          dat_total = total_data_elements,
-          params    = params,
-          indcv     = indcv,
-          iter      = j,
-          budget    = budget
-        )
-      }
+      # if("svm" %in% algorithms){
+      #   fit_ml[["svm"]][[j]] <- run_svm(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      # }
 
 
       if("bartc" %in% algorithms){
@@ -562,20 +559,16 @@ itr_single_outcome <- function(
 evaluate_itr <- function(fit, ...){
 
   estimates  <- fit$estimates
-  cv         <- estimates[[1]]$params$cv
+  cv         <- estimates$params$cv
   df         <- fit$df
   algorithms <- fit$df$algorithms
   outcome    <- fit$df$outcome
 
-  qoi        <- vector("list", length = length(outcome))
+  ## compute qoi
+  qoi      <- vector("list", length = length(outcome))
+  qoi <- compute_qoi(estimates, algorithms)
 
-  ## loop over all outcomes
-  for (m in 1:length(outcome)) {
-
-    ## compute qoi
-    qoi[[m]] <- compute_qoi(estimates[[m]], algorithms)
-
-  }
+  
 
   out <- list(
     qoi = qoi, cv = cv, df = df, estimates = estimates)
@@ -601,13 +594,13 @@ test_itr <- function(
 
   # test parameters
   estimates  <- fit$estimates
-  cv         <- estimates[[1]]$params$cv
-  fit_ml     <- estimates[[1]]$fit_ml
-  Tcv        <- estimates[[1]]$Tcv
-  Ycv        <- estimates[[1]]$Ycv
-  indcv      <- estimates[[1]]$indcv
-  n_folds    <- estimates[[1]]$params$n_folds
-  ngates     <- estimates[[1]]$params$ngates
+  cv         <- estimates$params$cv
+  fit_ml     <- estimates$fit_ml
+  Tcv        <- estimates$Tcv
+  Ycv        <- estimates$Ycv
+  indcv      <- estimates$indcv
+  n_folds    <- estimates$params$n_folds
+  ngates     <- estimates$params$ngates
   algorithms <- fit$df$algorithms
   outcome    <- fit$df$outcome
   # run tests

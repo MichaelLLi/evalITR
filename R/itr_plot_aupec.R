@@ -13,19 +13,19 @@ plot.itr <- function(x,outcome = TRUE,...){
 estimate = x
 fit = estimate$qoi
 cv = estimate$cv
-fit_outcome = estimate$df$outcome
+outcome = estimate$df$outcome
 data = estimate$df$data
 algorithms = estimate$df$algorithms
 treatment = estimate$df$treatment
 
-if(outcome != TRUE){
-  # plot user selected outcome 
-  m = which(fit_outcome == outcome) 
-}else {
-  # plot the first outcome
-  m = 1 
-  outcome = fit_outcome[1]
-}
+# if(outcome != TRUE){
+#   # plot user selected outcome 
+#   m = which(fit_outcome == outcome) 
+# }else {
+#   # plot the first outcome
+#   m = 1 
+#   outcome = fit_outcome[1]
+# }
 
 ## -----------------------------------------
 ## format output under cross validation
@@ -34,17 +34,17 @@ if(cv == TRUE){
   graphLabels <- data.frame(
     type = algorithms,
     Pval = map(
-      fit[[m]]$AUPEC, ~.x$aupec_cv) %>%
+      fit$AUPEC, ~.x$aupec_cv) %>%
       bind_rows() %>%
       mutate(Pval = paste0("AUPEC = ", round(aupec, 2), " (s.e. = ", round(sd, 2), ")")) %>% pull(Pval))
 
   Tcv = data %>% pull(treatment) %>% as.numeric()
   Ycv = data %>% pull(outcome) %>% as.numeric()
 
-  bind_rows(map(fit[[m]]$AUPEC, ~.x$aupec_cv)) %>% 
+  bind_rows(map(fit$AUPEC, ~.x$aupec_cv)) %>% 
     mutate(type = algorithms) %>%
     inner_join(bind_rows(
-      map(fit[[m]]$AUPEC, ~.x$outputdf)),
+      map(fit$AUPEC, ~.x$outputdf)),
       by = "type"
     ) %>%
     mutate(AUPECmin = aupec.y - 1.96*sd,
@@ -60,14 +60,14 @@ if(cv == FALSE){
   graphLabels <- data.frame(
     type = algorithms,
     Pval = map(
-      fit[[m]]$AUPEC, ~.x[c('aupec', 'sd')]) %>% 
+      fit$AUPEC, ~.x[c('aupec', 'sd')]) %>% 
       bind_rows() %>% 
       mutate(Pval = paste0("AUPEC = ", round(aupec, 2), " (s.e. = ", round(sd, 2), ")")) %>% pull(Pval))
 
-  Tcv = estimate$estimates[[1]][['Tcv']] %>% as.numeric()
-  Ycv = estimate$estimates[[1]][['Ycv']] %>% as.numeric()
+  Tcv = estimate$estimates[['Tcv']] %>% as.numeric()
+  Ycv = estimate$estimates[['Ycv']] %>% as.numeric()
   
-  map(fit[[m]]$AUPEC, ~.x) %>% 
+  map(fit$AUPEC, ~.x) %>% 
     bind_rows() %>%
     mutate(
           aupec = vec + mean(Ycv),
