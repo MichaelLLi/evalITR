@@ -35,15 +35,6 @@ run_caret <- function(
 
 train_caret <- function(dat_train, train_params, train_method, ...) {
 
-    # caret train paramters
-    preProcess = train_params$preProcess
-    weights = train_params$weights
-    metric = train_params$metric
-    maximize = train_params$maximize
-    trControl = train_params$trControl
-    tuneGrid = train_params$tuneGrid
-    tuneLength = train_params$tuneLength
-
     ## format training data
     training_data_elements_caret = create_ml_args_caret(dat_train)
 
@@ -52,20 +43,15 @@ train_caret <- function(dat_train, train_params, train_method, ...) {
 
     formula = as.formula(paste("Y ~ (", paste0(covariates, collapse = "+"), ")*Treat"))
 
+    ## add additional parameters from ...
+    train_params = c(train_params, list(...))
+    
     ## train
-    fit <- caret::train(formula,
-                    data = training_data_elements_caret[["data"]],
-                    method = train_method,
-                    preProcess = preProcess,
-                    weights = weights,
-                    metric = metric,
-                    maximize = maximize,
-                    trControl = trControl,
-                    tuneGrid = tuneGrid,
-                    tuneLength = tuneLength)
-                    ## This last option is actually one
-                    ## for gbm() that passes through
-                    # verbose = FALSE)
+    fit <- do.call(caret::train, c(list(
+            formula,
+            data = training_data_elements_caret[["data"]],
+            method = train_method), 
+            train_params))
 
   return(fit)
 
