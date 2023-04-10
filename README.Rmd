@@ -137,10 +137,38 @@ The`summary()` function displays the following summary statistics: (1) populatio
 # summarize estimates
 summary(est)
 
-# summarize estimates with model trained using caret
+# similarly for caret
 # summary(est_caret)
 ```
 
+We can extract estimates from the `est` object. The following code shows how to extract the GATE estimates for the writing score with `rlasso` and `lasso` algorithms. 
+
+```{r est_extract, eval = FALSE}
+# plot GATE estimates
+summary(est)$GATE %>%
+  mutate(conf.low = estimate - 1.96 * std.deviation,
+         conf.high = estimate + 1.96 * std.deviation,
+         group = as_factor(group)) %>%
+  ggplot(., aes(
+    x = group, y = estimate,
+    ymin = conf.low , ymax = conf.high, color = algorithm)) +
+  ggdist::geom_pointinterval(
+    width=0.5,    
+    position=position_dodge(0.5),
+    interval_size_range = c(0.8, 1.5),
+    fatten_point = 2.5) +
+  theme_bw() +    
+  theme(panel.grid element_blank(),
+        panel.background = element_blank()) +
+  labs(x = "Group", y = "GATE estimate") +
+  geom_hline(yintercept = 0, linetype = "dashed", color = "#4e4e4e") +
+  scale_color_manual(values = c("#E69F00", "#56B4E9", "#009E73", "#076f00", "#0072B2")) 
+
+```  
+
+```{r pic0, echo=FALSE, out.width = '100%'}
+knitr::include_graphics("man/figures/gate.png")
+```
 
 We plot the estimated Area Under the Prescriptive Effect Curve for the writing score across a range of budget constraints for causal forest.
 
