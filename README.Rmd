@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r pic1, echo=FALSE, out.width = '100%'}
+```{r pic1, echo=FALSE, out.width = '60%'}
 knitr::include_graphics("man/figures/README-manual.png")
 ```
 

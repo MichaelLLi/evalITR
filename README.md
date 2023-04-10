@@ -200,7 +200,7 @@ summary(est)$GATE %>%
   scale_color_manual(values = c("#E69F00", "#56B4E9", "#009E73", "#076f00", "#0072B2")) 
 ```
 
-<img src="man/figures/gate.png" width="100%" />
+<img src="man/figures/gate.png" width="60%" />
 
 We plot the estimated Area Under the Prescriptive Effect Curve for the
 writing score across a range of budget constraints for causal forest.
