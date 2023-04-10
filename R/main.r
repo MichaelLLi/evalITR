@@ -53,6 +53,9 @@ estimate_itr <- function(
 
   caret_algorithms <- names(caret::getModelInfo())
 
+  ## rlearn algorithms
+  rlearner_algorithms <- c("rkern", "rlasso","rboost", "tkern", "tlasso", "tboost", "skern", "slasso", "sboost", "xkern", "xlasso", "xboost", "ukern", "ulasso", "uboost")
+
   # caret train parameters
   train_params <- list(
     # train_method = train_method,
@@ -76,7 +79,7 @@ estimate_itr <- function(
 
   params <- list(
     n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio, ngates = ngates, cv = cv, 
-    train_params = train_params, caret_algorithms = caret_algorithms)
+    train_params = train_params, caret_algorithms = caret_algorithms, rlearner_algorithms = rlearner_algorithms)
 
   df <- list(algorithms = algorithms, outcome = outcome, data = data, treatment = treatment)
 
@@ -147,6 +150,9 @@ itr_single_outcome <- function(
 
   ## caret parameters
   caret_algorithms = params$caret_algorithms
+
+  ## rlearn algorithms
+  rlearner_algorithms = params$rlearner_algorithms
 
 ## =================================
 ## sample splitting
@@ -222,6 +228,30 @@ itr_single_outcome <- function(
         models[[algorithms[i]]] <- caret_est$train
 
       }
+
+      # check if algorithm is in the rlearner package
+      if (algorithms[i] %in% rlearner_algorithms) {
+        
+        # set the train_method to the algorithm
+        train_method = algorithms[i]
+
+        # run the algorithm
+        rlearner_est <- run_rlearner(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          budget    = budget,
+          indcv     = 1,
+          iter      = 1,
+          train_method = train_method)
+
+        # store the results
+        fit_ml[[algorithms[i]]] <- rlearner_est$test
+        models[[algorithms[i]]] <- rlearner_est$train
+
+      }
+    
     }
 
     if ("causal_forest" %in% algorithms) {
@@ -255,6 +285,54 @@ itr_single_outcome <- function(
       fit_ml[["lasso"]] <- est$test
       models[["lasso"]] <- est$train
     }
+
+    # if("rlasso" %in% algorithms){
+    #   # run lasso
+    #   est <- run_rlasso(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    #   # store the results
+    #   fit_ml[["rlasso"]] <- est$test
+    #   models[["rlasso"]] <- est$train
+    # }
+
+    # if("rboost" %in% algorithms){
+    #   # run rboost
+    #   est <- run_rboost(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    #   # store the results
+    #   fit_ml[["rboost"]] <- est$test
+    #   models[["rboost"]] <- est$train
+    # }
+
+    # if("rkern" %in% algorithms){
+    #   # run rkern
+    #   est <- run_rboost(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    #   # store the results
+    #   fit_ml[["rkern"]] <- est$test
+    #   models[["rkern"]] <- est$train
+    # }
 
     # if("svm" %in% algorithms){
     #   # run svm
@@ -447,6 +525,31 @@ itr_single_outcome <- function(
           models[[algorithms[i]]][[j]] <- caret_est$train
 
         }
+
+        # check if algorithm is in the rlearner package
+        if (algorithms[i] %in% rlearner_algorithms) {
+
+          # set the train_method to the algorithm
+          train_method = algorithms[i]
+
+          # run the algorithm
+          rlearner_est <- run_rlearner(
+            dat_train     = training_data_elements,
+            dat_test      = testing_data_elements,
+            dat_total     = total_data_elements,
+            train_method  = train_method,
+            params        = params,
+            indcv         = indcv,
+            iter          = j,
+            budget        = budget,
+            ...
+          )
+
+          # store the results
+          fit_ml[[algorithms[i]]][[j]] <- rlearner_est$test
+          models[[algorithms[i]]][[j]] <- rlearner_est$train
+
+        }
       }
 
       if ("causal_forest" %in% algorithms) {
@@ -480,6 +583,54 @@ itr_single_outcome <- function(
         fit_ml[["lasso"]][[j]] <- est$test
         models[["lasso"]][[j]] <- est$train
       }
+
+      # if("rlasso" %in% algorithms){
+      #   # run lasso
+      #   est <- run_rlasso(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      #   # store the results
+      #   fit_ml[["rlasso"]][[j]] <- est$test
+      #   models[["rlasso"]][[j]] <- est$train
+      # }
+
+      # if("rboost" %in% algorithms){
+      #   # run lasso
+      #   est <- run_rboost(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      #   # store the results
+      #   fit_ml[["rboost"]][[j]] <- est$test
+      #   models[["rboost"]][[j]] <- est$train
+      # }
+
+      # if("rkern" %in% algorithms){
+      #   # run rkern
+      #   est <- run_rkern(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      #   # store the results
+      #   fit_ml[["rkern"]][[j]] <- est$test
+      #   models[["rkern"]][[j]] <- est$train
+      # }
 
       # if("svm" %in% algorithms){
       #   # run svm

@@ -33,6 +33,28 @@ create_ml_arguments = function(outcome, treatment, data){
   return(list(Y = Y, X = X, Treat = Treat, formula = formula))
 }
 
+#' Create general arguments 
+#' @importFrom stats model.matrix
+#' @param data A dataset
+create_ml_args = function(data){
+
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat =data[["Treat"]]
+
+  X_and_Treat = cbind(X, Treat)
+  X_expand = model.matrix(~.*Treat, data = X_and_Treat)
+
+  # also needed for testing:
+  X0t = cbind(X, Treat = 0)
+  X1t = cbind(X, Treat = 1)
+  X0t_expand = model.matrix(~.*Treat, data = X0t)
+  X1t_expand = model.matrix(~.*Treat, data = X1t)
+
+  return(list(Y = Y, X = X, Treat = Treat, X_expand = X_expand, X0t_expand = X0t_expand, X1t_expand = X1t_expand))
+}
+
+
 
 #' Create arguments for causal forest
 #' @importFrom stats model.matrix
@@ -101,6 +123,7 @@ create_ml_args_lasso = function(data){
 
   return(list(Y = Y, X = X, Treat = Treat, X_expand = X_expand, X0t_expand = X0t_expand, X1t_expand = X1t_expand))
 }
+
 
 #' Create arguments for SVM
 #' @importFrom rlang .data
