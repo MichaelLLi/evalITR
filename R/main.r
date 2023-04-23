@@ -696,3 +696,356 @@ test_itr <- function(
 
 utils::globalVariables(c("Treat", "aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm", "vec"))
 
+#' Conduct hypothesis tests
+#' @param fit Fitted model. Usually an output from \code{estimate_itr}
+#' @param ngates The number of groups to separate the data into. The groups are determined by \code{tau}. Default is 5.
+#' @param nsim Number of Monte Carlo simulations used to simulate the null distributions. Default is 10000.
+#' @param ... Further arguments passed to the function.
+#' @return An object of \code{itr} class
+#' @export
+test_itr <- function(
+    fit,
+    nsim = 10000,
+    ...
+) {
+
+  # test parameters
+  estimates  <- fit$estimates
+  cv         <- estimates[[1]]$params$cv
+  fit_ml     <- estimates[[1]]$fit_ml
+  Tcv        <- estimates[[1]]$Tcv
+  Ycv        <- estimates[[1]]$Ycv
+  indcv      <- estimates[[1]]$indcv
+  n_folds    <- estimates[[1]]$params$n_folds
+  ngates     <- estimates[[1]]$params$ngates
+  algorithms <- fit$df$algorithms
+  outcome    <- fit$df$outcome
+
+  # run tests
+
+  ## =================================
+  ## sample splitting
+  ## =================================
+
+  if(cv == FALSE){
+    cat('Conduct hypothesis tests for GATEs unde sample splitting ...\n')
+
+    ## create empty lists to for consistcv and hetcv
+    consist <- list()
+    het <- list()
+
+      # model with a single outcome
+      ## run consistency and heterogeneity tests for each model
+      if ("causal_forest" %in% algorithms) {
+        consist[["causal_forest"]] <- consist.test(
+          T   = Tcv,
+          tau = fit_ml$causal_forest$tau,
+          Y   = Ycv,
+          ngates = ngates)
+
+        het[["causal_forest"]] <- het.test(
+          T   = Tcv,
+          tau = fit_ml$causal_forest$tau,
+          Y   = Ycv,
+          ngates = ngates)
+      }
+
+      if ("lasso" %in% algorithms) {
+        consist[["lasso"]] <- consist.test(
+          T   = Tcv,
+          tau = fit_ml$lasso$tau,
+          Y   = Ycv,
+          ngates = ngates)
+
+        het[["lasso"]] <- het.test(
+          T   = Tcv,
+          tau = fit_ml$lasso$tau,
+          Y   = Ycv,
+          ngates = ngates)
+      }
+
+    if ("svm" %in% algorithms) {
+      consist[["svm"]] <- consist.test(
+        T   = Tcv,
+        tau = fit_ml$svm$tau,
+        Y   = Ycv,
+        ngates = ngates)
+
+      het[["svm"]] <- het.test(
+        T   = Tcv,
+        tau = fit_ml$svm$tau,
+        Y   = Ycv,
+        ngates = ngates)
+    }
+
+    if ("bartc" %in% algorithms) {
+      consist[["bartc"]] <- consist.test(
+        T   = Tcv,
+        tau = fit_ml$bartc$tau,
+        Y   = Ycv,
+        ngates = ngates)
+
+      het[["bartc"]] <- het.test(
+        T   = Tcv,
+        tau = fit_ml$bartc$tau,
+        Y   = Ycv,
+        ngates = ngates)
+    }
+
+    if ("bart" %in% algorithms) {
+      consist[["bart"]] <- consist.test(
+        T   = Tcv,
+        tau = fit_ml$bart$tau,
+        Y   = Ycv,
+        ngates = ngates)
+
+      het[["bart"]] <- het.test(
+        T   = Tcv,
+        tau = fit_ml$bart$tau,
+        Y   = Ycv,
+        ngates = ngates)
+    }
+
+    if ("boost" %in% algorithms) {
+      consist[["boost"]] <- consist.test(
+        T   = Tcv,
+        tau = fit_ml$boost$tau,
+        Y   = Ycv,
+        ngates = ngates)
+
+      het[["boost"]] <- het.test(
+        T   = Tcv,
+        tau = fit_ml$boost$tau,
+        Y   = Ycv,
+        ngates = ngates)
+    }
+
+    if ("random_forest" %in% algorithms) {
+      consist[["random_forest"]] <- consist.test(
+        T   = Tcv,
+        tau = fit_ml$random_forest$tau,
+        Y   = Ycv,
+        ngates = ngates)
+
+      het[["random_forest"]] <- het.test(
+        T   = Tcv,
+        tau = fit_ml$random_forest$tau,
+        Y   = Ycv,
+        ngates = ngates)
+    }
+
+    if ("bagging" %in% algorithms) {
+      consist[["bagging"]] <- consist.test(
+        T   = Tcv,
+        tau = fit_ml$bagging$tau,
+        Y   = Ycv,
+        ngates = ngates)
+
+      het[["bagging"]] <- het.test(
+        T   = Tcv,
+        tau = fit_ml$bagging$tau,
+        Y   = Ycv,
+        ngates = ngates)
+    }
+
+    if ("cart" %in% algorithms) {
+      consist[["cart"]] <- consist.test(
+        T   = Tcv,
+        tau = fit_ml$cart$tau,
+        Y   = Ycv,
+        ngates = ngates)
+
+      het[["cart"]] <- het.test(
+        T   = Tcv,
+        tau = fit_ml$cart$tau,
+        Y   = Ycv,
+        ngates = ngates)
+    }
+
+    if ("caret" %in% algorithms) {
+      consist[["caret"]] <- consist.test(
+        T   = Tcv,
+        tau = fit_ml$caret$tau,
+        Y   = Ycv,
+        ngates = ngates)
+
+      het[["caret"]] <- het.test(
+        T   = Tcv,
+        tau = fit_ml$caret$tau,
+        Y   = Ycv,
+        ngates = ngates)
+    }
+
+  }
+
+  ## =================================
+  ## cross validation
+  ## =================================
+
+  if(cv == TRUE){
+    cat('Conduct hypothesis tests for GATEs unde cross-validation ...\n')
+
+      ## create empty lists to for consistcv and hetcv
+    consistcv <- list()
+    hetcv <- list()
+
+      ## run consistency and heterogeneity tests for each model
+      if ("causal_forest" %in% algorithms) {
+        consistcv[["causal_forest"]] <- consistcv.test(
+          T   = Tcv,
+          tau = gettaucv(fit)[["causal_forest"]],
+          Y   = Ycv,
+          ind = indcv,
+          ngates = ngates)
+
+        hetcv[["causal_forest"]] <- hetcv.test(
+          T   = Tcv,
+          tau = gettaucv(fit)[["causal_forest"]],
+          Y   = Ycv,
+          ind = indcv,
+          ngates = ngates)
+      }
+
+    if ("lasso" %in% algorithms) {
+      consistcv[["lasso"]] <- consistcv.test(
+        T   = Tcv,
+        tau = gettaucv(fit)[["lasso"]],
+        Y   = Ycv,
+        ind = indcv,
+        ngates = ngates)
+
+      hetcv[["lasso"]] <- hetcv.test(
+        T   = Tcv,
+        tau = gettaucv(fit)[["lasso"]],
+        Y   = Ycv,
+        ind = indcv,
+        ngates = ngates)
+    }
+
+if ("bartc" %in% algorithms) {
+  consistcv[["bartc"]] <- consistcv.test(
+    T   = Tcv,
+    tau = gettaucv(fit)[["bartc"]],
+    Y   = Ycv,
+    ind = indcv,
+    ngates = ngates)
+
+  hetcv[["bartc"]] <- hetcv.test(
+    T   = Tcv,
+    tau = gettaucv(fit)[["bartc"]],
+    Y   = Ycv,
+    ind = indcv,
+    ngates = ngates)
+}
+
+if ("bart" %in% algorithms) {
+  consistcv[["bart"]] <- consistcv.test(
+    T   = Tcv,
+    tau = gettaucv(fit)[["bart"]],
+    Y   = Ycv,
+    ind = indcv,
+    ngates = ngates)
+
+  hetcv[["bart"]] <- hetcv.test(
+    T   = Tcv,
+    tau = gettaucv(fit)[["bart"]],
+    Y   = Ycv,
+    ind = indcv,
+    ngates = ngates)
+}
+
+if ("boost" %in% algorithms) {
+  consistcv[["boost"]] <- consistcv.test(
+    T   = Tcv,
+    tau = gettaucv(fit)[["boost"]],
+    Y   = Ycv,
+    ind = indcv,
+    ngates = ngates)
+
+  hetcv[["boost"]] <- hetcv.test(
+    T   = Tcv,
+    tau = gettaucv(fit)[["boost"]],
+    Y   = Ycv,
+    ind = indcv,
+    ngates = ngates)
+}
+
+if ("random_forest" %in% algorithms) {
+  consistcv[["random_forest"]] <- consistcv.test(
+    T   = Tcv,
+    tau = gettaucv(fit)[["random_forest"]],
+    Y   = Ycv,
+    ind = indcv,
+    ngates = ngates)
+
+  hetcv[["random_forest"]] <- hetcv.test(
+    T   = Tcv,
+    tau = gettaucv(fit)[["random_forest"]],
+    Y   = Ycv,
+    ind = indcv,
+    ngates = ngates)
+}
+
+if ("bagging" %in% algorithms) {
+  consistcv[["bagging"]] <- consistcv.test(
+    T   = Tcv,
+    tau = gettaucv(fit)[["bagging"]],
+    Y   = Ycv,
+    ind = indcv,
+    ngates = ngates)
+
+  hetcv[["bagging"]] <- hetcv.test(
+    T   = Tcv,
+    tau = gettaucv(fit)[["bagging"]],
+    Y   = Ycv,
+    ind = indcv,
+    ngates = ngates)
+}
+
+if ("cart" %in% algorithms) {
+  consistcv[["cart"]] <- consistcv.test(
+    T   = Tcv,
+    tau = gettaucv(fit)[["cart"]],
+    Y   = Ycv,
+    ind = indcv,
+    ngates = ngates)
+
+  hetcv[["cart"]] <- hetcv.test(
+    T   = Tcv,
+    tau = gettaucv(fit)[["cart"]],
+    Y   = Ycv,
+    ind = indcv,
+    ngates = ngates)
+}
+
+if ("caret" %in% algorithms) {
+  consistcv[["caret"]] <- consistcv.test(
+    T   = Tcv,
+    tau = gettaucv(fit)[["caret"]],
+    Y   = Ycv,
+    ind = indcv,
+    ngates = ngates)
+
+  hetcv[["caret"]] <- hetcv.test(
+    T   = Tcv,
+    tau = gettaucv(fit)[["caret"]],
+    Y   = Ycv,
+    ind = indcv,
+    ngates = ngates)
+    }
+  }
+
+  # formulate and return output
+  if(cv == FALSE){
+    tests <- list(consist = consist,
+                  het = het)
+    return(tests)
+  }
+  if(cv == TRUE){
+    tests_cv <- list(consistcv = consistcv,
+                    hetcv = hetcv)
+    return(tests_cv)
+  }
+}
+
+utils::globalVariables(c("Treat", "aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm", "vec"))

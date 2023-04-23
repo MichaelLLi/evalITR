@@ -346,21 +346,27 @@ gettaucv <- function(
     fit,
     ...
 ){
+  df <- fit$df
   estimates <- fit$estimates
+  algorithms <- df[["algorithms"]]
   fit_ml <- estimates[[1]]$fit_ml
   n_folds <- estimates[[1]]$params$n_folds
   tau_cv <- list()
 
-  # for one model
-  for (k in seq(n_folds)) {
-    tau_cv[[k]] <- fit_ml[["causal_forest"]][[k]][["tau_cv"]]
+  # extract tau_cv for each algorithm in j
+  for (j in seq_along(algorithms)) {
+    tau_cv[[j]] <- fit_ml[[j]]
+    # Assign the name of the algorithm to the corresponding element in the tau_cv list
+    names(tau_cv)[j] <- algorithms[j]
+
+    # extract and formate tau_cv across k folds in each j
+    for (k in seq(n_folds)) {
+    tau_cv[[j]][[k]] <- fit_ml[[j]][[k]][["tau_cv"]]
+    }
+
+    # convert k folds of tau_cv to a single matrix in every algorithm j
+    tau_cv[[j]] <- do.call(cbind, tau_cv[[j]])
+
   }
-
-  # convert to a single matrix
-  tau_cv <- do.call(cbind, tau_cv)
-
   return(tau_cv)
-
 }
-
-length(gettaucv(fit_cv))
