@@ -13,28 +13,29 @@ knitr::opts_chunk$set(
 ```
 
 
+# evalITR: Estimation and Evaluation Methods for Individualized Treatment Rules
+
+<!-- badges: start -->
 ```{r Workflow, echo=FALSE, out.width = '100%'}
 knitr::include_graphics("man/figures/README-manual.png")
 ```
-
-# evalITR
-
-<!-- badges: start -->
 <!-- badges: end -->
 
-## Installation
+This R package enables researchers to make statistical inference with any learning algorithm to estimate and validate individualized treatment rules with experimental data. The package is modularized and integrates with various state-of-the-art machine learning packages. It allows parameter tuning and provides original ITR evaluation metrics as well as hypothesis testing. Users will be able to complete the entire workflow of analysis i.e., training, estimation, and validation in one step. Computation of various summary statistics and plotting functionality are also included. 
 
-You can install the development version of evalITR from [GitHub](https://github.com/) with:
+## Installation Instructions
 
-``` r
+You can install the development version of 'evalITR' from [GitHub](https://github.com/) with:
+
+```{r}
 # install.packages("devtools")
-devtools::install_github("MichaelLLi/evalITR")
+devtools::install_github("xiaolong-y/evalITR@causal-ml")
 ```
 
 
-(Optional) if you have multiple cores, we recommendate using multisession futures and processing in parallel. This would increase computation efficiency and reduce the time to fit the model. 
+(Optional) if you have multiple cores, we recommend using multisession futures and processing in parallel. This would increase computation efficiency and reduce the time to fit the model. 
 
-```r
+```{r}
 library(furrr)
 library(future.apply)
 
@@ -43,8 +44,8 @@ plan(multisession, workers =nworkers)
 ```
 
 
-
-## Example under sample splitting
+## Getting started
+### Example under sample splitting
 
 
 This is an example using the `star` dataset (for more information about the dataset, please use `?star`). 
@@ -144,7 +145,7 @@ plot(est)
 plot(est_caret)
 ```
 
-## Example under cross-validation
+### Example under cross-validation
 
 The package also allows estimate ITR with k-folds cross-validation. Instead of specifying the `ratio` argument, we choose the number of folds (`n_folds`). The following code presents an example of estimating ITR with 3 folds cross-validation. In practice, we recommend using 10 folds to get a more stable model performance. 
 
@@ -186,7 +187,7 @@ plot(est_cv)
 ```
 
 
-## Example with multiple ML algorithms/outcomes
+### Example with multiple ML algorithms/outcomes
 
 We can estimate ITR with various machine learning algorithms and then compare the performance of each model. The package includes 8 different ML algorithms (causal forest, BART, lasso, boosting trees, random forest, CART, bagging trees, svm).
 
@@ -239,12 +240,11 @@ We plot the estimated Area Under the Prescriptive Effect Curve for the writing s
 plot(est_cv, outcome = "g3tlangss")
 ```
 
-Hypothesis tests
-```{r}
-test_cv <- test_itr(fit_cv)
-test <- test_itr(fit)
-test_caret <- test_itr(fit_caret) #under caret
-
-```
+<!-- We conduct hypothesis testing via the following function. -->
+<!-- ```{r} -->
+<!-- test_cv <- test_itr(fit_cv) -->
+<!-- test <- test_itr(fit) -->
+<!-- test_caret <- test_itr(fit_caret) #under caret -->
+<!-- ``` -->
 
 
