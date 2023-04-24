@@ -4,7 +4,8 @@
 #' @param ... Other parameters. Currently not supported
 #' @importFrom stats pnorm
 #' @export
-summary.itr <- function(object, outcome = TRUE, ...) {
+summary.itr <- function(object,
+                        outcome = TRUE, ...) {
   out         <- list()
   fit_outcome <- object$df$outcome
   algorithm   <- object$df$algorithm
@@ -182,38 +183,98 @@ summary.itr <- function(object, outcome = TRUE, ...) {
   }
 
   class(out) <- c("summary.itr", class(out))
-
   return(out)
 }
 
-#' Print
+#' Print summary.itr
 #' @importFrom cli cat_rule
 #' @param x An object of \code{summary.itr} class. This is typically an output of \code{summary.itr()} function.
 #' @param ... Other parameters. Currently not supported.
 #' @export
-print.summary.itr <- function(x, ...) {
-  # PAPE
-  cli::cat_rule(left = "PAPE")
-  print(as.data.frame(x[["PAPE"]]), digits = 2)
-  cli::cat_line("")
+print.summary.itr <- function(x,
+                              test,
+                              ...) {
 
-  # PAPE
-  cli::cat_rule(left = "PAPEp")
-  print(as.data.frame(x[["PAPEp"]]), digits = 2)
-  cli::cat_line("")
+  if(test == TRUE){
+    # Tests
+    cli::cat_rule(left = "Rank Consistency Test Results")
+    print(as.data.frame(consist_tibble), n_extra = 200)
+    cli::cat_line("")
 
-  # PAPE
-  cli::cat_rule(left = "PAPDp")
-  print(as.data.frame(x[["PAPDp"]]), digits = 2)
-  cli::cat_line("")
+    cli::cat_rule(left = "Within Group Heterogeneity Test Results")
+    print(as.data.frame(het_tibble), n_extra = 200)
+    cli::cat_line("")
 
-  # PAPE
-  cli::cat_rule(left = "AUPEC")
-  print(as.data.frame(x[["AUPEC"]]), digits = 2)
-  cli::cat_line("")
+  } else {
+    # PAPE
+    cli::cat_rule(left = "PAPE")
+    print(as.data.frame(x[["PAPE"]]), digits = 2)
+    cli::cat_line("")
 
-  # GATE
-  cli::cat_rule(left = "GATE")
-  print(as.data.frame(x[["GATE"]]), digits = 2)
-  cli::cat_line("")
+    # PAPE
+    cli::cat_rule(left = "PAPEp")
+    print(as.data.frame(x[["PAPEp"]]), digits = 2)
+    cli::cat_line("")
+
+    # PAPE
+    cli::cat_rule(left = "PAPDp")
+    print(as.data.frame(x[["PAPDp"]]), digits = 2)
+    cli::cat_line("")
+
+    # PAPE
+    cli::cat_rule(left = "AUPEC")
+    print(as.data.frame(x[["AUPEC"]]), digits = 2)
+    cli::cat_line("")
+
+    # GATE
+    cli::cat_rule(left = "GATE")
+    print(as.data.frame(x[["GATE"]]), digits = 2)
+    cli::cat_line("")
+  }
+
 }
+
+#' Summarize test_itr output
+#' @param object An object of \code{test_itr} class
+#' @param ... Other parameters. Currently not supported
+#' @importFrom stats pnorm
+#' @export
+
+summary.test.itr <- function(test, ...) {
+  consist <- test$consist
+  het <- test$het
+  consist_tibble <- tibble()
+  het_tibble <- tibble()
+
+  consist_tibble <- as.tibble(consist) %>%
+    t() %>%
+    as.data.frame()
+  colnames(consist_tibble) <- c("Test Statistic", "p-value")
+
+  het_tibble <- as.tibble(het) %>%
+    t() %>%
+    as.data.frame()
+  colnames(het_tibble) <- c("Test Statistic", "p-value")
+
+  class(consist_tibble) <- c("summary.itr", class(consist_tibble))
+  class(het_tibble) <- c("summary.itr", class(het_tibble))
+  return(consist_tibble)
+  return(het_tibble)
+}
+
+#' #' Print summary.itr
+#' #' @importFrom cli cat_rule
+#' #' @param x An object of \code{summary.test_itr} class. This is typically an output of \code{summary.test_itr()} function.
+#' #' @param ... Other parameters. Currently not supported.
+#' #' @export
+#' print.summary.test.itr <- function(x, ...) {
+#'
+#'   # Tests
+#'   cli::cat_rule(left = "Rank Consistency Test Results")
+#'   print(consist_tibble, digits = 2)
+#'   cli::cat_line("")
+#'
+#'   cli::cat_rule(left = "Within Group Heterogeneity Test Results")
+#'   print(het_tibble, digits = 2)
+#'   cli::cat_line("")
+#' }
