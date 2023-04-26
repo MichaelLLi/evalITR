@@ -1,0 +1,8 @@
+---
+title: "Evaluation of Individualized Treatment Rules"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Evaluation of Individualized Treatment Rules}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---

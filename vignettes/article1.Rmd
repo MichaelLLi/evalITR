@@ -1,8 +1,0 @@
----
-title: "evalITR: Article 1 Example"
-output: rmarkdown::html_vignette
-vignette: >
-  %\VignetteIndexEntry{evalITR: Article 1 Example}
-  %\VignetteEngine{knitr::rmarkdown}
-  %\VignetteEncoding{UTF-8}
----
