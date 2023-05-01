@@ -1,0 +1,8 @@
+---
+title: "Estimation of ITR using Observational Data and Evaluation as RCT"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Estimation of ITR using Observational Data and Evaluation as RCT}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---

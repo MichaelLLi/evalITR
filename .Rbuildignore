@@ -4,3 +4,6 @@
 ^\.travis\.yml$
 ^CRAN-RELEASE$
 ^README\.Rmd$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$

@@ -246,6 +246,27 @@ create_ml_args_cart = function(data){
 }
 
 
+
+# Create arguments for caret
+create_ml_args_caret = function(data){
+
+  formula = data[["formula"]]
+  Y = data[["Y"]]
+  X = data[["X"]]
+  Treat = data[["Treat"]]
+
+  data = cbind(Y, X, Treat)
+
+  # also needed for testing:
+  data0t = cbind(Y, X, Treat = 0)
+  data1t = cbind(Y, X, Treat = 1)
+
+  return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
+}
+
+
+
+
 # # Create arguments for neural net
 #
 # create_ml_args_neuralnet = function(training_data, create_ml_arguments_outputs){
@@ -289,7 +310,7 @@ create_ml_args_knn = function(create_ml_arguments_outputs){
   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
 }
 
-# Re-organize cross-validation output to plot the AUPEC curve  
+# Re-organize cross-validation output to plot the AUPEC curve
 getAupecOutput = function(
   tauML, taucvML, That_pcv_mat, MLname,
   NFOLDS, Ycv, Tcv, indcv
@@ -301,9 +322,6 @@ getAupecOutput = function(
     tau = tauML[,j][!is.na(tauML[,j])]
     aupec_grid[[j]] = AUPEC(Tcv[indcv==j], tau,Ycv[indcv==j])
   }
-
-  ## use That_pcv_mat
-  # aupec_cv = AUPECcv(T = Tcv, tau = That_pcv_mat, Y = Ycv, ind = indcv)
 
   ## use taucv
   aupec_cv = AUPECcv(T = Tcv, tau = taucvML, Y = Ycv, ind = indcv)
@@ -321,4 +339,34 @@ getAupecOutput = function(
   return(list(aupec_cv = aupec_cv,
               aupec_vec = aupec_vec,
               outputdf = outputdf))
+}
+
+# transformation function for taucv matrix
+gettaucv <- function(
+    fit,
+    ...
+){
+  df <- fit$df
+  estimates <- fit$estimates
+  algorithms <- df[["algorithms"]]
+  fit_ml <- estimates[[1]]$fit_ml
+  n_folds <- estimates[[1]]$params$n_folds
+  tau_cv <- list()
+
+  # extract tau_cv for each algorithm in j
+  for (j in seq_along(algorithms)) {
+    tau_cv[[j]] <- fit_ml[[j]]
+    # Assign the name of the algorithm to the corresponding element in the tau_cv list
+    names(tau_cv)[j] <- algorithms[j]
+
+    # extract and formate tau_cv across k folds in each j
+    for (k in seq(n_folds)) {
+    tau_cv[[j]][[k]] <- fit_ml[[j]][[k]][["tau_cv"]]
+    }
+
+    # convert k folds of tau_cv to a single matrix in every algorithm j
+    tau_cv[[j]] <- do.call(cbind, tau_cv[[j]])
+
+  }
+  return(tau_cv)
 }

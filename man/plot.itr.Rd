@@ -4,20 +4,14 @@
 \alias{plot.itr}
 \title{Plot the AUPEC curve}
 \usage{
-\method{plot}{itr}(x, data, treatment, outcome, algorithms, ...)
+\method{plot}{itr}(x, outcome = TRUE, ...)
 }
 \arguments{
-\item{x}{An object of \code{run_itr} class. This is typically an output of \code{run_itr()} function.}
+\item{x}{An object of \code{estimate_itr} class. This is typically an output of \code{estimate_itr()} function.}
 
-\item{data}{The dataset.}
+\item{outcome}{Outcome variable. Can be different from the input of \code{run_itr}}
 
-\item{treatment}{A vector of the unit-level binary treatment receipt variable for each sample.}
-
-\item{outcome}{A vector of the outcome variable of interest for each sample.}
-
-\item{algorithms}{A vector of machine learning algorithms.}
-
-\item{...}{Other parameters. Currently not supported}
+\item{...}{Further arguments passed to the function.}
 }
 \value{
 A plot of ggplot2 object.

@@ -10,10 +10,22 @@ run_itr(
   covariates,
   data,
   algorithms,
-  plim,
+  budget,
   n_folds = 5,
   ratio = 0,
-  ngates = 5
+  ngates = 5,
+  trainControl_method = "boot",
+  number = ifelse(grepl("cv", trainControl_method), 10, 25),
+  repeats = ifelse(grepl("[d_]cv$", trainControl_method), 1, NA),
+  allowParallel = TRUE,
+  train_method = "rf",
+  preProcess = NULL,
+  weights = NULL,
+  metric = ifelse(is.factor(data[outcome]), "Accuracy", "RMSE"),
+  maximize = ifelse(metric \%in\% c("RMSE", "logLoss", "MAE", "logLoss"), FALSE, TRUE),
+  trControl = trainControl(),
+  tuneGrid = NULL,
+  tuneLength = 1
 )
 }
 \arguments{
@@ -27,13 +39,35 @@ run_itr(
 
 \item{algorithms}{List of machine learning algorithms.}
 
-\item{plim}{Proportion of treated units.}
+\item{budget}{Proportion of treated units.}
 
 \item{n_folds}{Number of cross-validation folds. Default is 5.}
 
 \item{ratio}{Split ratio between train and test set under sample splitting. Default is 0.}
 
 \item{ngates}{The number of groups to separate the data into. The groups are determined by tau. Default is 5.}
+
+\item{trainControl_method}{caret parameter}
+
+\item{number}{caret parameter}
+
+\item{repeats}{caret parameter}
+
+\item{allowParallel}{caret parameter}
+
+\item{train_method}{caret parameter}
+
+\item{preProcess}{caret parameter}
+
+\item{weights}{caret parameter}
+
+\item{metric}{caret parameter}
+
+\item{maximize}{caret parameter}
+
+\item{tuneGrid}{caret parameter}
+
+\item{tuneLength}{caret parameter}
 }
 \value{
 An object of \code{itr} class

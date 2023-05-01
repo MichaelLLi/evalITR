@@ -7,11 +7,11 @@
 #'
 #' @param T A vector of the unit-level binary treatment receipt variable for each sample.
 #' @param That A matrix where the \code{i}th column is the unit-level binary treatment that would have been assigned by the
-#' individualized treatment rule generated in the \code{i}th fold. If \code{plim} is specified, please ensure
+#' individualized treatment rule generated in the \code{i}th fold. If \code{budget} is specified, please ensure
 #' that the percentage of treatment units of That is lower than the budget constraint.
 #' @param Y The outcome variable of interest.
 #' @param ind A vector of integers (between 1 and number of folds inclusive) indicating which testing set does each sample belong to.
-#' @param plim The maximum percentage of population that can be treated under the
+#' @param budget The maximum percentage of population that can be treated under the
 #' budget constraint. Should be a decimal between 0 and 1. Default is NA which assumes
 #' no budget constraint.
 #' @param centered If \code{TRUE}, the outcome variables would be centered before processing. This minimizes
@@ -37,7 +37,7 @@
 #' @importFrom quadprog solve.QP
 #' @importFrom Matrix nearPD
 #' @export PAPEcv
-PAPEcv <- function (T, That, Y, ind, plim = NA, centered = TRUE) {
+PAPEcv <- function (T, That, Y, ind, budget = NA, centered = TRUE) {
   if (!(identical(as.numeric(T),as.numeric(as.logical(T))))) {
     stop("T should be binary.")
   }
@@ -50,10 +50,10 @@ PAPEcv <- function (T, That, Y, ind, plim = NA, centered = TRUE) {
   if ((length(T)!=dim(That)[1]) | (dim(That)[1]!=length(Y))) {
     stop("All the data should have the same length.")
   }
-  if (!is.na(plim) & !(sum(sapply(1:max(ind),function(i) sum(That[ind==i, i])<=floor(length(T[ind==i])*plim)+1))==max(ind))) {
-    stop("The number of treated units in That should be below or equal to plim.")
+  if (!is.na(budget) & !(sum(sapply(1:max(ind),function(i) sum(That[ind==i, i])<=floor(length(T[ind==i])*budget)+1))==max(ind))) {
+    stop("The number of treated units in That should be below or equal to budget")
   }
-  if (!is.na(plim) & ((plim<0) | (plim>1))) {
+  if (!is.na(budget) & ((budget<0) | (budget>1))) {
     stop("Budget constraint should be between 0 and 1")
   }
   if (length(T)==0) {
@@ -65,7 +65,7 @@ PAPEcv <- function (T, That, Y, ind, plim = NA, centered = TRUE) {
   if (centered) {
     Y = Y - mean(Y)
   }
-  if (is.na(plim)) {
+  if (is.na(budget)) {
     nfolds = max(ind)
     n = length(Y)
     n1 = sum(T)
@@ -122,13 +122,13 @@ PAPEcv <- function (T, That, Y, ind, plim = NA, centered = TRUE) {
     kf1 = numeric(nfolds)
     kf0 = numeric(nfolds)
     for (i in 1:nfolds) {
-      output = PAPE(T[ind==i],That[ind==i,i],Y[ind==i],plim)
+      output = PAPE(T[ind==i],That[ind==i,i],Y[ind==i],budget)
       m = length(T[ind==i])
       m1 = sum(T[ind==i])
       m0 = m - m1
       probs=sum(That[ind==i,i])/m
-      Sfp1=Sfp1 + var(((That[,i]-plim)*Y)[T==1 & ind==i])/(m1*nfolds)
-      Sfp0=Sfp0 + var(((That[,i]-plim)*Y)[T==0 & ind==i])/(m0*nfolds)
+      Sfp1=Sfp1 + var(((That[,i]-budget)*Y)[T==1 & ind==i])/(m1*nfolds)
+      Sfp0=Sfp0 + var(((That[,i]-budget)*Y)[T==0 & ind==i])/(m0*nfolds)
       temp1 = mean(Y[T==1 & That[,i]==1 & ind==i])-mean(Y[T==0 & That[,i]==1 & ind==i])
       temp0 = mean(Y[T==1 & That[,i]==0 & ind==i])-mean(Y[T==0 & That[,i]==0 & ind==i])
       if (!is.nan(temp1)) {
@@ -143,7 +143,7 @@ PAPEcv <- function (T, That, Y, ind, plim = NA, centered = TRUE) {
     SF2 = var(papepfold)
     kf1 = mean(kf1)
     kf0 = mean(kf0)
-    varfp=Sfp1+Sfp0+floor(mF*plim)*(mF-floor(mF*plim))/(mF^2*(mF-1))*((2*plim-1)*kf1^2-2*plim*kf1*kf0)
+    varfp=Sfp1+Sfp0+floor(mF*budget)*(mF-floor(mF*budget))/(mF^2*(mF-1))*((2*budget-1)*kf1^2-2*budget*kf1*kf0)
     vartotal = varfp - (nfolds - 1) / nfolds * min(varfp, SF2)
     return(list(papep=mean(papepfold),sd=sqrt(max(vartotal,0))))
   }
