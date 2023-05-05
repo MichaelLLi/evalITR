@@ -9,7 +9,7 @@
 #'   Proportion of treated units.
 #' @param n_folds
 #'   Number of cross-validation folds. Default is 5.
-#' @param ratio
+#' @param split_ratio
 #'   Split ratio between train and test set under sample splitting. Default is 0.
 #' @param ngates
 #'   The number of groups to separate the data into. The groups are determined by tau. Default is 5.
@@ -20,6 +20,7 @@
 #' @param tuneLength caret parameter
 #' @param ... Additional arguments passed to \code{caret::train}
 #' @import dplyr
+#' @import rlearner
 #' @importFrom rlang !! sym
 #' @export
 #' @return An object of \code{itr} class
@@ -30,7 +31,7 @@ estimate_itr <- function(
     algorithms,
     budget,
     n_folds = 5,
-    ratio = 0,
+    split_ratio = 0,
     ngates = 5,
     preProcess = NULL,
     weights = NULL,
@@ -75,10 +76,10 @@ estimate_itr <- function(
   n_df <- nrow(data)
   n_X  <- length(data) - 1
   n_folds <- n_folds
-  cv <- ifelse(ratio > 0, FALSE, TRUE)
+  cv <- ifelse(split_ratio > 0, FALSE, TRUE)
 
   params <- list(
-    n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio, ngates = ngates, cv = cv, 
+    n_df = n_df, n_folds = n_folds, n_alg = n_alg, split_ratio = split_ratio, ngates = ngates, cv = cv, 
     train_params = train_params, caret_algorithms = caret_algorithms, rlearner_algorithms = rlearner_algorithms)
 
   df <- list(algorithms = algorithms, outcome = outcome, data = data, treatment = treatment)
@@ -168,7 +169,7 @@ itr_single_outcome <- function(
 
     # create split series of test/training partitions
     split <- caret::createDataPartition(data$Treat,
-                                        p = params$ratio,
+                                        p = params$split_ratio,
                                         list = FALSE)
     trainset = data[split,]
     testset = data[-split,]
@@ -780,13 +781,13 @@ evaluate_itr <- function(fit, ...){
 
 #' Conduct hypothesis tests
 #' @param fit Fitted model. Usually an output from \code{estimate_itr}
-#' @param nsim Number of Monte Carlo simulations used to simulate the null distributions. Default is 10000.
+#' @param nsim Number of Monte Carlo simulations used to simulate the null distributions. Default is 1000.
 #' @param ... Further arguments passed to the function.
 #' @return An object of \code{itr} class
 #' @export
 test_itr <- function(
     fit,
-    nsim = 10000,
+    nsim = 1000,
     ...
 ) {
 

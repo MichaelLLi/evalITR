@@ -40,6 +40,7 @@ Imports:
     purrr,
     randomForest,
     rlang,
+    rlearner,
     rpart,
     rqPen,
     scales,

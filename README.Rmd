@@ -52,7 +52,7 @@ This is an example using the `star` dataset (for more information about the data
 We start with a simple example with one outcome variable (writing scores) and one machine learning algorithm (causal forest). Then we move to incoporate multiple outcomes and compare model performances with several machine learning algorithms. 
 
 
-To begin, we load the dataset and specify the outcome variable and covariates to be used in the model. Next, we utilize a random forest algorithm to develop an Individualized Treatment Rule (ITR) for estimating the varied impacts of small class sizes on students' writing scores.  Since the treatment is often costly for most policy programs, we consider a case with 20% budget constraint (`budget` = 0.2). The model will identify the top 20% of units who benefit from the treatment most and assign them to with the treatment. We train the model through sample splitting, with the `ratio` between the train and test sets determined by the ratio argument. Specifically, we allocate 70% of the data to train the model, while the remaining 30% is used as testing data (`ratio` = 0.7).
+To begin, we load the dataset and specify the outcome variable and covariates to be used in the model. Next, we utilize a random forest algorithm to develop an Individualized Treatment Rule (ITR) for estimating the varied impacts of small class sizes on students' writing scores.  Since the treatment is often costly for most policy programs, we consider a case with 20% budget constraint (`budget` = 0.2). The model will identify the top 20% of units who benefit from the treatment most and assign them to with the treatment. We train the model through sample splitting, with the `split_ratio` between the train and test sets determined by the `split_ratio` argument. Specifically, we allocate 70% of the data to train the model, while the remaining 30% is used as testing data (`split_ratio` = 0.7).
 
 
 ```{r estimate, message = FALSE}
@@ -86,7 +86,7 @@ fit <- estimate_itr(
                data = star_data,
                algorithms = c("causal_forest"),
                budget = 0.2,
-               ratio = 0.7)
+               split_ratio = 0.7)
 
 
 # evaluate ITR 
@@ -119,7 +119,7 @@ fit_caret <- estimate_itr(
               data = star_data,
               algorithms = c("gbm"),
               budget = 0.2,
-              ratio = 0.7,
+              split_ratio = 0.7,
               tuneGrid = gbmGrid,
               verbose = FALSE)
 
@@ -145,20 +145,18 @@ We can extract estimates from the `est` object. The following code shows how to 
 
 ```{r est_extract, eval = FALSE}
 # plot GATE estimates
-summary(est)$GATE %>%
-  mutate(conf.low = estimate - 1.96 * std.deviation,
-         conf.high = estimate + 1.96 * std.deviation,
-         group = as_factor(group)) %>%
+summary(est)$GATE %>% 
+  mutate(group = as_factor(group)) %>%
   ggplot(., aes(
     x = group, y = estimate,
-    ymin = conf.low , ymax = conf.high, color = algorithm)) +
+    ymin = lower , ymax = upper, color = algorithm)) +
   ggdist::geom_pointinterval(
     width=0.5,    
     position=position_dodge(0.5),
     interval_size_range = c(0.8, 1.5),
     fatten_point = 2.5) +
   theme_bw() +    
-  theme(panel.grid element_blank(),
+  theme(panel.grid = element_blank(),
         panel.background = element_blank()) +
   labs(x = "Group", y = "GATE estimate") +
   geom_hline(yintercept = 0, linetype = "dashed", color = "#4e4e4e") +
@@ -182,7 +180,7 @@ plot(est)
 
 ## Example under cross-validation
 
-The package also allows estimate ITR with k-folds cross-validation. Instead of specifying the `ratio` argument, we choose the number of folds (`n_folds`). The following code presents an example of estimating ITR with 3 folds cross-validation. In practice, we recommend using 10 folds to get a more stable model performance. 
+The package also allows estimate ITR with k-folds cross-validation. Instead of specifying the `split_ratio` argument, we choose the number of folds (`n_folds`). The following code presents an example of estimating ITR with 3 folds cross-validation. In practice, we recommend using 10 folds to get a more stable model performance. 
 
 ```{r cv_estimate, message = FALSE}
 # estimate ITR 

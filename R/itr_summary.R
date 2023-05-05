@@ -87,9 +87,9 @@ summary.itr <- function(object, ...) {
       bind_rows() %>%
       mutate(
         statistic = gate / sd,
-        p.value = 2 * pnorm(abs(gate / sd), lower.tail = FALSE),
-        upper = c(mean(gate) - qnorm(0.95) * sd),
-        lower = c(mean(gate) + qnorm(0.95) * sd)
+        p.value = 2 * pnorm(abs(statistic), lower.tail = FALSE),
+        upper = gate - qnorm(0.95) * sd,
+        lower = gate + qnorm(0.95) * sd
       ) %>%
       rename(
         estimate = gate,
@@ -170,8 +170,8 @@ summary.itr <- function(object, ...) {
       mutate(
         statistic = gate / sd,
         p.value = 2 * pnorm(abs(gate / sd), lower.tail = FALSE),
-        upper = c(mean(gate) - qnorm(0.95) * sd),
-        lower = c(mean(gate) + qnorm(0.95) * sd)
+        upper = gate + qnorm(0.975) * sd,
+        lower = gate - qnorm(0.975) * sd
       ) %>%
       rename(
         estimate = gate,

@@ -11,7 +11,7 @@ estimate_itr(
   algorithms,
   budget,
   n_folds = 5,
-  ratio = 0,
+  split_ratio = 0,
   ngates = 5,
   preProcess = NULL,
   weights = NULL,
@@ -34,7 +34,7 @@ estimate_itr(
 
 \item{n_folds}{Number of cross-validation folds. Default is 5.}
 
-\item{ratio}{Split ratio between train and test set under sample splitting. Default is 0.}
+\item{split_ratio}{Split ratio between train and test set under sample splitting. Default is 0.}
 
 \item{ngates}{The number of groups to separate the data into. The groups are determined by tau. Default is 5.}
 
