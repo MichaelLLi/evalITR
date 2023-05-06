@@ -1,6 +1,6 @@
 #' Summarize estimate_itr output 
 #' @param object An object of \code{estimate_itr} class (typically an output of \code{estimate_itr()} function).
-#' @param ... Other parameters. Currently not supported
+#' @param ... Other parameters. 
 #' @importFrom stats pnorm
 #' @export
 summary.itr <- function(object, ...) {
@@ -8,16 +8,7 @@ summary.itr <- function(object, ...) {
   fit_outcome <- object$df$outcome
   algorithm   <- object$df$algorithm
   cv          <- object$cv
-
-  # if(outcome != TRUE){
-  #   # plot user selected outcome
-  #   m = which(fit_outcome == outcome)
-  #   fit <- object$qoi[[m]]  
-  # }else {
-  #   m = 1 # plot the first outcome
-  #   fit <- object$qoi[[1]]
-  # }
-  fit <- object$qoi
+  fit         <- object$qoi
 
   ## -----------------------------------------
   ## compute quantities under sample splitting
@@ -87,7 +78,7 @@ summary.itr <- function(object, ...) {
       bind_rows() %>%
       mutate(
         statistic = gate / sd,
-        p.value = 2 * pnorm(abs(statistic), lower.tail = FALSE),
+        p.value = 2 * pnorm(abs(gate / sd), lower.tail = FALSE),
         upper = gate - qnorm(0.95) * sd,
         lower = gate + qnorm(0.95) * sd
       ) %>%
@@ -217,3 +208,96 @@ print.summary.itr <- function(x, ...) {
   print(as.data.frame(x[["GATE"]]), digits = 2)
   cli::cat_line("")
 }
+
+
+
+#' Summarize test_itr output 
+#' @param object An object of \code{test_itr} class (typically an output of \code{test_itr()} function).
+#' @param ... Other parameters. 
+#' @importFrom stats pnorm
+#' @export
+summary.test_itr <- function(object, ...) {
+  out            <- list()
+  consist_tibble <- tibble()
+  het_tibble     <- tibble()
+
+  ## -----------------------------------------
+  ## hypothesis tests
+  ## -----------------------------------------
+  if (names(object[1]) == "consist") {
+
+    # parameters for test_itr object
+    consist        <- object$consist
+    het            <- object$het
+    consist_names <- names(consist)
+    het_names <- names(het)
+
+    # reformat
+    out[["Consistency"]] <- consist %>%
+      map(., ~ as_tibble(.)) %>%
+      bind_rows() %>%
+      mutate("algorithm" = consist_names) %>%
+      rename("statistic" = stat,
+            "p.value" = pval) %>%
+      select("algorithm", "statistic", "p.value")
+
+
+    out[["Heterogeneity"]] <- het %>%
+      map(., ~ as_tibble(.)) %>%
+      bind_rows() %>%
+      mutate("algorithm" = het_names) %>%
+      rename("statistic" = stat,
+            "p.value" = pval) %>%
+      select("algorithm", "statistic", "p.value")
+  } 
+
+
+  if (names(object[1]) == "consistcv") {
+    
+    # parameters for test_itr object
+    consist <- object$consistcv
+    het <- object$hetcv
+    consist_names <- names(consist)
+    het_names <- names(het)
+
+    # reformat
+    out[["Consistency_cv"]] <- consist %>%
+      map(., ~ as_tibble(.)) %>%
+      bind_rows() %>%
+      mutate("algorithm" = consist_names) %>%
+      rename("statistic" = stat,
+            "p-value" = pval) %>%
+      select("algorithm", "statistic", "p-value")
+
+    out[["Heterogeneity_cv"]] <- het %>%
+      map(., ~ as_tibble(.)) %>%
+      bind_rows() %>%
+      mutate("algorithm" = het_names) %>%
+      rename("statistic" = stat,
+            "p-value" = pval) %>%
+      select("algorithm", "Test Statistic", "p-value")
+  }
+
+  class(out) <- c("summary.test_itr", class(out))
+
+  return(out)
+}
+
+#' Print
+#' @importFrom cli cat_rule
+#' @param x An object of \code{summary.test_itr} class. This is typically an output of \code{summary.test_itr()} function.
+#' @param ... Other parameters. 
+#' @export
+print.summary.test_itr <- function(x, ...) {
+
+  # Rank Consistency Test
+  cli::cat_rule(left = "Rank Consistency Test Results")
+  print(as.data.frame(x[["Consistency"]], digits = 2))
+  cli::cat_line("")
+
+  # Group Heterogeneity Test
+  cli::cat_rule(left = "Group Heterogeneity Test Results")
+  print(as.data.frame(x[["Heterogeneity"]], digits = 2))
+  cli::cat_line("")
+}
+
