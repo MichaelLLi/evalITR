@@ -753,6 +753,8 @@ itr_single_outcome <- function(
     Ycv = Ycv, Tcv = Tcv, indcv = indcv, budget = budget
   ))
 }
+
+
 #' Evaluate ITR
 #' @param fit Fitted model. Usually an output from \code{estimate_itr}
 #' @param ... Further arguments passed to the function.
@@ -783,7 +785,7 @@ evaluate_itr <- function(fit, ...){
 #' @param fit Fitted model. Usually an output from \code{estimate_itr}
 #' @param nsim Number of Monte Carlo simulations used to simulate the null distributions. Default is 1000.
 #' @param ... Further arguments passed to the function.
-#' @return An object of \code{itr} class
+#' @return An object of \code{test_itr} class
 #' @export
 test_itr <- function(
     fit,
@@ -802,8 +804,13 @@ test_itr <- function(
   ngates     <- estimates$params$ngates
   algorithms <- fit$df$algorithms
   outcome    <- fit$df$outcome
-  # run tests
 
+  # caret and rlearner parameters
+  caret_algorithms <- estimates$params$caret_algorithms
+  rlearner_algorithms <- estimates$params$rlearner_algorithms
+
+  # run tests
+  
   ## =================================
   ## sample splitting
   ## =================================
@@ -811,40 +818,30 @@ test_itr <- function(
   if(cv == FALSE){
     cat('Conduct hypothesis tests for GATEs unde sample splitting ...\n')
 
-    ## create empty lists to for consistcv and hetcv
+    # create empty lists to for consistcv and hetcv
     consist <- list()
     het <- list()
 
-      # model with a single outcome
-      ## run consistency tests for each model
-      if ("causal_forest" %in% algorithms) {
-        consist[["causal_forest"]] <- consist.test(
-          T   = Tcv,
-          tau = fit_ml$causal_forest$tau,
-          Y   = Ycv,
-          ngates = ngates)
+    # run consistency and heterogeneity tests for each model
+    for (i in algorithms) {
 
-        het[["causal_forest"]] <- het.test(
-          T   = Tcv,
-          tau = fit_ml$causal_forest$tau,
-          Y   = Ycv,
-          ngates = ngates)
-      }
+      consist[[i]] <- consist.test(
+        T   = Tcv,
+        tau = fit_ml[[i]]$tau,
+        Y   = Ycv,
+        ngates = ngates)
 
-      if ("lasso" %in% algorithms) {
-        consist[["lasso"]] <- consist.test(
-          T   = Tcv,
-          tau = fit_ml$lasso$tau,
-          Y   = Ycv,
-          ngates = ngates)
+      het[[i]] <- het.test(
+        T   = Tcv,
+        tau = fit_ml[[i]]$tau,
+        Y   = Ycv,
+        ngates = ngates)
+    }
+   
 
-        het[["lasso"]] <- het.test(
-          T   = Tcv,
-          tau = fit_ml$lasso$tau,
-          Y   = Ycv,
-          ngates = ngates)
-      }
-
+    # return a list of consist and het
+    out <- list(consist = consist, het = het)
+  
   }
 
   ## =================================
@@ -854,47 +851,39 @@ test_itr <- function(
   if(cv == TRUE){
     cat('Conduct hypothesis tests for GATEs unde cross-validation ...\n')
 
-      ## create empty lists to for consistcv and hetcv
+    # create empty lists to for consistcv and hetcv
     consistcv <- list()
     hetcv <- list()
 
-      ## run consistency tests for each model
+    # run consistency and heterogeneity tests for each model
+    for (i in algorithms) {
 
-      if ("causal_forest" %in% algorithms) {
-        consistcv[["causal_forest"]] <- consistcv.test(
-          T   = Tcv,
-          tau = gettaucv(fit),
-          Y   = Ycv,
-          ind = indcv,
-          ngates = ngates)
-      }
+      consistcv[[i]] <- consistcv.test(
+        T   = Tcv,
+        tau = gettaucv(fit)[[i]],
+        Y   = Ycv,
+        ind = indcv,
+        ngates = ngates)
 
-      ## run heterogeneity tests for each model
-      if ("causal_forest" %in% algorithms) {
-        hetcv[["causal_forest"]] <- hetcv.test(
-          T   = Tcv,
-          tau = gettaucv(fit), # a matrix of length(total sample size) x n_folds
-          Y   = Ycv,
-          ind = indcv,
-          ngates = ngates)
-      }
+      hetcv[[i]] <- hetcv.test(
+        T   = Tcv,
+        tau = gettaucv(fit)[[i]],
+        Y   = Ycv,
+        ind = indcv,
+        ngates = ngates)
+    
+    }
 
+  # return a list of consistcv and hetcv
+  out <- list(consistcv = consistcv, hetcv = hetcv)
   }
 
-  # formulate and return output
-  if(cv == FALSE){
-    tests <- list(consist = consist,
-                  het = het)
-    return(tests)
-  }
-  if(cv == TRUE){
-    tests_cv <- list(consistcv = consistcv,
-                    hetcv = hetcv)
-    return(tests_cv)
-  }
+  class(out) <- c("test_itr", class(out))
+
+  return(out)
 
 }
 
 
-utils::globalVariables(c("Treat", "aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm", "vec", "Y"))
+utils::globalVariables(c("Treat", "aupec", "sd", "pval", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm", "vec", "Y", "algorithm", "statistic", "p.value"))
 

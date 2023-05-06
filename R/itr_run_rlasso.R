@@ -1,26 +1,24 @@
 
-## rlearner
+## rlasso
 
-run_rlearner <- function(
+run_rlasso <- function(
   dat_train,
   dat_test,
   dat_total,
   params,
   indcv,
   iter,
-  budget,
-  train_method,
-  ...
+  budget
 ) {
 
   # split/cross-validation
   cv <- params$cv
 
   ## train
-  fit_train <- train_rlearner(dat_train, train_method)
+  fit_train <- train_rlasso(dat_train)
 
   ## test
-  fit_test <- test_rlearner(
+  fit_test <- test_rlasso(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb,
     indcv, iter, budget, cv
   )
@@ -31,27 +29,24 @@ run_rlearner <- function(
 
 
 
-train_rlearner <- function(dat_train, train_method) {
+train_rlasso <- function(dat_train) {
 
   ## format training data
   training_data_elements <- create_ml_args(dat_train)
 
-  ## parameters
+   ## outcome
   outcome = training_data_elements[["Y"]]
   treat = training_data_elements[["Treat"]]
   covs  = training_data_elements[["X"]] %>% as.matrix()
 
-  # rlearner_fun <- get(train_method, envir = as.environment("package::rlearner"))
-  # fit <- rlearner_fun(covs, treat, outcome)
-
-  ## fit
-  fit <- do.call(train_method, list(covs, treat, outcome))
+    ## fit
+    fit <- rlearner::rlasso(covs, treat, outcome)
 
   return(fit)
 }
 
 #'@importFrom stats predict runif
-test_rlearner <- function(
+test_rlasso <- function(
   fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, budget, cv
 ) {
 

@@ -9,7 +9,7 @@
 \arguments{
 \item{object}{An object of \code{estimate_itr} class (typically an output of \code{estimate_itr()} function).}
 
-\item{...}{Other parameters. Currently not supported}
+\item{...}{Other parameters.}
 }
 \description{
 Summarize estimate_itr output

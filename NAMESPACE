@@ -2,7 +2,9 @@
 
 S3method(plot,itr)
 S3method(print,summary.itr)
+S3method(print,summary.test_itr)
 S3method(summary,itr)
+S3method(summary,test_itr)
 export(AUPEC)
 export(AUPECcv)
 export(GATE)

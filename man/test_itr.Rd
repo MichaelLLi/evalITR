@@ -14,7 +14,7 @@ test_itr(fit, nsim = 1000, ...)
 \item{...}{Further arguments passed to the function.}
 }
 \value{
-An object of \code{itr} class
+An object of \code{test_itr} class
 }
 \description{
 Conduct hypothesis tests

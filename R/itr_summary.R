@@ -236,19 +236,19 @@ summary.test_itr <- function(object, ...) {
     out[["Consistency"]] <- consist %>%
       map(., ~ as_tibble(.)) %>%
       bind_rows() %>%
-      mutate("algorithm" = consist_names) %>%
-      rename("statistic" = stat,
-            "p.value" = pval) %>%
-      select("algorithm", "statistic", "p.value")
+      mutate(algorithm = consist_names) %>%
+      rename(statistic = stat,
+            p.value = pval) %>%
+      select(algorithm, statistic, p.value)
 
 
     out[["Heterogeneity"]] <- het %>%
       map(., ~ as_tibble(.)) %>%
       bind_rows() %>%
-      mutate("algorithm" = het_names) %>%
-      rename("statistic" = stat,
-            "p.value" = pval) %>%
-      select("algorithm", "statistic", "p.value")
+      mutate(algorithm = het_names) %>%
+      rename(statistic = stat,
+            p.value = pval) %>%
+      select(algorithm, statistic, p.value)
   } 
 
 
@@ -264,18 +264,18 @@ summary.test_itr <- function(object, ...) {
     out[["Consistency_cv"]] <- consist %>%
       map(., ~ as_tibble(.)) %>%
       bind_rows() %>%
-      mutate("algorithm" = consist_names) %>%
-      rename("statistic" = stat,
-            "p-value" = pval) %>%
-      select("algorithm", "statistic", "p-value")
+      mutate(algorithm = consist_names) %>%
+      rename(statistic = stat,
+            p.value = pval) %>%
+      select(algorithm, statistic, p.value)
 
     out[["Heterogeneity_cv"]] <- het %>%
       map(., ~ as_tibble(.)) %>%
       bind_rows() %>%
-      mutate("algorithm" = het_names) %>%
-      rename("statistic" = stat,
-            "p-value" = pval) %>%
-      select("algorithm", "Test Statistic", "p-value")
+      mutate(algorithm = het_names) %>%
+      rename(statistic = stat,
+            p.value = pval) %>%
+      select(algorithm, statistic, p.value)
   }
 
   class(out) <- c("summary.test_itr", class(out))
