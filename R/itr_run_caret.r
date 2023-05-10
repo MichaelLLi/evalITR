@@ -39,9 +39,9 @@ train_caret <- function(dat_train, train_params, train_method, ...) {
     training_data_elements_caret = create_ml_args_caret(dat_train)
 
     ## train formula
-    covariates = training_data_elements_caret[["data"]] %>% dplyr::select(-c(Y, Treat)) %>% colnames()
+    covariates = training_data_elements_caret[["data"]] %>% dplyr::select(-c(Y, T)) %>% colnames()
 
-    formula = as.formula(paste("Y ~ (", paste0(covariates, collapse = "+"), ")*Treat"))
+    formula = as.formula(paste("Y ~ (", paste0(covariates, collapse = "+"), ")*T"))
 
     ## add additional parameters from ...
     train_params = c(train_params, list(...))

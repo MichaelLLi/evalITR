@@ -4,7 +4,7 @@
 \alias{itr_single_outcome}
 \title{Evaluate ITR for Single Outcome}
 \usage{
-itr_single_outcome(data, algorithms, params, folds, budget, ...)
+itr_single_outcome(data, algorithms, params, folds, budget, user_function, ...)
 }
 \arguments{
 \item{data}{A dataset.}

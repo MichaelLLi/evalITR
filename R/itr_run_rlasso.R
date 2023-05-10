@@ -36,11 +36,11 @@ train_rlasso <- function(dat_train) {
 
    ## outcome
   outcome = training_data_elements[["Y"]]
-  treat = training_data_elements[["Treat"]]
+  treatment = training_data_elements[["T"]]
   covs  = training_data_elements[["X"]] %>% as.matrix()
 
     ## fit
-    fit <- rlearner::rlasso(covs, treat, outcome)
+    fit <- rlearner::rlasso(covs, treatment, outcome)
 
   return(fit)
 }

@@ -25,12 +25,12 @@ create_ml_arguments = function(outcome, treatment, data){
     dplyr::select(-c(all_of(outcome), all_of(treatment))) %>%
     as.data.frame()
 
-  Treat = data %>%
+  T = data %>%
     dplyr::select(all_of(treatment)) %>% unlist() %>% as.numeric()
 
   formula = as.formula(paste(outcome, "~", paste(c(treatment, names(X)), collapse = "+")))
 
-  return(list(Y = Y, X = X, Treat = Treat, formula = formula))
+  return(list(Y = Y, X = X, T = T, formula = formula))
 }
 
 #' Create general arguments 
@@ -40,18 +40,18 @@ create_ml_args = function(data){
 
   Y = data[["Y"]]
   X = data[["X"]]
-  Treat =data[["Treat"]]
+  T =data[["T"]]
 
-  X_and_Treat = cbind(X, Treat)
-  X_expand = model.matrix(~.*Treat, data = X_and_Treat)
+  X_and_T = cbind(X, T)
+  X_expand = model.matrix(~.*T, data = X_and_T)
 
   # also needed for testing:
-  X0t = cbind(X, Treat = 0)
-  X1t = cbind(X, Treat = 1)
-  X0t_expand = model.matrix(~.*Treat, data = X0t)
-  X1t_expand = model.matrix(~.*Treat, data = X1t)
+  X0t = cbind(X, T = 0)
+  X1t = cbind(X, T = 1)
+  X0t_expand = model.matrix(~.*T, data = X0t)
+  X1t_expand = model.matrix(~.*T, data = X1t)
 
-  return(list(Y = Y, X = X, Treat = Treat, X_expand = X_expand, X0t_expand = X0t_expand, X1t_expand = X1t_expand))
+  return(list(Y = Y, X = X, T = T, X_expand = X_expand, X0t_expand = X0t_expand, X1t_expand = X1t_expand))
 }
 
 
@@ -63,11 +63,11 @@ create_ml_args_causalforest = function(data){
 
   Y = data[["Y"]]
   X = data[["X"]]
-  Treat = data[["Treat"]]
+  T = data[["T"]]
 
   X_expand = model.matrix(~. -1, data = X)
 
-  return(list(Y = Y, X = X, Treat = Treat, X_expand = X_expand))
+  return(list(Y = Y, X = X, T = T, X_expand = X_expand))
 }
 
 
@@ -77,15 +77,15 @@ create_ml_args_bart = function(data){
 
   Y = data[["Y"]]
   X = data[["X"]]
-  Treat =data[["Treat"]]
+  T=data[["T"]]
 
-  X_and_Treat = cbind(X, Treat)
+  X_and_T = cbind(X, T)
 
   # also needed for testing:
-  X0t = cbind(X, Treat = 0)
-  X1t = cbind(X, Treat = 1)
+  X0t = cbind(X, T = 0)
+  X1t = cbind(X, T= 1)
 
-  return(list(Y = Y, X = X, Treat = Treat, X_and_Treat = X_and_Treat, X0t = X0t, X1t = X1t))
+  return(list(Y = Y, X = X, T = T, X_and_T = X_and_T, X0t = X0t, X1t = X1t))
 }
 
 #' Create arguments for bartCause
@@ -94,13 +94,13 @@ create_ml_args_bartc = function(data){
 
   Y = data[["Y"]]
   X = data[["X"]]
-  Treat =data[["Treat"]]
+  T =data[["T"]]
 
   # also needed for testing:
   X0t = cbind(X, z = 0)
   X1t = cbind(X, z = 1)
 
-  return(list(Y = Y, X = X, Treat = Treat, X0t = X0t, X1t = X1t))
+  return(list(Y = Y, X = X, T = T, X0t = X0t, X1t = X1t))
 }
 
 #' Create arguments for LASSO
@@ -110,18 +110,18 @@ create_ml_args_lasso = function(data){
 
   Y = data[["Y"]]
   X = data[["X"]]
-  Treat =data[["Treat"]]
+  T =data[["T"]]
 
-  X_and_Treat = cbind(X, Treat)
-  X_expand = model.matrix(~.*Treat, data = X_and_Treat)
+  X_and_T = cbind(X, T)
+  X_expand = model.matrix(~.*T, data = X_and_T)
 
   # also needed for testing:
-  X0t = cbind(X, Treat = 0)
-  X1t = cbind(X, Treat = 1)
-  X0t_expand = model.matrix(~.*Treat, data = X0t)
-  X1t_expand = model.matrix(~.*Treat, data = X1t)
+  X0t = cbind(X, T = 0)
+  X1t = cbind(X, T = 1)
+  X0t_expand = model.matrix(~.*T, data = X0t)
+  X1t_expand = model.matrix(~.*T, data = X1t)
 
-  return(list(Y = Y, X = X, Treat = Treat, X_expand = X_expand, X0t_expand = X0t_expand, X1t_expand = X1t_expand))
+  return(list(Y = Y, X = X, T = T, X_expand = X_expand, X0t_expand = X0t_expand, X1t_expand = X1t_expand))
 }
 
 
@@ -134,13 +134,13 @@ create_ml_args_svm = function(data){
   formula = data[["formula"]]
   Y = data[["Y"]] %>% scale()
   X = data[["X"]] %>% mutate_all(.data, scale)
-  Treat = data[["Treat"]]  %>% scale()
+  T = data[["T"]]  %>% scale()
 
-  data = cbind(Y, X, Treat)
+  data = cbind(Y, X, T)
 
   # also needed for testing:
-  data0t = cbind(Y, X, Treat = 0)
-  data1t = cbind(Y, X, Treat = 1)
+  data0t = cbind(Y, X, T = 0)
+  data1t = cbind(Y, X, T = 1)
 
   return(list(formula = formula, data = data,
               data0t = data0t, data1t = data1t))
@@ -154,15 +154,15 @@ create_ml_args_svm_cls = function(data){
 
   Y = data[["Y"]]
   X = data[["X"]]
-  Treat = data[["Treat"]]
+  T = data[["T"]]
 
-  formula = as.formula(paste(as.factor("Y"), "~", paste(c("Treat", names(X)), collapse = "+")))
+  formula = as.formula(paste(as.factor("Y"), "~", paste(c("T", names(X)), collapse = "+")))
 
-  data = cbind(Y, X, Treat)
+  data = cbind(Y, X, T)
 
   # also needed for testing:
-  data0t = cbind(Y, X, Treat = 0)
-  data1t = cbind(Y, X, Treat = 1)
+  data0t = cbind(Y, X, T = 0)
+  data1t = cbind(Y, X, T = 1)
 
   return(list(formula = formula, data = data,
               data0t = data0t, data1t = data1t))
@@ -174,13 +174,13 @@ create_ml_args_lda = function(data){
   formula = data[["formula"]]
   Y = data[["Y"]]
   X = data[["X"]]
-  Treat = data[["Treat"]]
+  T = data[["T"]]
 
-  data = cbind(Y, X, Treat)
+  data = cbind(Y, X, T)
 
   # also needed for testing:
-  X0t = cbind(X, Treat = 0)
-  X1t = cbind(X, Treat = 1)
+  X0t = cbind(X, T = 0)
+  X1t = cbind(X, T = 1)
   data0t = cbind(Y, X0t)
   data1t = cbind(Y, X1t)
 
@@ -193,13 +193,13 @@ create_ml_args_boosted = function(data){
   formula = data[["formula"]]
   Y = data[["Y"]]
   X = data[["X"]]
-  Treat = data[["Treat"]]
+  T = data[["T"]]
 
-  data = cbind(Y, X, Treat)
+  data = cbind(Y, X, T)
 
   # also needed for testing:
-  data0t = cbind(Y, X, Treat = 0)
-  data1t = cbind(Y, X, Treat = 1)
+  data0t = cbind(Y, X, T = 0)
+  data1t = cbind(Y, X, T = 1)
 
   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
 }
@@ -210,19 +210,19 @@ create_ml_args_rf = function(data){
 
   Y = data[["Y"]]
   X = data[["X"]]
-  Treat = data[["Treat"]]
+  T = data[["T"]]
 
   if(length(unique(Y)) > 2){
     formula = data[["formula"]]
   }else{
-    formula = as.formula(paste("as.factor(Y) ~", paste(c("Treat", names(X)), collapse = "+")))
+    formula = as.formula(paste("as.factor(Y) ~", paste(c("T", names(X)), collapse = "+")))
   }
 
-  data = cbind(Y, X, Treat)
+  data = cbind(Y, X, T)
 
   # also needed for testing:
-  data0t = cbind(Y, X, Treat = 0)
-  data1t = cbind(Y, X, Treat = 1)
+  data0t = cbind(Y, X, T = 0)
+  data1t = cbind(Y, X, T = 1)
 
   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
 }
@@ -233,19 +233,19 @@ create_ml_args_bagging = function(data){
 
   Y = data[["Y"]]
   X = data[["X"]]
-  Treat = data[["Treat"]]
+  T = data[["T"]]
 
   if(length(unique(Y)) >2){
     formula = data[["formula"]]
   }else{
-    formula = as.formula(paste("as.factor(Y) ~", paste(c("Treat", names(X)), collapse = "+")))
+    formula = as.formula(paste("as.factor(Y) ~", paste(c("T", names(X)), collapse = "+")))
   }
 
-  data = cbind(Y, X, Treat)
+  data = cbind(Y, X, T)
 
   # also needed for testing:
-  data0t = cbind(Y, X, Treat = 0)
-  data1t = cbind(Y, X, Treat = 1)
+  data0t = cbind(Y, X, T = 0)
+  data1t = cbind(Y, X, T = 1)
 
   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
 }
@@ -257,13 +257,13 @@ create_ml_args_cart = function(data){
   formula = data[["formula"]]
   Y = data[["Y"]]
   X = data[["X"]]
-  Treat = data[["Treat"]]
+  T = data[["T"]]
 
-  data = cbind(Y, X, Treat)
+  data = cbind(Y, X, T)
 
   # also needed for testing:
-  data0t = cbind(Y, X, Treat = 0)
-  data1t = cbind(Y, X, Treat = 1)
+  data0t = cbind(Y, X, T = 0)
+  data1t = cbind(Y, X, T = 1)
 
   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
 }
@@ -276,13 +276,13 @@ create_ml_args_caret = function(data){
   formula = data[["formula"]]
   Y = data[["Y"]]
   X = data[["X"]]
-  Treat = data[["Treat"]]
+  T = data[["T"]]
 
-  data = cbind(Y, X, Treat)
+  data = cbind(Y, X, T)
 
   # also needed for testing:
-  data0t = cbind(Y, X, Treat = 0)
-  data1t = cbind(Y, X, Treat = 1)
+  data0t = cbind(Y, X, T = 0)
+  data1t = cbind(Y, X, T = 1)
 
   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
 }
@@ -298,15 +298,15 @@ create_ml_args_caret = function(data){
 #   formula = create_ml_arguments_outputs[["formula"]]
 #   Y = create_ml_arguments_outputs[["Y"]]
 #   X = create_ml_arguments_outputs[["X"]]
-#   Treat = create_ml_arguments_outputs[["Treat"]]
+#   T = create_ml_arguments_outputs[["T"]]
 #
 #   max = apply(training_data, 2 , max)
 #   min = apply(training_data, 2 , min)
 #   scaled_data = as.data.frame(scale(training_data, center = min, scale = max - min))
 #
 #   # also needed for testing:
-#   X0t = cbind(X, Treat = 0)
-#   X1t = cbind(X, Treat = 1)
+#   X0t = cbind(X, T = 0)
+#   X1t = cbind(X, T = 1)
 #   X0t_expand = model.matrix(~. -1, data = X0t)
 #   X1t_expand = model.matrix(~. -1, data = X1t)
 #
@@ -320,13 +320,13 @@ create_ml_args_knn = function(create_ml_arguments_outputs){
   formula = create_ml_arguments_outputs[["formula"]]
   Y = create_ml_arguments_outputs[["Y"]]
   X = create_ml_arguments_outputs[["X"]]
-  Treat = create_ml_arguments_outputs[["Treat"]]
+  T = create_ml_arguments_outputs[["T"]]
 
-  data = cbind(Y, X, Treat)
+  data = cbind(Y, X, T)
 
   # also needed for testing:
-  X0t = cbind(X, Treat = 0)
-  X1t = cbind(X, Treat = 1)
+  X0t = cbind(X, T = 0)
+  X1t = cbind(X, T = 1)
   data0t = cbind(Y, X0t)
   data1t = cbind(Y, X1t)
 

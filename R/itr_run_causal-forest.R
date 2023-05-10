@@ -38,7 +38,7 @@ train_causal_forest <- function(dat_train) {
   fit <- grf::causal_forest(
     training_data_elements_cf[["X_expand"]],
     training_data_elements_cf[["Y"]],
-    training_data_elements_cf[["Treat"]],
+    training_data_elements_cf[["T"]],
     num.trees = 2000
   )
   return(fit)

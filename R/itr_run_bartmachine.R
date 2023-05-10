@@ -38,7 +38,7 @@ train_bart <- function(dat_train) {
 
   ## fit
   fit <- bartMachine::bartMachine(
-            X=training_data_elements_bart[["X_and_Treat"]],
+            X=training_data_elements_bart[["X_and_T"]],
             y=outcome_bart,
             num_trees = 30,
             run_in_sample = TRUE,

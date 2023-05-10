@@ -33,7 +33,7 @@ train_bartc <- function(dat_train) {
 
   ## fit
   fit <- bartCause::bartc(response = training_data_elements_bartc[["Y"]],
-                      treatment = training_data_elements_bartc[["Treat"]],
+                      treatment = training_data_elements_bartc[["T"]],
                       confounders = training_data_elements_bartc[["X"]],
                       keepTrees = TRUE)
 

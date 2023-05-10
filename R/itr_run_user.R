@@ -1,7 +1,7 @@
 
-## rlearner
+## user-defined functions
 
-run_rlearner <- function(
+run_user <- function(
   dat_train,
   dat_test,
   dat_total,
@@ -17,10 +17,10 @@ run_rlearner <- function(
   cv <- params$cv
 
   ## train
-  fit_train <- train_rlearner(dat_train, train_method)
+  fit_train <- train_user(dat_train, train_method)
 
   ## test
-  fit_test <- test_rlearner(
+  fit_test <- test_user(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb,
     indcv, iter, budget, cv
   )
@@ -31,35 +31,35 @@ run_rlearner <- function(
 
 
 
-train_rlearner <- function(dat_train, train_method) {
+train_user <- function(dat_train, train_method) {
 
   ## format training data
-  training_data_elements <- create_ml_args(dat_train)
+#   training_data_elements <- create_ml_args(dat_train)
 
   ## parameters
-  outcome = training_data_elements[["Y"]]
-  treatment = training_data_elements[["T"]]
-  covs  = training_data_elements[["X"]] %>% as.matrix()
+#   outcome = training_data_elements[["Y"]]
+#   treatment = training_data_elements[["T"]]
+#   covs  = training_data_elements[["X"]] %>% as.matrix()
 
   ## fit
-  fit <- do.call(train_method, list(covs, treatment, outcome))
+  fit <- do.call(train_method, list(dat_train))
 
   return(fit)
 }
 
 #'@importFrom stats predict runif
-test_rlearner <- function(
+test_user <- function(
   fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, budget, cv
 ) {
 
   ## format data
-  testing_data_elements <- create_ml_args(dat_test)
-  total_data_elements   <- create_ml_args(dat_total)
+#   testing_data_elements <- create_ml_args(dat_test)
+#   total_data_elements   <- create_ml_args(dat_total)
 
   if(cv == TRUE){
     ## predict
-    new_data = total_data_elements[["X"]] %>% as.matrix()
-    tau_total=predict(fit_train,new_data)
+    # new_data = total_data_elements[["X"]] %>% as.matrix()
+    tau_total=predict(fit_train,dat_total)
 
     ## compute quantities of interest
     tau_test <-  tau_total[indcv == iter]
@@ -77,8 +77,8 @@ test_rlearner <- function(
 
   if(cv == FALSE){
     ## predict
-    new_data = testing_data_elements[["X"]] %>% as.matrix()
-    tau_test=predict(fit_train, new_data)
+    # new_data = testing_data_elements[["X"]] %>% as.matrix()
+    tau_test=predict(fit_train, dat_test)
 
     ## compute quantities of interest
     That     =  as.numeric(tau_test > 0)

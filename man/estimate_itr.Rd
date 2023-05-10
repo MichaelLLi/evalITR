@@ -18,6 +18,7 @@ estimate_itr(
   trControl = caret::trainControl(method = "none"),
   tuneGrid = NULL,
   tuneLength = ifelse(trControl$method == "none", 1, 3),
+  user_function = NULL,
   ...
 )
 }
