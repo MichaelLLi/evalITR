@@ -67,16 +67,12 @@ outcomes <- "g3tlangss"
 # specifying the treatment
 treatment <- "treatment"
 
-# specifying covariates
-covariates <-  c(
-  "gender","race","birthmonth","birthyear","SCHLURBN","GRDRANGE","GKENRMNT","GKFRLNCH","GKBUSED","GKWHITE")
-
 # specifying the data (remove other outcomes)
 star_data <- star %>% dplyr::select(-c(g3treadss,g3tmathss))
 
 # specifying the formula
 user_formula <- as.formula(
-  "g3tlangss ~ gender + race + birthmonth + birthyear + SCHLURBN + GRDRANGE + GKENRMNT + GKFRLNCH + GKBUSED + GKWHITE + treatment")
+  "g3tlangss ~ treatment + gender + race + birthmonth + birthyear + SCHLURBN + GRDRANGE + GKENRMNT + GKFRLNCH + GKBUSED + GKWHITE ")
 
 
 # estimate ITR 
@@ -180,7 +176,7 @@ plot(est)
 
 The package also allows estimate ITR with k-folds cross-validation. Instead of specifying the `split_ratio` argument, we choose the number of folds (`n_folds`). The following code presents an example of estimating ITR with 3 folds cross-validation. In practice, we recommend using 10 folds to get a more stable model performance. 
 
-```{r cv_estimate, message = FALSE, echo=FALSE, out.width = '60%'}
+```{r cv_estimate, message = FALSE, out.width = '60%'}
 # estimate ITR 
 set.seed(2021)
 fit_cv <- estimate_itr(
@@ -210,7 +206,7 @@ We can estimate ITR with various machine learning algorithms and then compare th
 The package also allows estimate heterogeneous treatment effects on the individual and group-level. On the individual-level, the summary statistics and the AUPEC plot show whether assigning individualized treatment rules may outperform complete random experiment. On the group-level, we specify the number of groups through `ngates` and estimating heterogeneous treatment effects across groups. 
 
 
-```{r multiple, message = FALSE}
+```{r multiple, message = FALSE, warning = FALSE}
 # specify the trainControl method
 fitControl <- caret::trainControl(
                            method = "repeatedcv",
