@@ -18,15 +18,6 @@ data = estimate$df$data
 algorithms = estimate$df$algorithms
 treatment = estimate$df$treatment
 
-# if(outcome != TRUE){
-#   # plot user selected outcome 
-#   m = which(fit_outcome == outcome) 
-# }else {
-#   # plot the first outcome
-#   m = 1 
-#   outcome = fit_outcome[1]
-# }
-
 ## -----------------------------------------
 ## format output under cross validation
 ## -----------------------------------------

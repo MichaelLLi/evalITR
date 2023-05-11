@@ -2,7 +2,6 @@
 #' @param fit_obj An output object from \code{itr_single_outcome} function.
 #' @param algorithms Machine learning algorithms
 #' @importFrom rlang .data
-# compute_qoi <- function(fit_obj, algorithms) {
 
 compute_qoi <- function(fit_obj, algorithms) {
 
@@ -14,7 +13,6 @@ compute_qoi <- function(fit_obj, algorithms) {
   indcv  <- fit_obj$indcv
   budget   <- fit_obj$budget
   cv     <- fit_obj$params$cv
-
 
 
   ## -----------------------------------------
@@ -170,6 +168,68 @@ compute_qoi <- function(fit_obj, algorithms) {
         PAPE = PAPE,
         PAPEp = PAPEp,
         PAPDp = PAPDp,
+        AUPEC = aupec,
+        GATE = GATE)
+
+  return(out)
+}
+
+
+
+
+
+#' Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv) with user defined functions
+#' @param user_function 
+#' A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}. 
+#' @param treatment A binary treatment variable in the sample.
+#' @param outcome A vector of the outcome variable of interest for each sample.
+#' @param tau A vector of the unit-level continuous score for treatment assignment. We assume those that have tau<0 should not have treatment. Conditional Average Treatment Effect is one possible measure.
+#' @importFrom rlang .data
+
+compute_qoi_user <- function(user_function, treatment, outcome,tau, data, ngates, ...) {
+
+  # parameters
+  That <- do.call(user_function, list(data))
+  Ycv <- data %>% pull(sym(outcome))
+  Tcv <- data %>% pull(sym(treatment))
+
+  # PAPE 
+  PAPE <- PAPEp <- vector("list", length(user_function))
+  for (i in seq_len(length(user_function))) {
+
+    ## compute PAPE
+    PAPE[[i]] <- PAPE(Tcv, That, Ycv, centered = TRUE)
+
+    ## name
+    PAPE[[i]]$alg <- user_function[i]
+  }
+
+  ## AUPEC
+  aupec <- vector("list", length = length(user_function))
+  for (i in seq_along(length(user_function))) {
+
+    aupec[[i]] <- AUPEC(Tcv, tau, Ycv, centered = TRUE)
+  }
+
+  ## GATE
+  GATE <- vector("list", length = length(algorithms))
+  for (i in seq_along(algorithms)) {
+
+    ## Compute GATE
+    GATE[[i]] <- GATE(Tcv, tau, Ycv, ngates)
+
+    ## indicate algorithm
+    GATE[[i]]$alg <- user_function[i]
+
+    ## indicate group number
+    GATE[[i]]$group <- seq_along(GATE[[i]]$gate)
+  }
+  
+
+  out <- list(
+        PAPE = PAPE,
+        # PAPEp = PAPEp,
+        # PAPDp = PAPDp,
         AUPEC = aupec,
         GATE = GATE)
 

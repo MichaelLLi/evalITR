@@ -13,7 +13,7 @@ knitr::opts_chunk$set(
 ```
 
 
-```{r pic1, echo=FALSE, out.width = '60%'}
+```{r pic1, echo=FALSE, out.width = '100%'}
 knitr::include_graphics("man/figures/README-manual.png")
 ```
 
@@ -28,7 +28,7 @@ You can install the development version of evalITR from [GitHub](https://github.
 
 ``` r
 # install.packages("devtools")
-devtools::install_github("MichaelLLi/evalITR")
+devtools::install_github("MichaelLLi/evalITR", ref = "causal-ml")
 ```
 
 
@@ -68,15 +68,15 @@ outcomes <- "g3tlangss"
 treatment <- "treatment"
 
 # specifying covariates
-covariates <-  star %>% dplyr::select(-c("g3tlangss",
-                "g3treadss","g3tmathss","treatment")) %>% 
-                colnames()
+covariates <-  c(
+  "gender","race","birthmonth","birthyear","SCHLURBN","GRDRANGE","GKENRMNT","GKFRLNCH","GKBUSED","GKWHITE")
 
-# specifying the data
-star_data = star %>% dplyr::select(-c(g3treadss,g3tmathss))
+# specifying the data (remove other outcomes)
+star_data <- star %>% dplyr::select(-c(g3treadss,g3tmathss))
 
 # specifying the formula
-user_formula <- as.formula(paste(paste0(outcomes)," ~ ", paste0(covariates, collapse = "+"), " + treatment"))
+user_formula <- as.formula(
+  "g3tlangss ~ gender + race + birthmonth + birthyear + SCHLURBN + GRDRANGE + GKENRMNT + GKFRLNCH + GKBUSED + GKWHITE + treatment")
 
 
 # estimate ITR 
@@ -164,25 +164,23 @@ summary(est)$GATE %>%
 
 ```  
 
-```{r pic0, echo=FALSE, out.width = '100%'}
+```{r pic0, echo=FALSE, out.width = '60%'}
 knitr::include_graphics("man/figures/gate.png")
 ```
 
 We plot the estimated Area Under the Prescriptive Effect Curve for the writing score across a range of budget constraints for causal forest.
 
-```{r sp_plot, fig.width=4, fig.height=3,fig.align = "center"}
+```{r sp_plot, out.width = '60%'}
 # plot the AUPEC 
 plot(est)
 
-# plot the AUPEC for the model trained using caret
-# plot(est_caret)
 ```
 
 ## Example under cross-validation
 
 The package also allows estimate ITR with k-folds cross-validation. Instead of specifying the `split_ratio` argument, we choose the number of folds (`n_folds`). The following code presents an example of estimating ITR with 3 folds cross-validation. In practice, we recommend using 10 folds to get a more stable model performance. 
 
-```{r cv_estimate, message = FALSE}
+```{r cv_estimate, message = FALSE, echo=FALSE, out.width = '60%'}
 # estimate ITR 
 set.seed(2021)
 fit_cv <- estimate_itr(
@@ -257,6 +255,6 @@ fit$estimates$models$rf %>%
   ggplot() + theme_bw() 
 ```
 
-```{r pic2, echo=FALSE, out.width = '100%'}
+```{r pic2, echo=FALSE, out.width = '60%'}
 knitr::include_graphics("man/figures/rf.png")
 ```
