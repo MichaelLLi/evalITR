@@ -1,122 +1,70 @@
-#' Evaluate ITR
-#'
-#' @param outcome Outcome variable (or a list of outcome variables). Only takes in numeric values for both continous outcomes and binary outcomes (0 or 1).
+#' Estimate individual treatment rules (ITR)
 #' @param treatment Treatment variable
+#' @param form a formula object that takes the form \code{y ~ T + x1 + x2 + ...}. 
 #' @param data
-#'   A data frame that contains \code{outcome} and \code{treatment}.
+#'   A data frame that contains the outcome \code{y} and the treatment \code{T}. 
 #' @param algorithms
-#'   List of machine learning algorithms.
+#'   List of machine learning algorithms to be used. 
 #' @param budget
 #'   Proportion of treated units.
 #' @param n_folds
 #'   Number of cross-validation folds. Default is 5.
-#' @param covariates
-#'   Covariates included in the model.
-#' @param ratio
+#' @param split_ratio
 #'   Split ratio between train and test set under sample splitting. Default is 0.
 #' @param ngates
 #'   The number of groups to separate the data into. The groups are determined by tau. Default is 5.
-#' @param trainControl_method caret parameter
-#' @param number caret parameter
-#' @param repeats caret parameter
-#' @param allowParallel caret parameter
-#' @param train_method caret parameter
 #' @param preProcess caret parameter
 #' @param weights caret parameter
-#' @param metric caret parameter
-#' @param maximize caret parameter
+#' @param trControl caret parameter
 #' @param tuneGrid caret parameter
 #' @param tuneLength caret parameter
+#' @param ... Additional arguments passed to \code{caret::train}
 #' @import dplyr
+#' @import rlearner
 #' @importFrom rlang !! sym
 #' @export
 #' @return An object of \code{itr} class
 estimate_itr <- function(
-    outcome,
     treatment,
-    covariates,
+    form,
     data,
     algorithms,
     budget,
     n_folds = 5,
-    ratio = 0,
+    split_ratio = 0,
     ngates = 5,
-    trainControl_method = "boot",
-    number = ifelse(grepl("cv", trainControl_method), 10, 25),
-    repeats = ifelse(grepl("[d_]cv$", trainControl_method), 1, NA),
-    # p = 0.75,
-    # search = "grid",
-    # initialWindow = NULL,
-    # horizon = 1,
-    # fixedWindow = TRUE,
-    # skip = 0,
-    # verboseIter = FALSE,
-    # returnData = TRUE,
-    # returnResamp = "final",
-    # savePredictions = FALSE,
-    # classProbs = FALSE,
-    # # summaryFunction = caret::defaultSummary(), #might need to change this
-    # # selectionFunction = "best",
-    # preProcOptions = list(
-    #   thresh = 0.95, ICAcomp = 3, k = 5, freqCut = 95/5, uniqueCut = 10, cutoff = 0.9),
-    # sampling = NULL,
-    # index = NULL,
-    # indexOut = NULL,
-    # indexFinal = NULL,
-    # timingSamps = 0,
-    # # predictionBounds = rep(FALSE, 2),
-    # seeds = NA,
-    # adaptive = list(min = 5, alpha = 0.05, method = "gls", complete = TRUE),
-    # trim = FALSE,
-    allowParallel = TRUE,
-    train_method = "rf",
     preProcess = NULL,
     weights = NULL,
-    metric = ifelse(is.factor(data[outcome]), "Accuracy", "RMSE"),
-    maximize = ifelse(metric %in% c("RMSE", "logLoss", "MAE", "logLoss"), FALSE, TRUE),
-    trControl = trainControl(),
+    trControl = caret::trainControl(method = "none"),
     tuneGrid = NULL,
-    tuneLength = 1
+    tuneLength = ifelse(trControl$method == "none", 1, 3),
+    ...
 ) {
 
+  # specify the outcome and covariates
+  convert_data <- convert_formula(form, data, treatment)
+
+  outcome <- convert_data$outcome
+  covariates <- convert_data$covariates
+  data <- convert_data$data
+
   ## caret parameters
-  trainControl_params <- list(
-    trainControl_method = trainControl_method,
-    number = number,
-    repeats = repeats,
-    # p = p,
-    # search = search,
-    # initialWindow = initialWindow,
-    # horizon = horizon,
-    # fixedWindow = fixedWindow,
-    # skip = skip,
-    # verboseIter = verboseIter,
-    # returnData = returnData,
-    # returnResamp = returnResamp,
-    # # savePredictions = savePredictions,
-    # classProbs = classProbs,
-    # # summaryFunction = summaryFunction,
-    # # selectionFunction = selectionFunction,
-    # preProcOptions = preProcOptions,
-    # sampling = sampling,
-    # index = index,
-    # indexOut = indexOut,
-    # indexFinal = indexFinal,
-    # timingSamps = timingSamps,
-    # # predictionBounds = predictionBounds,
-    # seeds = seeds,
-    # adaptive = adaptive,
-    # trim = trim,
-    allowParalle = allowParallel)
+  metric = ifelse(is.factor(data[outcome]), "Accuracy", "RMSE")
+  maximize = ifelse(metric %in% c("RMSE", "logLoss", "MAE", "logLoss"), FALSE, TRUE)
+
+  caret_algorithms <- names(caret::getModelInfo())
+
+  ## rlearn algorithms
+  rlearner_algorithms <- c("rkern", "rlasso","rboost", "tkern", "tlasso", "tboost", "skern", "slasso", "sboost", "xkern", "xlasso", "xboost", "ukern", "ulasso", "uboost")
 
   # caret train parameters
   train_params <- list(
-    train_method = train_method,
+    # train_method = train_method,
     preProcess = preProcess,
     weights = weights,
     metric = metric,
     maximize = maximize,
-    # trControl = trainControl(),
+    trControl = trControl,
     tuneGrid = tuneGrid,
     tuneLength = tuneLength
   )
@@ -128,44 +76,43 @@ estimate_itr <- function(
   n_df <- nrow(data)
   n_X  <- length(data) - 1
   n_folds <- n_folds
-  cv <- ifelse(ratio > 0, FALSE, TRUE)
+  cv <- ifelse(split_ratio > 0, FALSE, TRUE)
 
   params <- list(
-    n_df = n_df, n_folds = n_folds, n_alg = n_alg, ratio = ratio, ngates = ngates, cv = cv, trainControl_params = trainControl_params, train_params = train_params)
+    n_df = n_df, n_folds = n_folds, n_alg = n_alg, split_ratio = split_ratio, ngates = ngates, cv = cv, 
+    train_params = train_params, caret_algorithms = caret_algorithms, rlearner_algorithms = rlearner_algorithms)
 
   df <- list(algorithms = algorithms, outcome = outcome, data = data, treatment = treatment)
 
   ## loop over all outcomes
   estimates <- vector("list", length = length(outcome))
-  for (m in 1:length(outcome)) {
+  
+  ## data to use
+  ## rename outcome and treatment variable
+  data_filtered <- data %>%
+    select(Y = !!sym(outcome), Treat = !!sym(treatment), all_of(covariates))
 
-    ## data to use
-    ## rename outcome and treatment variable
-    data_filtered <- data %>%
-      select(Y = !!sym(outcome[m]), Treat = !!sym(treatment), all_of(covariates))
-
-    ## cross-validation
-    if(cv == TRUE){
-      ## create folds
-      treatment_vec <- data_filtered %>% dplyr::pull(Treat)
-      folds <- caret::createFolds(treatment_vec, k = n_folds)
-    }
-
-    ## sample splitting
-    if(cv == FALSE){
-      folds = n_folds
-    }
-
-    ## run
-    estimates[[m]] <- itr_single_outcome(
-      data       = data_filtered,
-      algorithms = algorithms,
-      params     = params,
-      folds      = folds,
-      budget     = budget
-    )
-
+  ## cross-validation
+  if(cv == TRUE){
+    ## create folds
+    treatment_vec <- data_filtered %>% dplyr::pull(Treat)
+    folds <- caret::createFolds(treatment_vec, k = n_folds)
   }
+
+  ## sample splitting
+  if(cv == FALSE){
+    folds = n_folds
+  }
+
+  ## run
+  estimates <- itr_single_outcome(
+    data       = data_filtered,
+    algorithms = algorithms,
+    params     = params,
+    folds      = folds,
+    budget     = budget,
+    ...
+  )
 
   out <- list(estimates = estimates, df = df)
 
@@ -183,19 +130,30 @@ estimate_itr <- function(
 #' @param params A list of parameters.
 #' @param folds Number of folds.
 #' @param budget The maximum percentage of population that can be treated under the budget constraint.
+#' @param ... Additional arguments passed to \code{caret::train}
+#' @return A list of estimates.
 
 itr_single_outcome <- function(
     data,
     algorithms,
     params,
     folds,
-    budget
+    budget,
+    ...
 ) {
 
   ## obj to store outputs
   fit_ml <- lapply(1:params$n_alg, function(x) vector("list", length = params$n_folds))
   names(fit_ml) <- algorithms
 
+  models <- lapply(1:params$n_alg, function(x) vector("list", length = params$n_folds))
+  names(models) <- algorithms
+
+  ## caret parameters
+  caret_algorithms = params$caret_algorithms
+
+  ## rlearn algorithms
+  rlearner_algorithms = params$rlearner_algorithms
 
 ## =================================
 ## sample splitting
@@ -211,7 +169,7 @@ itr_single_outcome <- function(
 
     # create split series of test/training partitions
     split <- caret::createDataPartition(data$Treat,
-                                        p = params$ratio,
+                                        p = params$split_ratio,
                                         list = FALSE)
     trainset = data[split,]
     testset = data[-split,]
@@ -243,8 +201,63 @@ itr_single_outcome <- function(
     ##
     ## run each ML algorithm
     ##
+
+    # loop over all algorithms
+    for (i in seq_along(algorithms)) {
+
+      # check if algorithm is in the caret package
+      if (algorithms[i] %in% caret_algorithms) {
+        
+        # set the train_method to the algorithm
+        train_method = algorithms[i]
+
+        # run the algorithm
+        caret_est <- run_caret(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          budget    = budget,
+          indcv     = 1,
+          iter      = 1,
+          train_method = train_method,
+          ...
+        )
+
+        # store the results
+        fit_ml[[algorithms[i]]] <- caret_est$test
+        models[[algorithms[i]]] <- caret_est$train
+
+      }
+
+      # check if algorithm is in the rlearner package
+      if (algorithms[i] %in% rlearner_algorithms) {
+        
+        # set the train_method to the algorithm
+        train_method = algorithms[i]
+
+        # run the algorithm
+        rlearner_est <- run_rlearner(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          budget    = budget,
+          indcv     = 1,
+          iter      = 1,
+          train_method = train_method)
+
+        # store the results
+        fit_ml[[algorithms[i]]] <- rlearner_est$test
+        models[[algorithms[i]]] <- rlearner_est$train
+
+      }
+    
+    }
+
     if ("causal_forest" %in% algorithms) {
-      fit_ml[["causal_forest"]] <- run_causal_forest(
+      # run causal forest
+      est <- run_causal_forest(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
@@ -253,10 +266,14 @@ itr_single_outcome <- function(
         indcv     = 1, #indcv and iter set to 1 for sample splitting
         iter      = 1
       )
+      # store the results
+      fit_ml[["causal_forest"]] <- est$test
+      models[["causal_forest"]] <- est$train
     }
 
     if("lasso" %in% algorithms){
-      fit_ml[["lasso"]] <- run_lasso(
+      # run lasso
+      est <- run_lasso(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
@@ -265,23 +282,79 @@ itr_single_outcome <- function(
         iter      = 1,
         budget    = budget
       )
+      # store the results
+      fit_ml[["lasso"]] <- est$test
+      models[["lasso"]] <- est$train
     }
 
-    if("svm" %in% algorithms){
-      fit_ml[["svm"]] <- run_svm(
-        dat_train = training_data_elements,
-        dat_test  = testing_data_elements,
-        dat_total = total_data_elements,
-        params    = params,
-        indcv     = 1,
-        iter      = 1,
-        budget    = budget
-      )
-    }
+    # if("rlasso" %in% algorithms){
+    #   # run lasso
+    #   est <- run_rlasso(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    #   # store the results
+    #   fit_ml[["rlasso"]] <- est$test
+    #   models[["rlasso"]] <- est$train
+    # }
+
+    # if("rboost" %in% algorithms){
+    #   # run rboost
+    #   est <- run_rboost(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    #   # store the results
+    #   fit_ml[["rboost"]] <- est$test
+    #   models[["rboost"]] <- est$train
+    # }
+
+    # if("rkern" %in% algorithms){
+    #   # run rkern
+    #   est <- run_rboost(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    #   # store the results
+    #   fit_ml[["rkern"]] <- est$test
+    #   models[["rkern"]] <- est$train
+    # }
+
+    # if("svm" %in% algorithms){
+    #   # run svm
+    #   est <- run_svm(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    #   # store the results
+    #   fit_ml[["svm"]] <- est$test
+    #   models[["svm"]] <- est$train
+    # }
 
 
     if("bartc" %in% algorithms){
-      fit_ml[["bartc"]] <- run_bartc(
+      # run bartcause
+      est <- run_bartc(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
@@ -290,46 +363,62 @@ itr_single_outcome <- function(
         iter      = 1,
         budget    = budget
       )
+      # store the results
+      fit_ml[["bartc"]] <- est$test
+      models[["bartc"]] <- est$train
     }
 
-    if("bart" %in% algorithms){
-      fit_ml[["bart"]] <- run_bartmachine(
-        dat_train = training_data_elements,
-        dat_test  = testing_data_elements,
-        dat_total = total_data_elements,
-        params    = params,
-        indcv     = 1,
-        iter      = 1,
-        budget    = budget
-      )
-    }
+    # if("bart" %in% algorithms){
+    #   # run bart
+    #   est <- run_bartmachine(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    #   # store the results
+    #   fit_ml[["bart"]] <- est$test
+    #   models[["bart"]] <- est$train
+    # }
 
-    if("boost" %in% algorithms){
-      fit_ml[["boost"]] <- run_boost(
-        dat_train = training_data_elements,
-        dat_test  = testing_data_elements,
-        dat_total = total_data_elements,
-        params    = params,
-        indcv     = 1,
-        iter      = 1,
-        budget    = budget
-      )
-    }
+    # if("boost" %in% algorithms){
+    #   # run boost
+    #   est <- run_boost(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    #   # store the results
+    #   fit_ml[["boost"]] <- est$test
+    #   models[["boost"]] <- est$train
+    # }
 
-    if("random_forest" %in% algorithms){
-      fit_ml[["random_forest"]] <- run_random_forest(
-        dat_train = training_data_elements,
-        dat_test  = testing_data_elements,
-        dat_total = total_data_elements,
-        params    = params,
-        indcv     = 1,
-        iter      = 1,
-        budget    = budget
-      )
-    }
+    # if("random_forest" %in% algorithms){
+    #   # run random forest
+    #   est <- run_random_forest(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    #   # store the results
+    #   fit_ml[["random_forest"]] <- est$test
+    #   models[["random_forest"]] <- est$train
+    # }
 
     if("bagging" %in% algorithms){
-      fit_ml[["bagging"]] <- run_bagging(
+      # run bagging
+      est <- run_bagging(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
@@ -338,10 +427,14 @@ itr_single_outcome <- function(
         iter      = 1,
         budget    = budget
       )
+      # store the results
+      fit_ml[["bagging"]] <- est$test
+      models[["bagging"]] <- est$train
     }
 
     if("cart" %in% algorithms){
-      fit_ml[["cart"]] <- run_cart(
+      # run cart
+      est <- run_cart(
         dat_train = training_data_elements,
         dat_test  = testing_data_elements,
         dat_total = total_data_elements,
@@ -350,18 +443,9 @@ itr_single_outcome <- function(
         iter      = 1,
         budget    = budget
       )
-    }
-
-    if("caret" %in% algorithms){
-      fit_ml[["caret"]] <- run_caret(
-        dat_train = training_data_elements,
-        dat_test  = testing_data_elements,
-        dat_total = total_data_elements,
-        params    = params,
-        indcv     = 1,
-        iter      = 1,
-        budget    = budget
-      )
+      # store the results
+      fit_ml[["cart"]] <- est$test
+      models[["cart"]] <- est$train
     }
 
   }
@@ -414,8 +498,64 @@ itr_single_outcome <- function(
       ##
       ## run each ML algorithm
       ##
+      
+      # loop over all algorithms
+      for (i in seq_along(algorithms)) {
+
+        # check if algorithm is in the caret package
+        if (algorithms[i] %in% caret_algorithms) {
+          
+          # set the train_method to the algorithm
+          train_method = algorithms[i]
+
+          # run the algorithm
+          caret_est <- run_caret(
+            dat_train     = training_data_elements,
+            dat_test      = testing_data_elements,
+            dat_total     = total_data_elements,
+            train_method  = train_method,
+            params        = params,
+            indcv         = indcv,
+            iter          = j,
+            budget        = budget,
+            ...
+          )
+
+          # store the results
+          fit_ml[[algorithms[i]]][[j]] <- caret_est$test
+          models[[algorithms[i]]][[j]] <- caret_est$train
+
+        }
+
+        # check if algorithm is in the rlearner package
+        if (algorithms[i] %in% rlearner_algorithms) {
+
+          # set the train_method to the algorithm
+          train_method = algorithms[i]
+
+          # run the algorithm
+          rlearner_est <- run_rlearner(
+            dat_train     = training_data_elements,
+            dat_test      = testing_data_elements,
+            dat_total     = total_data_elements,
+            train_method  = train_method,
+            params        = params,
+            indcv         = indcv,
+            iter          = j,
+            budget        = budget,
+            ...
+          )
+
+          # store the results
+          fit_ml[[algorithms[i]]][[j]] <- rlearner_est$test
+          models[[algorithms[i]]][[j]] <- rlearner_est$train
+
+        }
+      }
+
       if ("causal_forest" %in% algorithms) {
-        fit_ml[["causal_forest"]][[j]] <- run_causal_forest(
+        # run causal forest
+        est <- run_causal_forest(
           dat_train = training_data_elements,
           dat_test  = testing_data_elements,
           dat_total = total_data_elements,
@@ -424,10 +564,14 @@ itr_single_outcome <- function(
           iter      = j,
           budget    = budget
         )
+        # store the results
+        fit_ml[["causal_forest"]][[j]] <- est$test
+        models[["causal_forest"]][[j]] <- est$train
       }
 
       if("lasso" %in% algorithms){
-        fit_ml[["lasso"]][[j]] <- run_lasso(
+        # run lasso
+        est <- run_lasso(
           dat_train = training_data_elements,
           dat_test  = testing_data_elements,
           dat_total = total_data_elements,
@@ -436,23 +580,79 @@ itr_single_outcome <- function(
           iter      = j,
           budget    = budget
         )
+        # store the results
+        fit_ml[["lasso"]][[j]] <- est$test
+        models[["lasso"]][[j]] <- est$train
       }
 
-      if("svm" %in% algorithms){
-        fit_ml[["svm"]][[j]] <- run_svm(
-          dat_train = training_data_elements,
-          dat_test  = testing_data_elements,
-          dat_total = total_data_elements,
-          params    = params,
-          indcv     = indcv,
-          iter      = j,
-          budget    = budget
-        )
-      }
+      # if("rlasso" %in% algorithms){
+      #   # run lasso
+      #   est <- run_rlasso(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      #   # store the results
+      #   fit_ml[["rlasso"]][[j]] <- est$test
+      #   models[["rlasso"]][[j]] <- est$train
+      # }
+
+      # if("rboost" %in% algorithms){
+      #   # run lasso
+      #   est <- run_rboost(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      #   # store the results
+      #   fit_ml[["rboost"]][[j]] <- est$test
+      #   models[["rboost"]][[j]] <- est$train
+      # }
+
+      # if("rkern" %in% algorithms){
+      #   # run rkern
+      #   est <- run_rkern(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      #   # store the results
+      #   fit_ml[["rkern"]][[j]] <- est$test
+      #   models[["rkern"]][[j]] <- est$train
+      # }
+
+      # if("svm" %in% algorithms){
+      #   # run svm
+      #   est <- run_svm(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      #   # store the results
+      #   fit_ml[["svm"]][[j]] <- est$test
+      #   models[["svm"]][[j]] <- est$train
+      # }
 
 
       if("bartc" %in% algorithms){
-        fit_ml[["bartc"]][[j]] <- run_bartc(
+        # run bartcause
+        est <- run_bartc(
           dat_train = training_data_elements,
           dat_test  = testing_data_elements,
           dat_total = total_data_elements,
@@ -461,46 +661,62 @@ itr_single_outcome <- function(
           iter      = j,
           budget    = budget
         )
+        # store the results
+        fit_ml[["bartc"]][[j]] <- est$test
+        models[["bartc"]][[j]] <- est$train
       }
 
-      if("bart" %in% algorithms){
-        fit_ml[["bart"]][[j]] <- run_bartmachine(
-          dat_train = training_data_elements,
-          dat_test  = testing_data_elements,
-          dat_total = total_data_elements,
-          params    = params,
-          indcv     = indcv,
-          iter      = j,
-          budget    = budget
-        )
-      }
+      # if("bart" %in% algorithms){
+      #   # run bart
+      #   est <- run_bartmachine(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      #   # store the results
+      #   fit_ml[["bart"]][[j]] <- est$test
+      #   models[["bart"]][[j]] <- est$train
+      # }
 
-      if("boost" %in% algorithms){
-        fit_ml[["boost"]][[j]] <- run_boost(
-          dat_train = training_data_elements,
-          dat_test  = testing_data_elements,
-          dat_total = total_data_elements,
-          params    = params,
-          indcv     = indcv,
-          iter      = j,
-          budget    = budget
-        )
-      }
+      # if("boost" %in% algorithms){
+      #   # run boost
+      #   est <- run_boost(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      #   # store the results
+      #   fit_ml[["boost"]][[j]] <- est$test
+      #   models[["boost"]][[j]] <- est$train
+      # }
 
-      if("random_forest" %in% algorithms){
-        fit_ml[["random_forest"]][[j]] <- run_random_forest(
-          dat_train = training_data_elements,
-          dat_test  = testing_data_elements,
-          dat_total = total_data_elements,
-          params    = params,
-          indcv     = indcv,
-          iter      = j,
-          budget    = budget
-        )
-      }
+      # if("random_forest" %in% algorithms){
+      #   # run random forest
+      #   est <- run_random_forest(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      #   # store the results
+      #   fit_ml[["random_forest"]][[j]] <- est$test
+      #   models[["random_forest"]][[j]] <- est$train
+      # }
 
       if("bagging" %in% algorithms){
-        fit_ml[["bagging"]][[j]] <- run_bagging(
+        # run bagging
+        est <- run_bagging(
           dat_train = training_data_elements,
           dat_test  = testing_data_elements,
           dat_total = total_data_elements,
@@ -509,10 +725,14 @@ itr_single_outcome <- function(
           iter      = j,
           budget    = budget
         )
+        # store the results
+        fit_ml[["bagging"]][[j]] <- est$test
+        models[["bagging"]][[j]] <- est$train
       }
 
       if("cart" %in% algorithms){
-        fit_ml[["cart"]][[j]] <- run_cart(
+        # run cart
+        est <- run_cart(
           dat_train = training_data_elements,
           dat_test  = testing_data_elements,
           dat_total = total_data_elements,
@@ -521,30 +741,21 @@ itr_single_outcome <- function(
           iter      = j,
           budget    = budget
         )
+        # store the results
+        fit_ml[["cart"]][[j]] <- est$test
+        models[["cart"]][[j]] <- est$train
       }
-
-      if("caret" %in% algorithms){
-        fit_ml[["caret"]][[j]] <- run_caret(
-          dat_train = training_data_elements,
-          dat_test  = testing_data_elements,
-          dat_total = total_data_elements,
-          params    = params,
-          indcv     = indcv,
-          iter      = j,
-          budget    = budget
-        )
-      }
-
     } ## end of fold
-
   }
 
   return(list(
-    params = params, fit_ml = fit_ml,
+    params = params, fit_ml = fit_ml, models = models,
     Ycv = Ycv, Tcv = Tcv, indcv = indcv, budget = budget
   ))
 }
-#' Estimate quantity of interests
+
+
+#' Evaluate ITR
 #' @param fit Fitted model. Usually an output from \code{estimate_itr}
 #' @param ... Further arguments passed to the function.
 #' @return An object of \code{itr} class
@@ -552,20 +763,14 @@ itr_single_outcome <- function(
 evaluate_itr <- function(fit, ...){
 
   estimates  <- fit$estimates
-  cv         <- estimates[[1]]$params$cv
+  cv         <- estimates$params$cv
   df         <- fit$df
   algorithms <- fit$df$algorithms
   outcome    <- fit$df$outcome
 
-  qoi        <- vector("list", length = length(outcome))
-
-  ## loop over all outcomes
-  for (m in 1:length(outcome)) {
-
-    ## compute qoi
-    qoi[[m]] <- compute_qoi(estimates[[m]], algorithms)
-
-  }
+  ## compute qoi
+  qoi      <- vector("list", length = length(outcome))
+  qoi <- compute_qoi(estimates, algorithms)
 
   out <- list(
     qoi = qoi, cv = cv, df = df, estimates = estimates)
@@ -578,30 +783,34 @@ evaluate_itr <- function(fit, ...){
 
 #' Conduct hypothesis tests
 #' @param fit Fitted model. Usually an output from \code{estimate_itr}
-#' @param ngates The number of groups to separate the data into. The groups are determined by \code{tau}. Default is 5.
-#' @param nsim Number of Monte Carlo simulations used to simulate the null distributions. Default is 10000.
+#' @param nsim Number of Monte Carlo simulations used to simulate the null distributions. Default is 1000.
 #' @param ... Further arguments passed to the function.
-#' @return An object of \code{itr} class
+#' @return An object of \code{test_itr} class
 #' @export
 test_itr <- function(
     fit,
-    nsim = 10000,
+    nsim = 1000,
     ...
 ) {
 
   # test parameters
   estimates  <- fit$estimates
-  cv         <- estimates[[1]]$params$cv
-  fit_ml     <- estimates[[1]]$fit_ml
-  Tcv        <- estimates[[1]]$Tcv
-  Ycv        <- estimates[[1]]$Ycv
-  indcv      <- estimates[[1]]$indcv
-  n_folds    <- estimates[[1]]$params$n_folds
-  ngates     <- estimates[[1]]$params$ngates
+  cv         <- estimates$params$cv
+  fit_ml     <- estimates$fit_ml
+  Tcv        <- estimates$Tcv
+  Ycv        <- estimates$Ycv
+  indcv      <- estimates$indcv
+  n_folds    <- estimates$params$n_folds
+  ngates     <- estimates$params$ngates
   algorithms <- fit$df$algorithms
   outcome    <- fit$df$outcome
-  # run tests
 
+  # caret and rlearner parameters
+  caret_algorithms <- estimates$params$caret_algorithms
+  rlearner_algorithms <- estimates$params$rlearner_algorithms
+
+  # run tests
+  
   ## =================================
   ## sample splitting
   ## =================================
@@ -609,40 +818,30 @@ test_itr <- function(
   if(cv == FALSE){
     cat('Conduct hypothesis tests for GATEs unde sample splitting ...\n')
 
-    ## create empty lists to for consistcv and hetcv
+    # create empty lists to for consistcv and hetcv
     consist <- list()
     het <- list()
 
-      # model with a single outcome
-      ## run consistency tests for each model
-      if ("causal_forest" %in% algorithms) {
-        consist[["causal_forest"]] <- consist.test(
-          T   = Tcv,
-          tau = fit_ml$causal_forest$tau,
-          Y   = Ycv,
-          ngates = ngates)
+    # run consistency and heterogeneity tests for each model
+    for (i in algorithms) {
 
-        het[["causal_forest"]] <- het.test(
-          T   = Tcv,
-          tau = fit_ml$causal_forest$tau,
-          Y   = Ycv,
-          ngates = ngates)
-      }
+      consist[[i]] <- consist.test(
+        T   = Tcv,
+        tau = fit_ml[[i]]$tau,
+        Y   = Ycv,
+        ngates = ngates)
 
-      if ("lasso" %in% algorithms) {
-        consist[["lasso"]] <- consist.test(
-          T   = Tcv,
-          tau = fit_ml$lasso$tau,
-          Y   = Ycv,
-          ngates = ngates)
+      het[[i]] <- het.test(
+        T   = Tcv,
+        tau = fit_ml[[i]]$tau,
+        Y   = Ycv,
+        ngates = ngates)
+    }
+   
 
-        het[["lasso"]] <- het.test(
-          T   = Tcv,
-          tau = fit_ml$lasso$tau,
-          Y   = Ycv,
-          ngates = ngates)
-      }
-
+    # return a list of consist and het
+    out <- list(consist = consist, het = het)
+  
   }
 
   ## =================================
@@ -652,400 +851,39 @@ test_itr <- function(
   if(cv == TRUE){
     cat('Conduct hypothesis tests for GATEs unde cross-validation ...\n')
 
-      ## create empty lists to for consistcv and hetcv
+    # create empty lists to for consistcv and hetcv
     consistcv <- list()
     hetcv <- list()
 
-      ## run consistency tests for each model
+    # run consistency and heterogeneity tests for each model
+    for (i in algorithms) {
 
-      if ("causal_forest" %in% algorithms) {
-        consistcv[["causal_forest"]] <- consistcv.test(
-          T   = Tcv,
-          tau = gettaucv(fit),
-          Y   = Ycv,
-          ind = indcv,
-          ngates = ngates)
-      }
-
-      ## run heterogeneity tests for each model
-      if ("causal_forest" %in% algorithms) {
-        hetcv[["causal_forest"]] <- hetcv.test(
-          T   = Tcv,
-          tau = gettaucv(fit), # a matrix of length(total sample size) x n_folds
-          Y   = Ycv,
-          ind = indcv,
-          ngates = ngates)
-      }
-
-  }
-
-  # formulate and return output
-  if(cv == FALSE){
-    tests <- list(consist = consist,
-                  het = het)
-    return(tests)
-  }
-  if(cv == TRUE){
-    tests_cv <- list(consistcv = consistcv,
-                    hetcv = hetcv)
-    return(tests_cv)
-  }
-
-}
-
-
-utils::globalVariables(c("Treat", "aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm", "vec"))
-
-#' Conduct hypothesis tests
-#' @param fit Fitted model. Usually an output from \code{estimate_itr}
-#' @param ngates The number of groups to separate the data into. The groups are determined by \code{tau}. Default is 5.
-#' @param nsim Number of Monte Carlo simulations used to simulate the null distributions. Default is 10000.
-#' @param ... Further arguments passed to the function.
-#' @return An object of \code{itr} class
-#' @export
-test_itr <- function(
-    fit,
-    nsim = 10000,
-    ...
-) {
-
-  # test parameters
-  estimates  <- fit$estimates
-  cv         <- estimates[[1]]$params$cv
-  fit_ml     <- estimates[[1]]$fit_ml
-  Tcv        <- estimates[[1]]$Tcv
-  Ycv        <- estimates[[1]]$Ycv
-  indcv      <- estimates[[1]]$indcv
-  n_folds    <- estimates[[1]]$params$n_folds
-  ngates     <- estimates[[1]]$params$ngates
-  algorithms <- fit$df$algorithms
-  outcome    <- fit$df$outcome
-
-  # run tests
-
-  ## =================================
-  ## sample splitting
-  ## =================================
-
-  if(cv == FALSE){
-    cat('Conduct hypothesis tests for GATEs unde sample splitting ...\n')
-
-    ## create empty lists to for consistcv and hetcv
-    consist <- list()
-    het <- list()
-
-      # model with a single outcome
-      ## run consistency and heterogeneity tests for each model
-      if ("causal_forest" %in% algorithms) {
-        consist[["causal_forest"]] <- consist.test(
-          T   = Tcv,
-          tau = fit_ml$causal_forest$tau,
-          Y   = Ycv,
-          ngates = ngates)
-
-        het[["causal_forest"]] <- het.test(
-          T   = Tcv,
-          tau = fit_ml$causal_forest$tau,
-          Y   = Ycv,
-          ngates = ngates)
-      }
-
-      if ("lasso" %in% algorithms) {
-        consist[["lasso"]] <- consist.test(
-          T   = Tcv,
-          tau = fit_ml$lasso$tau,
-          Y   = Ycv,
-          ngates = ngates)
-
-        het[["lasso"]] <- het.test(
-          T   = Tcv,
-          tau = fit_ml$lasso$tau,
-          Y   = Ycv,
-          ngates = ngates)
-      }
-
-    if ("svm" %in% algorithms) {
-      consist[["svm"]] <- consist.test(
+      consistcv[[i]] <- consistcv.test(
         T   = Tcv,
-        tau = fit_ml$svm$tau,
-        Y   = Ycv,
-        ngates = ngates)
-
-      het[["svm"]] <- het.test(
-        T   = Tcv,
-        tau = fit_ml$svm$tau,
-        Y   = Ycv,
-        ngates = ngates)
-    }
-
-    if ("bartc" %in% algorithms) {
-      consist[["bartc"]] <- consist.test(
-        T   = Tcv,
-        tau = fit_ml$bartc$tau,
-        Y   = Ycv,
-        ngates = ngates)
-
-      het[["bartc"]] <- het.test(
-        T   = Tcv,
-        tau = fit_ml$bartc$tau,
-        Y   = Ycv,
-        ngates = ngates)
-    }
-
-    if ("bart" %in% algorithms) {
-      consist[["bart"]] <- consist.test(
-        T   = Tcv,
-        tau = fit_ml$bart$tau,
-        Y   = Ycv,
-        ngates = ngates)
-
-      het[["bart"]] <- het.test(
-        T   = Tcv,
-        tau = fit_ml$bart$tau,
-        Y   = Ycv,
-        ngates = ngates)
-    }
-
-    if ("boost" %in% algorithms) {
-      consist[["boost"]] <- consist.test(
-        T   = Tcv,
-        tau = fit_ml$boost$tau,
-        Y   = Ycv,
-        ngates = ngates)
-
-      het[["boost"]] <- het.test(
-        T   = Tcv,
-        tau = fit_ml$boost$tau,
-        Y   = Ycv,
-        ngates = ngates)
-    }
-
-    if ("random_forest" %in% algorithms) {
-      consist[["random_forest"]] <- consist.test(
-        T   = Tcv,
-        tau = fit_ml$random_forest$tau,
-        Y   = Ycv,
-        ngates = ngates)
-
-      het[["random_forest"]] <- het.test(
-        T   = Tcv,
-        tau = fit_ml$random_forest$tau,
-        Y   = Ycv,
-        ngates = ngates)
-    }
-
-    if ("bagging" %in% algorithms) {
-      consist[["bagging"]] <- consist.test(
-        T   = Tcv,
-        tau = fit_ml$bagging$tau,
-        Y   = Ycv,
-        ngates = ngates)
-
-      het[["bagging"]] <- het.test(
-        T   = Tcv,
-        tau = fit_ml$bagging$tau,
-        Y   = Ycv,
-        ngates = ngates)
-    }
-
-    if ("cart" %in% algorithms) {
-      consist[["cart"]] <- consist.test(
-        T   = Tcv,
-        tau = fit_ml$cart$tau,
-        Y   = Ycv,
-        ngates = ngates)
-
-      het[["cart"]] <- het.test(
-        T   = Tcv,
-        tau = fit_ml$cart$tau,
-        Y   = Ycv,
-        ngates = ngates)
-    }
-
-    if ("caret" %in% algorithms) {
-      consist[["caret"]] <- consist.test(
-        T   = Tcv,
-        tau = fit_ml$caret$tau,
-        Y   = Ycv,
-        ngates = ngates)
-
-      het[["caret"]] <- het.test(
-        T   = Tcv,
-        tau = fit_ml$caret$tau,
-        Y   = Ycv,
-        ngates = ngates)
-    }
-
-  }
-
-  ## =================================
-  ## cross validation
-  ## =================================
-
-  if(cv == TRUE){
-    cat('Conduct hypothesis tests for GATEs unde cross-validation ...\n')
-
-      ## create empty lists to for consistcv and hetcv
-    consistcv <- list()
-    hetcv <- list()
-
-      ## run consistency and heterogeneity tests for each model
-      if ("causal_forest" %in% algorithms) {
-        consistcv[["causal_forest"]] <- consistcv.test(
-          T   = Tcv,
-          tau = gettaucv(fit)[["causal_forest"]],
-          Y   = Ycv,
-          ind = indcv,
-          ngates = ngates)
-
-        hetcv[["causal_forest"]] <- hetcv.test(
-          T   = Tcv,
-          tau = gettaucv(fit)[["causal_forest"]],
-          Y   = Ycv,
-          ind = indcv,
-          ngates = ngates)
-      }
-
-    if ("lasso" %in% algorithms) {
-      consistcv[["lasso"]] <- consistcv.test(
-        T   = Tcv,
-        tau = gettaucv(fit)[["lasso"]],
+        tau = gettaucv(fit)[[i]],
         Y   = Ycv,
         ind = indcv,
         ngates = ngates)
 
-      hetcv[["lasso"]] <- hetcv.test(
+      hetcv[[i]] <- hetcv.test(
         T   = Tcv,
-        tau = gettaucv(fit)[["lasso"]],
+        tau = gettaucv(fit)[[i]],
         Y   = Ycv,
         ind = indcv,
         ngates = ngates)
+    
     }
 
-if ("bartc" %in% algorithms) {
-  consistcv[["bartc"]] <- consistcv.test(
-    T   = Tcv,
-    tau = gettaucv(fit)[["bartc"]],
-    Y   = Ycv,
-    ind = indcv,
-    ngates = ngates)
-
-  hetcv[["bartc"]] <- hetcv.test(
-    T   = Tcv,
-    tau = gettaucv(fit)[["bartc"]],
-    Y   = Ycv,
-    ind = indcv,
-    ngates = ngates)
-}
-
-if ("bart" %in% algorithms) {
-  consistcv[["bart"]] <- consistcv.test(
-    T   = Tcv,
-    tau = gettaucv(fit)[["bart"]],
-    Y   = Ycv,
-    ind = indcv,
-    ngates = ngates)
-
-  hetcv[["bart"]] <- hetcv.test(
-    T   = Tcv,
-    tau = gettaucv(fit)[["bart"]],
-    Y   = Ycv,
-    ind = indcv,
-    ngates = ngates)
-}
-
-if ("boost" %in% algorithms) {
-  consistcv[["boost"]] <- consistcv.test(
-    T   = Tcv,
-    tau = gettaucv(fit)[["boost"]],
-    Y   = Ycv,
-    ind = indcv,
-    ngates = ngates)
-
-  hetcv[["boost"]] <- hetcv.test(
-    T   = Tcv,
-    tau = gettaucv(fit)[["boost"]],
-    Y   = Ycv,
-    ind = indcv,
-    ngates = ngates)
-}
-
-if ("random_forest" %in% algorithms) {
-  consistcv[["random_forest"]] <- consistcv.test(
-    T   = Tcv,
-    tau = gettaucv(fit)[["random_forest"]],
-    Y   = Ycv,
-    ind = indcv,
-    ngates = ngates)
-
-  hetcv[["random_forest"]] <- hetcv.test(
-    T   = Tcv,
-    tau = gettaucv(fit)[["random_forest"]],
-    Y   = Ycv,
-    ind = indcv,
-    ngates = ngates)
-}
-
-if ("bagging" %in% algorithms) {
-  consistcv[["bagging"]] <- consistcv.test(
-    T   = Tcv,
-    tau = gettaucv(fit)[["bagging"]],
-    Y   = Ycv,
-    ind = indcv,
-    ngates = ngates)
-
-  hetcv[["bagging"]] <- hetcv.test(
-    T   = Tcv,
-    tau = gettaucv(fit)[["bagging"]],
-    Y   = Ycv,
-    ind = indcv,
-    ngates = ngates)
-}
-
-if ("cart" %in% algorithms) {
-  consistcv[["cart"]] <- consistcv.test(
-    T   = Tcv,
-    tau = gettaucv(fit)[["cart"]],
-    Y   = Ycv,
-    ind = indcv,
-    ngates = ngates)
-
-  hetcv[["cart"]] <- hetcv.test(
-    T   = Tcv,
-    tau = gettaucv(fit)[["cart"]],
-    Y   = Ycv,
-    ind = indcv,
-    ngates = ngates)
-}
-
-if ("caret" %in% algorithms) {
-  consistcv[["caret"]] <- consistcv.test(
-    T   = Tcv,
-    tau = gettaucv(fit)[["caret"]],
-    Y   = Ycv,
-    ind = indcv,
-    ngates = ngates)
-
-  hetcv[["caret"]] <- hetcv.test(
-    T   = Tcv,
-    tau = gettaucv(fit)[["caret"]],
-    Y   = Ycv,
-    ind = indcv,
-    ngates = ngates)
-    }
+  # return a list of consistcv and hetcv
+  out <- list(consistcv = consistcv, hetcv = hetcv)
   }
 
-  # formulate and return output
-  if(cv == FALSE){
-    tests <- list(consist = consist,
-                  het = het)
-    return(tests)
-  }
-  if(cv == TRUE){
-    tests_cv <- list(consistcv = consistcv,
-                    hetcv = hetcv)
-    return(tests_cv)
-  }
+  class(out) <- c("test_itr", class(out))
+
+  return(out)
+
 }
 
-utils::globalVariables(c("Treat", "aupec", "sd", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm", "vec"))
+
+utils::globalVariables(c("Treat", "aupec", "sd", "pval", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm", "vec", "Y", "algorithm", "statistic", "p.value"))
+
