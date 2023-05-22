@@ -179,14 +179,17 @@ compute_qoi <- function(fit_obj, algorithms) {
 
 
 #' Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv) with user defined functions
-#' @param user_function 
-#' A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}. 
+#' @param user_function A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}. 
+#' @param algorithms A vector of the names of the algorithms to be used.
 #' @param treatment A binary treatment variable in the sample.
 #' @param outcome A vector of the outcome variable of interest for each sample.
 #' @param tau A vector of the unit-level continuous score for treatment assignment. We assume those that have tau<0 should not have treatment. Conditional Average Treatment Effect is one possible measure.
+#' @param data A data frame containing the variables of interest.
+#' @param ngates The number of gates to be used in the GATE function.
+#' @param ... Additional arguments to be passed to the user-defined function.
 #' @importFrom rlang .data
 
-compute_qoi_user <- function(user_function, treatment, outcome,tau, data, ngates, ...) {
+compute_qoi_user <- function(user_function, algorithms, treatment, outcome,tau, data, ngates, ...) {
 
   # parameters
   That <- do.call(user_function, list(data))

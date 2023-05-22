@@ -4,10 +4,33 @@
 \alias{evaluate_itr}
 \title{Evaluate ITR}
 \usage{
-evaluate_itr(fit, ...)
+evaluate_itr(
+  fit = NULL,
+  user_function = NULL,
+  outcome = NULL,
+  treatment = NULL,
+  tau = NULL,
+  data = NULL,
+  ngates = 5,
+  ...
+)
 }
 \arguments{
 \item{fit}{Fitted model. Usually an output from \code{estimate_itr}}
+
+\item{user_function}{A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}.}
+
+\item{outcome}{A character string of the outcome variable name.}
+
+\item{treatment}{A character string of the treatment variable name.}
+
+\item{tau}{A character string of the true treatment effect variable name.}
+
+\item{data}{A data frame containing the variables specified in \code{outcome}, \code{treatment}, and \code{tau}.}
+
+\item{ngates}{The number of gates to use for the ITR. The default is 5.
+A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}. 
+See \code{?evaluate_itr} for an example.}
 
 \item{...}{Further arguments passed to the function.}
 }

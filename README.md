@@ -145,26 +145,26 @@ design are given in [Imai and Li
 summary(est)
 #> ── PAPE ────────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1      1.3           1.4 causal_forest      0.94    0.35
+#> 1      1.4           1.2 causal_forest       1.1    0.27
 #> 
 #> ── PAPEp ───────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1      1.8           1.1 causal_forest       1.6    0.11
+#> 1      1.6           1.3 causal_forest       1.3    0.21
 #> 
 #> ── PAPDp ───────────────────────────────────────────────────────────────────────
 #> data frame with 0 columns and 0 rows
 #> 
 #> ── AUPEC ───────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1     0.62             1 causal_forest       0.6    0.55
+#> 1      1.8             1 causal_forest       1.8   0.071
 #> 
 #> ── GATE ────────────────────────────────────────────────────────────────────────
-#>   estimate std.deviation     algorithm group statistic p.value upper lower
-#> 1      -89           106 causal_forest     1     -0.84   0.401  -264    86
-#> 2      193           108 causal_forest     2      1.79   0.073    16   371
-#> 3      114           109 causal_forest     3      1.05   0.294   -65   293
-#> 4     -153           108 causal_forest     4     -1.41   0.159  -331    26
-#> 5      -28           107 causal_forest     5     -0.26   0.796  -203   148
+#>   estimate std.deviation     algorithm group statistic p.value  upper lower
+#> 1      -24           107 causal_forest     1     -0.22   0.825 -200.3   153
+#> 2     -231           108 causal_forest     2     -2.14   0.032 -408.5   -54
+#> 3      160           109 causal_forest     3      1.47   0.141  -18.9   340
+#> 4      173           108 causal_forest     4      1.61   0.108   -4.2   351
+#> 5      -69           107 causal_forest     5     -0.64   0.521 -245.2   108
 
 # similarly for caret
 # summary(est_caret)
@@ -312,31 +312,31 @@ est_cv <- evaluate_itr(fit_cv)
 summary(est_cv)
 #> ── PAPE ────────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
-#> 1   0.9540          0.82 causal_forest    1.1676    0.24
-#> 2  -0.0036          0.49         bartc   -0.0072    0.99
-#> 3   0.1733          1.07         lasso    0.1618    0.87
-#> 4   1.2657          0.95            rf    1.3347    0.18
+#> 1     0.95          0.82 causal_forest      1.17    0.24
+#> 2    -0.32          0.41         bartc     -0.79    0.43
+#> 3     0.17          1.07         lasso      0.16    0.87
+#> 4     1.27          0.95            rf      1.33    0.18
 #> 
 #> ── PAPEp ───────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
 #> 1     2.55          0.65 causal_forest      3.91 9.2e-05
-#> 2     1.88          0.85         bartc      2.21 2.7e-02
+#> 2     1.45          0.89         bartc      1.63 1.0e-01
 #> 3    -0.21          0.63         lasso     -0.33 7.4e-01
 #> 4     1.69          1.11            rf      1.52 1.3e-01
 #> 
 #> ── PAPDp ───────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation             algorithm statistic p.value
-#> 1     0.68          0.86 causal_forest x bartc      0.78 0.43351
+#> 1     1.11          1.01 causal_forest x bartc      1.09 0.27423
 #> 2     2.76          0.80 causal_forest x lasso      3.46 0.00054
 #> 3     0.87          0.71    causal_forest x rf      1.22 0.22292
-#> 4     2.08          1.12         bartc x lasso      1.86 0.06270
-#> 5     0.19          1.06            bartc x rf      0.18 0.85699
+#> 4     1.65          1.02         bartc x lasso      1.62 0.10506
+#> 5    -0.24          1.16            bartc x rf     -0.21 0.83600
 #> 6    -1.89          0.72            lasso x rf     -2.62 0.00892
 #> 
 #> ── AUPEC ───────────────────────────────────────────────────────────────────────
 #>   estimate std.deviation     algorithm statistic p.value
 #> 1     1.43           1.5 causal_forest      0.92    0.36
-#> 2     0.71           1.3         bartc      0.53    0.60
+#> 2     0.78           1.5         bartc      0.54    0.59
 #> 3     0.18           1.4         lasso      0.13    0.90
 #> 4     1.37           1.6            rf      0.88    0.38
 #> 
@@ -347,11 +347,11 @@ summary(est_cv)
 #> 3      60.9            59 causal_forest     3     1.034   0.301 176.4   -55
 #> 4       7.6            59 causal_forest     4     0.128   0.898 123.7  -109
 #> 5      40.9            99 causal_forest     5     0.411   0.681 235.8  -154
-#> 6      48.2            71         bartc     1     0.678   0.498 187.6   -91
-#> 7    -163.6            67         bartc     2    -2.435   0.015 -31.9  -295
-#> 8      -3.6            92         bartc     3    -0.039   0.969 177.1  -184
-#> 9      86.6            59         bartc     4     1.459   0.145 202.9   -30
-#> 10     50.6            97         bartc     5     0.520   0.603 241.3  -140
+#> 6      32.2            59         bartc     1     0.542   0.588 148.8   -84
+#> 7    -143.5            59         bartc     2    -2.435   0.015 -28.0  -259
+#> 8      33.2            82         bartc     3     0.406   0.685 193.5  -127
+#> 9      47.8            59         bartc     4     0.809   0.419 163.5   -68
+#> 10     48.5            92         bartc     5     0.529   0.597 228.3  -131
 #> 11    -14.4            94         lasso     1    -0.154   0.878 169.2  -198
 #> 12    -94.5            90         lasso     2    -1.051   0.293  81.8  -271
 #> 13     87.9            99         lasso     3     0.886   0.376 282.4  -107

@@ -38,7 +38,6 @@ estimate_itr <- function(
     trControl = caret::trainControl(method = "none"),
     tuneGrid = NULL,
     tuneLength = ifelse(trControl$method == "none", 1, 3),
-    user_function = NULL,
     ...
 ) {
 
@@ -69,9 +68,6 @@ estimate_itr <- function(
     tuneGrid = tuneGrid,
     tuneLength = tuneLength
   )
-
-  # combine package algs with user's own function
-  algorithms <- c(algorithms, user_function)
 
   # some working variables
   n_alg <- length(algorithms)
@@ -112,7 +108,6 @@ estimate_itr <- function(
     params     = params,
     folds      = folds,
     budget     = budget,
-    user_function = user_function,
     ...
   )
 
@@ -141,7 +136,6 @@ itr_single_outcome <- function(
     params,
     folds,
     budget,
-    user_function,
     ...
 ) {
 
@@ -258,35 +252,6 @@ itr_single_outcome <- function(
 
       }
     
-    }
-
-    # user defined algorithm
-    if (!is.null(user_function)){
-      
-      # loop over all user defined algorithms
-      for (i in seq_along(user_function)) {
-        
-        # set the train_method to the algorithm
-        train_method = user_function[i]
-
-        # run the algorithm
-        user_est <- run_user(
-          dat_train = trainset,
-          dat_test  = testset,
-          dat_total = data,
-          params    = params,
-          budget    = budget,
-          indcv     = 1,
-          iter      = 1,
-          train_method = train_method,
-          ...
-        )
-
-        # store the results
-        fit_ml[[user_function[i]]] <- user_est$test
-        models[[user_function[i]]] <- user_est$train
-
-      }
     }
 
     if ("causal_forest" %in% algorithms) {
@@ -522,35 +487,6 @@ itr_single_outcome <- function(
         }
       }
 
-      # user defined algorithm
-      if (!is.null(user_function)){
-        
-        # loop over all user defined algorithms
-        for (i in seq_along(user_function)) {
-          
-          # set the train_method to the algorithm
-          train_method = user_function[i]
-
-          # run the algorithm
-          user_est <- run_user(
-            dat_train = trainset,
-            dat_test  = testset,
-            dat_total = data,
-            params    = params,
-            budget    = budget,
-            indcv     = indcv,
-            iter      = j,
-            train_method = train_method,
-            ...
-          )
-
-          # store the results
-          fit_ml[[user_function[i]]][[j]] <- user_est$test
-          models[[user_function[i]]][[j]] <- user_est$train
-
-        }
-      }
-
       if ("causal_forest" %in% algorithms) {
         # run causal forest
         est <- run_causal_forest(
@@ -690,20 +626,54 @@ itr_single_outcome <- function(
 
 #' Evaluate ITR
 #' @param fit Fitted model. Usually an output from \code{estimate_itr}
+#' @param user_function A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}.
+#' @param outcome A character string of the outcome variable name.
+#' @param treatment A character string of the treatment variable name.
+#' @param tau A character string of the true treatment effect variable name.
+#' @param data A data frame containing the variables specified in \code{outcome}, \code{treatment}, and \code{tau}.
+#' @param ngates The number of gates to use for the ITR. The default is 5.
+#' A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}. 
+#' See \code{?evaluate_itr} for an example.
 #' @param ... Further arguments passed to the function.
 #' @return An object of \code{itr} class
 #' @export
-evaluate_itr <- function(fit, ...){
+evaluate_itr <- function(
+  fit = NULL, 
+  user_function = NULL,
+  outcome = NULL, 
+  treatment = NULL, 
+  tau = NULL, 
+  data = NULL, 
+  ngates = 5,
+  ...){
 
-  estimates  <- fit$estimates
-  cv         <- estimates$params$cv
-  df         <- fit$df
-  algorithms <- fit$df$algorithms
-  outcome    <- fit$df$outcome
+  # check if using fitted object
+  if(!is.null(fit)){
+    # estimate ITR from the fitted model
+    estimates  <- fit$estimates
+    cv         <- estimates$params$cv
+    df         <- fit$df
+    algorithms <- fit$df$algorithms
+    outcome    <- fit$df$outcome
 
-  # compute qoi
-  qoi      <- vector("list", length = length(outcome))
-  qoi <- compute_qoi(estimates, algorithms)
+    # compute qoi
+    qoi <- vector("list", length = length(outcome))
+    qoi <- compute_qoi(estimates, algorithms)
+    
+  } else {
+    # get ITR from the user-defined function
+    estimates <- list(
+      Ycv = data %>% pull(sym(outcome)), 
+      Tcv = data %>% pull(sym(treatment)), 
+      algorithms = "user-defined")
+    cv   <- FALSE    
+    df   <- data
+
+    # compute qoi
+    qoi   <- vector("list", length = length(outcome))
+    qoi   <- compute_qoi_user(
+      user_function, treatment, outcome,tau, data, ngates, ...)
+  }
 
   out <- list(
     qoi = qoi, cv = cv, df = df, estimates = estimates)

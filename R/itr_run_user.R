@@ -57,9 +57,8 @@ test_user <- function(
 #   total_data_elements   <- create_ml_args(dat_total)
 
   if(cv == TRUE){
-    ## predict
-    # new_data = total_data_elements[["X"]] %>% as.matrix()
-    tau_total=predict(fit_train,dat_total)
+    # predict
+    tau_total= do.call("predict", list(fit_train,dat_total))
 
     ## compute quantities of interest
     tau_test <-  tau_total[indcv == iter]
@@ -77,8 +76,7 @@ test_user <- function(
 
   if(cv == FALSE){
     ## predict
-    # new_data = testing_data_elements[["X"]] %>% as.matrix()
-    tau_test=predict(fit_train, dat_test)
+    tau_test= do.call("predict", list(fit_train, dat_test))
 
     ## compute quantities of interest
     That     =  as.numeric(tau_test > 0)

@@ -15,7 +15,8 @@ Description: Provides various statistical methods for evaluating
     Treatment Rules under budget constraints. Detailed reference in Imai
     and Li (2019) <arXiv:1905.05389>.
 License: GPL (>=2)
-URL: https://github.com/MichaelLLi/evalITR
+URL: https://github.com/MichaelLLi/evalITR,
+    https://michaellli.github.io/evalITR/
 BugReports: https://github.com/MichaelLLi/evalITR/issues
 Depends: 
     dplyr (>= 1.0),
@@ -46,7 +47,10 @@ Imports:
     scales,
     utils
 Suggests: 
+    knitr,
+    rmarkdown,
     testthat
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.2
+VignetteBuilder: knitr
