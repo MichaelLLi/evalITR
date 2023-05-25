@@ -18,14 +18,14 @@ knitr::opts_chunk$set(
 
 You can install the released version of evalITR from [CRAN](https://CRAN.R-project.org) with:
 
-```{r messsage = FALSE, warning = FALSE}
+```{r messsage = FALSE, warning = FALSE, eval=FALSE}
 # Install release version from CRAN (updating evalITR is the same command)
 install.packages("evalITR")
 ```
 
 Or, you can install the development version of evalITR from [GitHub](https://github.com/) with:
 
-``` {r messsage = FALSE, warning = FALSE}
+``` {r messsage = FALSE, warning = FALSE, eval = FALSE}
 # install.packages("devtools")
 devtools::install_github("MichaelLLi/evalITR", ref = "causal-ml")
 ```
@@ -37,7 +37,7 @@ If you want to use the latest version of the package, you can install the develo
 
 (Optional) if you have multiple cores, we recommendate using multisession futures and processing in parallel. This would increase computation efficiency and reduce the time to fit the model. 
 
-```{r messsage = FALSE, warning = FALSE}
+```{r messsage = FALSE, warning = FALSE, eval=FALSE}
 library(furrr)
 library(future.apply)
 

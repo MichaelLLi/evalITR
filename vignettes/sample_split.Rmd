@@ -13,6 +13,8 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "../man/figures/README-"
   )
+
+options(rmarkdown.html_vignette.check_title = FALSE)  
 ```
 
 
@@ -72,7 +74,7 @@ summary(est)
 
 We can extract estimates from the `est` object. The following code shows how to extract the GATE estimates for the writing score with the causal forest algorithm. 
 
-```{r est_extract, warning = FALSE, message = FALSE, out.width = '60%'}
+```{r est_extract, warning = FALSE, message = FALSE}
 # plot GATE estimates
 summary(est)$GATE %>% 
   mutate(group = as_factor(group)) %>%
@@ -95,7 +97,7 @@ summary(est)$GATE %>%
 
 We plot the estimated Area Under the Prescriptive Effect Curve for the writing score across a range of budget constraints for causal forest.
 
-```{r sp_plot, out.width = '50%'}
+```{r sp_plot}
 # plot the AUPEC 
 plot(est)
 ```
