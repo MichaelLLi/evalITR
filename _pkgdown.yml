@@ -1,4 +1,27 @@
-url: https://michaellli.github.io/evalITR/
+destination: docs
+
 template:
   bootstrap: 5
+  params:
+    bootswatch: spacelab
+
+navbar:
+  title: "evalITR"
+  left:
+    - text: "User's Guide"
+      menu:
+        - text: "Installation"
+          href: articles/install.html
+        - text: "Sample Splitting"
+          href: articles/sample_split.html
+        - text: "Sample Splitting with Caret"
+          href: articles/sample_split_caret.html
+        - text: "Cross-Validation"
+          href: articles/cv_single_alg.html.html
+        - text: "Cross-Validation with Multiple Algorithms"
+          href: articles/cv_multiple_alg.html
+    - text: "Reference"
+      href: reference/index.html
+    - text: "Changelog"
+      href: news/index.html
 

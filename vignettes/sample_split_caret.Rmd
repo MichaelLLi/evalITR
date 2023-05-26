@@ -14,10 +14,8 @@ knitr::opts_chunk$set(
   fig.path = "../man/figures/README-"
   )
 
-options(rmarkdown.html_vignette.check_title = FALSE)
-
 library(caret)
-library(tidyverse)
+library(dplyr)
 
 load("../data/star.rda")
 
@@ -35,16 +33,20 @@ user_formula <- as.formula(
   "g3tlangss ~ treatment + gender + race + birthmonth + 
   birthyear + SCHLURBN + GRDRANGE + GKENRMNT + GKFRLNCH + 
   GKBUSED + GKWHITE ")
+
 ```
 
 
 We can train the model with the `caret` package (for further information about `caret`, see [the original website](http://topepo.github.io/caret/index.html)). We use parallel computing to speed up the computation. 
 
-```{r parallel, message = FALSE}
+```{r parallel, message = FALSE, eval = FALSE}
 # parallel computing
 library(doParallel)
 cl <- makePSOCKcluster(5)
 registerDoParallel(cl)
+
+# stop after finishing the computation
+stopCluster(cl)
 ```
 
 The following example shows how to estimate the ITR with grandient boosting machine (GBM) using the `caret` package. Note that we have already loaded the data and specify the treatment, outcome, and covariates as shown in the [Sample Splitting](docs/articles/sample_split.html) vignette. Since we are using the `caret` package, we need to specify the `trainControl` and/or `tuneGrid` arguments. The `trainControl` argument specifies the cross-validation method and the `tuneGrid` argument specifies the tuning grid. For more information about these arguments, please refer to the [caret website](http://topepo.github.io/caret/model-training-and-tuning.html).
@@ -84,14 +86,12 @@ fit_caret <- estimate_itr(
 # evaluate ITR
 est_caret <- evaluate_itr(fit_caret)
 
-# stop parallel computing
-stopCluster(cl)
 ```
 
 
 We can extract the training model from `caret` and check the model performance. Other functions from `caret` can be applied to the training model.
 
-```{r caret_model, message = FALSE, warning = FALSE}
+```{r caret_model, message = FALSE, warning = FALSE, fig.width = 6, fig.height = 4}
 # extract the final model
 caret_model <- fit_caret$estimates$models$gbm
 print(caret_model$finalModel)
@@ -115,7 +115,7 @@ summary(est_caret)
 
 We plot the estimated Area Under the Prescriptive Effect Curve for the writing score across a range of budget constraints for the gradient boosting machine.
 
-```{r sp_plot}
+```{r sp_plot, fig.width = 6, fig.height = 4}
 # plot the AUPEC 
 plot(est_caret)
 ```
