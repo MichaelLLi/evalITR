@@ -6,11 +6,12 @@
 \usage{
 evaluate_itr(
   fit = NULL,
-  user_function = NULL,
-  outcome = NULL,
-  treatment = NULL,
-  tau = NULL,
-  data = NULL,
+  itr_function = NULL,
+  outcome = c(),
+  treatment = c(),
+  tau = list(),
+  data = list(),
+  budget = 1,
   ngates = 5,
   ...
 )
@@ -18,7 +19,7 @@ evaluate_itr(
 \arguments{
 \item{fit}{Fitted model. Usually an output from \code{estimate_itr}}
 
-\item{user_function}{A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}.}
+\item{itr_function}{A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}.}
 
 \item{outcome}{A character string of the outcome variable name.}
 
@@ -27,6 +28,8 @@ evaluate_itr(
 \item{tau}{A character string of the true treatment effect variable name.}
 
 \item{data}{A data frame containing the variables specified in \code{outcome}, \code{treatment}, and \code{tau}.}
+
+\item{budget}{The maximum percentage of population that can be treated under the budget constraint.}
 
 \item{ngates}{The number of gates to use for the ITR. The default is 5.
 A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}. 

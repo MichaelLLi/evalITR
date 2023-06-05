@@ -1,0 +1,12 @@
+pandoc: 2.19.2
+pkgdown: 2.0.6
+pkgdown_sha: ~
+articles:
+  cv_multiple_alg: cv_multiple_alg.html
+  cv_single_alg: cv_single_alg.html
+  install: install.html
+  sample_split: sample_split.html
+  sample_split_caret: sample_split_caret.html
+  user_itr: user_itr.html
+last_built: 2023-06-05T05:49Z
+

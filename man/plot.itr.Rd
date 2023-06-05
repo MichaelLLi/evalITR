@@ -4,12 +4,10 @@
 \alias{plot.itr}
 \title{Plot the AUPEC curve}
 \usage{
-\method{plot}{itr}(x, outcome = TRUE, ...)
+\method{plot}{itr}(x, ...)
 }
 \arguments{
-\item{x}{An object of \code{estimate_itr} class. This is typically an output of \code{estimate_itr()} function.}
-
-\item{outcome}{Outcome variable. Can be different from the input of \code{run_itr}}
+\item{x}{An object of \code{evaluate_itr()} class. This is typically an output of \code{evaluate_itr()} function.}
 
 \item{...}{Further arguments passed to the function.}
 }

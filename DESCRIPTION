@@ -33,14 +33,18 @@ Imports:
     cli,
     e1071,
     forcats,
+    gbm,
     ggdist,
     ggplot2,
     ggthemes,
     glmnet,
     grf,
+    haven,
     purrr,
     randomForest,
     rlang,
+    rlearner,
+    rpart,
     rqPen,
     scales,
     utils
@@ -48,7 +52,6 @@ Suggests:
     doParallel,
     furrr,
     knitr,
-    rlearner,    
     rmarkdown,
     testthat
 VignetteBuilder: 

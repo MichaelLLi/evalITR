@@ -30,7 +30,7 @@ estimate_itr(
 
 \item{algorithms}{List of machine learning algorithms to be used.}
 
-\item{budget}{Proportion of treated units.}
+\item{budget}{The maximum percentage of population that can be treated under the budget constraint.}
 
 \item{n_folds}{Number of cross-validation folds. Default is 5.}
 

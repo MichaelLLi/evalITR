@@ -5,7 +5,7 @@
 #' @export
 summary.itr <- function(object, ...) {
   out         <- list()
-  fit_outcome <- object$df$outcome
+  # fit_outcome <- object$df$outcome
   algorithm   <- object$df$algorithm
   cv          <- object$cv
   fit         <- object$qoi
@@ -13,7 +13,7 @@ summary.itr <- function(object, ...) {
   ## -----------------------------------------
   ## compute quantities under sample splitting
   ## -----------------------------------------
-  if (cv == FALSE) {
+  if (cv != TRUE) {
     out[["PAPE"]] <- fit$PAPE %>%
       map(., ~ as_tibble(.)) %>%
       bind_rows() %>%
@@ -58,9 +58,7 @@ summary.itr <- function(object, ...) {
         )
     }
 
-    temp <- fit$AUPEC
-
-    out[["AUPEC"]] <- temp %>%
+    out[["AUPEC"]] <- fit$AUPEC %>%
       map(., ~ .x[c("aupec", "sd")]) %>%
       bind_rows() %>%
       mutate(algorithm = algorithm) %>%
@@ -138,13 +136,11 @@ summary.itr <- function(object, ...) {
         )
     }
 
-    temp <- fit$AUPEC
-
-    out[["AUPEC"]] <- temp %>%
+    out[["AUPEC"]] <- fit$AUPEC %>% 
       map(., ~ .x$aupec_cv) %>%
       bind_rows() %>%
       mutate(
-        algorithm = temp %>% map(., ~ .x$outputdf$type %>% unique()) %>% unlist()
+        algorithm = fit$AUPEC %>% map(., ~ .x$outputdf$type %>% unique()) %>% unlist()
       ) %>%
       mutate(
         statistic = aupec / sd,
@@ -177,6 +173,7 @@ summary.itr <- function(object, ...) {
   return(out)
 }
 
+
 #' Print
 #' @importFrom cli cat_rule
 #' @param x An object of \code{summary.itr} class. This is typically an output of \code{summary.itr()} function.
@@ -208,7 +205,6 @@ print.summary.itr <- function(x, ...) {
   print(as.data.frame(x[["GATE"]]), digits = 2)
   cli::cat_line("")
 }
-
 
 
 #' Summarize test_itr output 

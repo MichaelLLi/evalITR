@@ -17,9 +17,11 @@ navbar:
         - text: "Sample Splitting with Caret"
           href: articles/sample_split_caret.html
         - text: "Cross-Validation"
-          href: articles/cv_single_alg.html.html
+          href: articles/cv_single_alg.html
         - text: "Cross-Validation with Multiple Algorithms"
           href: articles/cv_multiple_alg.html
+        - text: "User-Defined ITR"
+          href: articles/user_itr.html
     - text: "Reference"
       href: reference/index.html
     - text: "Changelog"
