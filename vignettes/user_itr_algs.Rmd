@@ -37,7 +37,7 @@ user_formula <- as.formula(
 
 ```
 
-### Compare Estimated and User Defined ITR
+###  Estimated vs. User Defined ITR
 
 The package allows to compare the performance of estimated ITRs with user defined ITRs. The `estimate_itr` function takes the following arguments:
 
@@ -91,7 +91,7 @@ plot(compare_itr)
 ```
 
 
-### Compare Estimated ITR from the Package vs. User-Defined model
+### Existing Model vs. User-Defined Model
 
 The package also allows to compare the performance of estimated ITRs of existing ML packages with user defined models. The following code shows an example using causal forest from the `grf` package with sample splitting. The `estimate_itr` function takes the following arguments:
 
