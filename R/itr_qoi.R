@@ -194,6 +194,8 @@ compute_qoi_user <- function(itr_function, Tcv, Ycv, tau, data, ngates, budget, 
   That <- do.call(itr_function, list(data))
   That_p <- numeric(length(That))
   That_p[sort(tau,decreasing =TRUE,index.return=TRUE)$ix[1:(floor(budget*length(tau))+1)]] = 1
+  function_name <- as.character(substitute(my_function))
+
 
   # PAPE 
   PAPE <- PAPEp <- vector("list", length(itr_function))
@@ -206,9 +208,9 @@ compute_qoi_user <- function(itr_function, Tcv, Ycv, tau, data, ngates, budget, 
     PAPEp[[i]] <- PAPE(Tcv, That_p, Ycv, centered = TRUE, budget)
 
     ## name
-    PAPE[[i]]$alg <- itr_function[i]
+    PAPE[[i]]$alg <- function_name[i]
     
-    PAPEp[[i]]$alg <- itr_function[i]
+    PAPEp[[i]]$alg <- function_name[i]
 
   }
 
@@ -220,7 +222,7 @@ compute_qoi_user <- function(itr_function, Tcv, Ycv, tau, data, ngates, budget, 
     aupec[[i]] <- AUPEC(Tcv, tau, Ycv, centered = TRUE)
 
     # name
-    aupec[[i]]$alg <- itr_function[i]
+    aupec[[i]]$alg <- function_name[i]
   }
 
   ## GATE
@@ -231,7 +233,7 @@ compute_qoi_user <- function(itr_function, Tcv, Ycv, tau, data, ngates, budget, 
     GATE[[i]] <- GATE(Tcv, tau, Ycv, ngates)
 
     ## indicate algorithm
-    GATE[[i]]$alg <- itr_function[i]
+    GATE[[i]]$alg <- function_name[i]
 
     ## indicate group number
     GATE[[i]]$group <- seq_along(GATE[[i]]$gate)
