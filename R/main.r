@@ -625,10 +625,9 @@ itr_single_outcome <- function(
 
 #' Evaluate ITR
 #' @param fit Fitted model. Usually an output from \code{estimate_itr}
-#' @param itr_function A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}.
+#' @param user_itr  A user-defined function to create an ITR. The function should take the data as input and return an unit-level continuous score for treatment assignment. We assume those that have score less than 0 should not have treatment. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}.
 #' @param outcome A character string of the outcome variable name.
 #' @param treatment A character string of the treatment variable name.
-#' @param tau A character string of the true treatment effect variable name.
 #' @param data A data frame containing the variables specified in \code{outcome}, \code{treatment}, and \code{tau}.
 #' @param budget The maximum percentage of population that can be treated under the budget constraint.
 #' @param ngates The number of gates to use for the ITR. The default is 5.
@@ -639,20 +638,21 @@ itr_single_outcome <- function(
 #' @export
 evaluate_itr <- function(
   fit = NULL, 
-  itr_function = NULL,
+  user_itr = NULL,
   outcome = c(), 
   treatment = c(), 
-  tau = list(), 
   data = list(), 
   budget = 1,
   ngates = 5,
   ...){
 
   # parameters
-  user_itr <- ifelse(is.null(itr_function), FALSE, TRUE)
+  out_algs <- list()
+  out_user  <- list()
 
-  # check if using fitted object
+  # estimate ITR from ML algorithms
   if(!is.null(fit)){
+
     # estimate ITR from the fitted model
     estimates  <- fit$estimates
     cv         <- estimates$params$cv
@@ -664,9 +664,16 @@ evaluate_itr <- function(
     qoi <- vector("list", length = length(outcome))
     qoi <- compute_qoi(estimates, algorithms)
 
-  } else {
-    
-    # get ITR from the user-defined function
+    # store the results
+    out_algs <- list(
+      qoi = qoi, 
+      cv = cv, 
+      df = df, 
+      estimates = estimates)    
+  } 
+
+  # get ITR from the user-defined function
+  if(!is.null(user_itr)){
     df  = data 
     Ycv = data[, outcome]
     Tcv = data[, treatment]
@@ -680,16 +687,20 @@ evaluate_itr <- function(
     # compute qoi
     qoi   <- vector("list", length = length(outcome))
     qoi   <- compute_qoi_user(
-      itr_function, Tcv, Ycv, tau, data, ngates, budget, ...)
+      user_itr, Tcv, Ycv, data, ngates, budget, ...)
+
+    # store the results
+    out_user <- list(
+      qoi = qoi, 
+      cv = cv, 
+      df = df, 
+      estimates = estimates)      
   }
-  
+
   # store the results
   out <- list(
-    qoi = qoi, 
-    cv = cv, 
-    df = df, 
-    estimates = estimates,
-    user_itr = user_itr)
+    out_algs = out_algs,
+    out_user = out_user)
 
   class(out) <- c("itr", class(out))
 

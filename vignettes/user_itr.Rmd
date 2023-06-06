@@ -36,23 +36,22 @@ user_formula <- as.formula(
 
 ```
 
-Instead of using the ITRs estimated by `evalITR` models, we can define our own ITR and evaluate its performance using the `evaluate_itr` function. The function takes the following arguments: `itr_function` a function defined by users that returns a vector of 0 and 1, `data` a data frame, `treatment` a character string specifying the treatment variable, `outcome` a character string specifying the outcome variable, `budget` a numeric value specifying the maximum percentage of population that can be treated under the budget constraint., and `tau` a numeric vector specifying the unit-level continuous score for treatment assignment. We assume those that have tau<0 should not have treatment. Conditional Average Treatment Effect is one possible measure.. The function returns an object that contains the estimated GATE, ATE, and AUPEC for the user defined ITR.
+Instead of using the ITRs estimated by `evalITR` models, we can define our own ITR and evaluate its performance using the `evaluate_itr` function. The function takes the following arguments: `user_itr` a function defined by users that returns a unit-level continuous score for treatment assignment. We assume those that have score less than 0 should not have treatment. The function also takes `data` a data frame, `treatment` a character string specifying the treatment variable, `outcome` a character string specifying the outcome variable, `budget` a numeric value specifying the maximum percentage of population that can be treated under the budget constraint. The function returns an object that contains the estimated GATE, ATE, and AUPEC for the user defined ITR.
 
 ```{r user_itr_summary, warning = FALSE, message = FALSE}
 # user's own ITR
-my_function <- function(data){
-  itr <- (data$race == 1)*1
-  return(itr)
+score_function <- function(data){
+  score <- (data$GKWHITE)/5
+  return(score)
 }
 
 # evalutate ITR
 user_itr <- evaluate_itr(
-  itr_function = "my_function",
+  user_itr = score_function,
   data = star_data,
   treatment = treatment,
   outcome = outcomes,
-  budget = 0.2,
-  tau = seq(0.1, 0.9, length.out = nrow(star_data)))
+  budget = 0.2)
 
 # summarize estimates
 summary(user_itr)

@@ -13,6 +13,8 @@ knitr::opts_chunk$set(
   comment = "#>",
   fig.path = "../man/figures/README-"
   )
+  
+load("../data/star.rda")
 
 ```
 
@@ -28,8 +30,6 @@ To begin, we load the dataset and specify the outcome variable and covariates to
 ```{r sample_split, warning = FALSE, message = FALSE}
 library(dplyr)
 library(evalITR)
-
-load("../data/star.rda")
 
 # specifying the outcome
 outcomes <- "g3tlangss"

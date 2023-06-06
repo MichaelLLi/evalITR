@@ -4,16 +4,14 @@
 \alias{compute_qoi_user}
 \title{Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv) with user defined functions}
 \usage{
-compute_qoi_user(itr_function, Tcv, Ycv, tau, data, ngates, budget, ...)
+compute_qoi_user(user_itr, Tcv, Ycv, data, ngates, budget, ...)
 }
 \arguments{
-\item{itr_function}{A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}.}
+\item{user_itr}{A user-defined function to create an ITR. The function should take the data as input and return an unit-level continuous score for treatment assignment. We assume those that have score less than 0 should not have treatment. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}.}
 
 \item{Tcv}{A vector of the unit-level binary treatment.}
 
 \item{Ycv}{A vector of the unit-level continuous outcome.}
-
-\item{tau}{A vector of the unit-level continuous score for treatment assignment. We assume those that have tau<0 should not have treatment. Conditional Average Treatment Effect is one possible measure.}
 
 \item{data}{A data frame containing the variables of interest.}
 
