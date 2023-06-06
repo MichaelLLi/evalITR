@@ -62,13 +62,13 @@
 
     <div class="section level2">
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
-    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_qoi_user</span><span class="op">(</span><span class="va">itr_function</span>, <span class="va">Tcv</span>, <span class="va">Ycv</span>, <span class="va">tau</span>, <span class="va">data</span>, <span class="va">ngates</span>, <span class="va">budget</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
+    <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">compute_qoi_user</span><span class="op">(</span><span class="va">user_itr</span>, <span class="va">Tcv</span>, <span class="va">Ycv</span>, <span class="va">data</span>, <span class="va">ngates</span>, <span class="va">budget</span>, <span class="va">...</span><span class="op">)</span></span></code></pre></div>
     </div>
 
     <div class="section level2">
     <h2 id="arguments">Arguments<a class="anchor" aria-label="anchor" href="#arguments"></a></h2>
-    <dl><dt>itr_function</dt>
-<dd><p>A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is <code>NULL</code>, which means the ITR will be estimated from the <code>estimate_itr</code>.</p></dd>
+    <dl><dt>user_itr</dt>
+<dd><p>A user-defined function to create an ITR. The function should take the data as input and return an unit-level continuous score for treatment assignment. We assume those that have score less than 0 should not have treatment. The default is <code>NULL</code>, which means the ITR will be estimated from the <code>estimate_itr</code>.</p></dd>
 
 
 <dt>Tcv</dt>
@@ -77,10 +77,6 @@
 
 <dt>Ycv</dt>
 <dd><p>A vector of the unit-level continuous outcome.</p></dd>
-
-
-<dt>tau</dt>
-<dd><p>A vector of the unit-level continuous score for treatment assignment. We assume those that have tau&lt;0 should not have treatment. Conditional Average Treatment Effect is one possible measure.</p></dd>
 
 
 <dt>data</dt>

@@ -153,8 +153,8 @@ applied to the training model.</p>
 <span><span class="va">caret_model</span> <span class="op">&lt;-</span> <span class="va">fit_caret</span><span class="op">$</span><span class="va">estimates</span><span class="op">$</span><span class="va">models</span><span class="op">$</span><span class="va">gbm</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">caret_model</span><span class="op">$</span><span class="va">finalModel</span><span class="op">)</span></span>
 <span><span class="co">#&gt; A gradient boosted model with gaussian loss function.</span></span>
-<span><span class="co">#&gt; 50 iterations were performed.</span></span>
-<span><span class="co">#&gt; There were 53 predictors of which 36 had non-zero influence.</span></span>
+<span><span class="co">#&gt; 100 iterations were performed.</span></span>
+<span><span class="co">#&gt; There were 53 predictors of which 22 had non-zero influence.</span></span>
 <span></span>
 <span><span class="co"># check model performance</span></span>
 <span><span class="fu">trellis.par.set</span><span class="op">(</span><span class="fu">caretTheme</span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="co"># theme</span></span>
@@ -168,41 +168,69 @@ applied to the training model.</p>
 <span>  scales <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>x <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span>rot <span class="op">=</span> <span class="fl">90</span><span class="op">)</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
 <p><img src="../reference/figures/README-caret_model-2.png" width="576"></p>
 <p>The<code><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary()</a></code> function displays the following summary
-statistics: (1) population average prescriptive effect
-<code>PAPE</code>; (2) population average prescriptive effect with a
-budget constraint <code>PAPEp</code>; (3) population average
-prescriptive effect difference with a budget constraint
-<code>PAPDp</code>. This quantity will be computed with more than 2
-machine learning algorithms); (4) and area under <strong>the</strong>
-prescriptive effect curve <code>AUPEC</code>. For more information about
-these evaluation metrics, please refer to <a href="https://arxiv.org/abs/1905.05389" class="external-link">Imai and Li (2021)</a>; (5)
-Grouped Average Treatment Effects <code>GATEs</code>. The details of the
-methods for this design are given in <a href="https://arxiv.org/abs/2203.14511" class="external-link">Imai and Li (2022)</a>.</p>
+statistics:</p>
+<table class="table">
+<colgroup>
+<col width="26%">
+<col width="73%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Statistics</th>
+<th align="left">Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>PAPE</code></td>
+<td align="left">population average prescriptive effect</td>
+</tr>
+<tr class="even">
+<td align="left"><code>PAPEp</code></td>
+<td align="left">population average prescriptive effect with a budget
+constraint</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>PAPDp</code></td>
+<td align="left">population average prescriptive effect difference with
+a budget constraint (this quantity will be computed with more than 2
+machine learning algorithms)</td>
+</tr>
+<tr class="even">
+<td align="left"><code>AUPEC</code></td>
+<td align="left">area under the prescriptive effect curve</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>GATE</code></td>
+<td align="left">grouped average treatment effects</td>
+</tr>
+</tbody>
+</table>
+<p>For more information about these evaluation metrics, please refer to
+<a href="https://arxiv.org/abs/1905.05389" class="external-link">Imai and Li (2021)</a> and <a href="https://arxiv.org/abs/2203.14511" class="external-link">Imai and Li (2022)</a>.</p>
 <div class="sourceCode" id="cb5"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># summarize estimates</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_caret</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── PAPE ────────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1    -0.35           1.5       gbm     -0.24    0.81</span></span>
+<span><span class="co">#&gt; 1     0.15           1.2       gbm      0.13     0.9</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── PAPEp ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1      1.6           1.3       gbm       1.2    0.21</span></span>
+<span><span class="co">#&gt; 1     -1.7           1.2       gbm      -1.5    0.14</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── PAPDp ───────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; data frame with 0 columns and 0 rows</span></span>
+<span><span class="co">#&gt; Cannot compute PAPDp</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── AUPEC ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     0.22           1.1       gbm      0.19    0.85</span></span>
+<span><span class="co">#&gt; 1    -0.46          0.95       gbm     -0.48    0.63</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── GATE ────────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation algorithm group statistic p.value upper lower</span></span>
-<span><span class="co">#&gt; 1      105           109       gbm     1      0.96    0.34   -75   285</span></span>
-<span><span class="co">#&gt; 2      -60           108       gbm     2     -0.56    0.58  -238   117</span></span>
-<span><span class="co">#&gt; 3     -139           107       gbm     3     -1.30    0.19  -315    37</span></span>
-<span><span class="co">#&gt; 4       64           108       gbm     4      0.59    0.55  -114   243</span></span>
-<span><span class="co">#&gt; 5       51           109       gbm     5      0.47    0.64  -128   230</span></span></code></pre></div>
+<span><span class="co">#&gt; 1     -116           108       gbm     1     -1.08    0.28  -294    61</span></span>
+<span><span class="co">#&gt; 2      -46           108       gbm     2     -0.43    0.67  -223   131</span></span>
+<span><span class="co">#&gt; 3       21           108       gbm     3      0.19    0.85  -157   199</span></span>
+<span><span class="co">#&gt; 4       12           109       gbm     4      0.11    0.91  -168   192</span></span>
+<span><span class="co">#&gt; 5      160           109       gbm     5      1.46    0.14   -20   340</span></span></code></pre></div>
 <p>We plot the estimated Area Under the Prescriptive Effect Curve for
 the writing score across a range of budget constraints for the gradient
 boosting machine.</p>

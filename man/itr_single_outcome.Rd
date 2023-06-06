@@ -4,7 +4,7 @@
 \alias{itr_single_outcome}
 \title{Evaluate ITR for Single Outcome}
 \usage{
-itr_single_outcome(data, algorithms, params, folds, budget, ...)
+itr_single_outcome(data, algorithms, params, folds, budget, user_model, ...)
 }
 \arguments{
 \item{data}{A dataset.}
@@ -16,6 +16,8 @@ itr_single_outcome(data, algorithms, params, folds, budget, ...)
 \item{folds}{Number of folds.}
 
 \item{budget}{The maximum percentage of population that can be treated under the budget constraint.}
+
+\item{user_model}{User's own function to estimated the ITR.}
 
 \item{...}{Additional arguments passed to \code{caret::train}}
 }

@@ -36,7 +36,19 @@ user_formula <- as.formula(
 
 ```
 
-Instead of using the ITRs estimated by `evalITR` models, we can define our own ITR and evaluate its performance using the `evaluate_itr` function. The function takes the following arguments: `user_itr` a function defined by users that returns a unit-level continuous score for treatment assignment. We assume those that have score less than 0 should not have treatment. The function also takes `data` a data frame, `treatment` a character string specifying the treatment variable, `outcome` a character string specifying the outcome variable, `budget` a numeric value specifying the maximum percentage of population that can be treated under the budget constraint. The function returns an object that contains the estimated GATE, ATE, and AUPEC for the user defined ITR.
+Instead of using the ITRs estimated by `evalITR` models, we can define our own ITR and evaluate its performance using the `evaluate_itr` function. The function takes the following arguments:
+
+
+| Argument | Description              |
+|:-------- | :------------------------|
+| `user_itr` | a function defined by users that returns a unit-level continuous score for treatment assignment (we assume those that have score less than 0 should not have treatment) |
+| `data`   | a data frame   |
+| `treatment` | a character string specifying the treatment variable in the `data` |
+| `outcome` | a character string specifying the outcome variable in the `data` |
+| `budget` | a numeric value specifying the maximum percentage of population that can be treated under the budget constraint |
+
+
+The function returns an object that contains the estimated GATE, ATE, and AUPEC for the user defined ITR.
 
 ```{r user_itr_summary, warning = FALSE, message = FALSE}
 # user's own ITR

@@ -58,7 +58,7 @@ if(length(estimate_algs) != 0){
       ) %>%
       mutate(AUPECmin = aupec.y - 1.96*sd,
             AUPECmax = aupec.y + 1.96*sd) %>%
-      rename(aupec = aupec.y) -> data
+      rename(aupec = aupec.y) -> data_algs
     
   }
 

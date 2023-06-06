@@ -17,6 +17,7 @@
 #' @param trControl caret parameter
 #' @param tuneGrid caret parameter
 #' @param tuneLength caret parameter
+#' @param user_model A user-defined function to create an ITR. The function should take the data as input and return a model to estimate the ITR. 
 #' @param ... Additional arguments passed to \code{caret::train}
 #' @import dplyr
 #' @import rlearner
@@ -37,6 +38,7 @@ estimate_itr <- function(
     trControl = caret::trainControl(method = "none"),
     tuneGrid = NULL,
     tuneLength = ifelse(trControl$method == "none", 1, 3),
+    user_model = NULL,
     ...
 ) {
 
@@ -67,6 +69,9 @@ estimate_itr <- function(
     tuneGrid = tuneGrid,
     tuneLength = tuneLength
   )
+
+  # combine package algs with user's own function
+  algorithms <- c(algorithms, user_model)
 
   # some working variables
   n_alg <- length(algorithms)
@@ -107,6 +112,7 @@ estimate_itr <- function(
     params     = params,
     folds      = folds,
     budget     = budget,
+    user_model = user_model,
     ...
   )
 
@@ -126,6 +132,7 @@ estimate_itr <- function(
 #' @param params A list of parameters.
 #' @param folds Number of folds.
 #' @param budget The maximum percentage of population that can be treated under the budget constraint.
+#' @param user_model User's own function to estimated the ITR.
 #' @param ... Additional arguments passed to \code{caret::train}
 #' @return A list of estimates.
 
@@ -135,6 +142,7 @@ itr_single_outcome <- function(
     params,
     folds,
     budget,
+    user_model,
     ...
 ) {
 
@@ -251,6 +259,29 @@ itr_single_outcome <- function(
 
       }
     
+    }
+
+    # user defined algorithm
+    if (!is.null(user_model)){
+
+    # run the algorithm
+    user_est <- run_user(
+      dat_train = trainset,
+      dat_test  = testset,
+      dat_total = data,
+      params    = params,
+      budget    = budget,
+      indcv     = 1,
+      iter      = 1,
+      train_method = user_model,
+      ...
+      )
+
+    # store the results
+    model_names = as.character(substitute(user_model))
+    fit_ml[[model_names]] <- user_est$test
+    models[[model_names]] <- user_est$train
+
     }
 
     if ("causal_forest" %in% algorithms) {
@@ -484,6 +515,30 @@ itr_single_outcome <- function(
           models[[algorithms[i]]][[j]] <- rlearner_est$train
 
         }
+      }
+
+      # user defined algorithm
+      if (!is.null(user_model)){
+
+      # run the algorithm
+      user_est <- run_user(
+        dat_train = trainset,
+        dat_test  = testset,
+        dat_total = data,
+        params    = params,
+        budget    = budget,
+        indcv     = indcv,
+        iter      = j,
+        train_method = user_model,
+        ...
+      )
+
+      # store the results
+      model_names <- as.character(substitute(user_model))
+      
+      fit_ml[[model_names]][[j]] <- user_est$test
+      models[[model_names]][[j]] <- user_est$train
+
       }
 
       if ("causal_forest" %in% algorithms) {

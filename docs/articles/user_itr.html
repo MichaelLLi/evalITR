@@ -88,16 +88,48 @@
 <p>Instead of using the ITRs estimated by <code>evalITR</code> models,
 we can define our own ITR and evaluate its performance using the
 <code>evaluate_itr</code> function. The function takes the following
-arguments: <code>user_itr</code> a function defined by users that
-returns a unit-level continuous score for treatment assignment. We
-assume those that have score less than 0 should not have treatment. The
-function also takes <code>data</code> a data frame,
-<code>treatment</code> a character string specifying the treatment
-variable, <code>outcome</code> a character string specifying the outcome
-variable, <code>budget</code> a numeric value specifying the maximum
-percentage of population that can be treated under the budget
-constraint. The function returns an object that contains the estimated
-GATE, ATE, and AUPEC for the user defined ITR.</p>
+arguments:</p>
+<table class="table">
+<colgroup>
+<col width="26%">
+<col width="73%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Argument</th>
+<th align="left">Description</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left"><code>user_itr</code></td>
+<td align="left">a function defined by users that returns a unit-level
+continuous score for treatment assignment (we assume those that have
+score less than 0 should not have treatment)</td>
+</tr>
+<tr class="even">
+<td align="left"><code>data</code></td>
+<td align="left">a data frame</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>treatment</code></td>
+<td align="left">a character string specifying the treatment variable in
+the <code>data</code>
+</td>
+</tr>
+<tr class="even">
+<td align="left"><code>outcome</code></td>
+<td align="left">a character string specifying the outcome variable in
+the <code>data</code>
+</td>
+</tr>
+<tr class="odd">
+<td align="left"><code>budget</code></td>
+<td align="left">a numeric value specifying the maximum percentage of
+population that can be treated under the budget constraint</td>
+</tr>
+</tbody>
+</table>
+<p>The function returns an object that contains the estimated GATE, ATE,
+and AUPEC for the user defined ITR.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># user's own ITR</span></span>
 <span><span class="va">score_function</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">{</span></span>
@@ -124,7 +156,7 @@ GATE, ATE, and AUPEC for the user defined ITR.</p>
 <span><span class="co">#&gt; 1    0.032          0.66  user_itr     0.049    0.96</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── PAPDp ───────────────────────────────────────────────────────────────────────</span></span>
-<span><span class="co">#&gt; data frame with 0 columns and 0 rows</span></span>
+<span><span class="co">#&gt; Cannot compute PAPDp</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── AUPEC ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation statistic p.value</span></span>
@@ -143,8 +175,8 @@ score with the causal forest algorithm.</p>
 <div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># plot GATE estimates</span></span>
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">user_itr</span><span class="op">)</span><span class="op">$</span><span class="va">GATE</span> <span class="op">%&gt;%</span></span>
-<span>  <span class="fu">mutate</span><span class="op">(</span>group <span class="op">=</span> <span class="fu">forcats</span><span class="fu">::</span><span class="fu"><a href="https://forcats.tidyverse.org/reference/as_factor.html" class="external-link">as_factor</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">user_itr</span><span class="op">)</span><span class="op">$</span><span class="va">GATE</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>  <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>group <span class="op">=</span> <span class="fu">forcats</span><span class="fu">::</span><span class="fu"><a href="https://forcats.tidyverse.org/reference/as_factor.html" class="external-link">as_factor</a></span><span class="op">(</span><span class="va">group</span><span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
 <span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/ggplot.html" class="external-link">ggplot</a></span><span class="op">(</span><span class="va">.</span>, <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/aes.html" class="external-link">aes</a></span><span class="op">(</span></span>
 <span>    x <span class="op">=</span> <span class="va">group</span>, y <span class="op">=</span> <span class="va">estimate</span>,</span>
 <span>    ymin <span class="op">=</span> <span class="va">lower</span> , ymax <span class="op">=</span> <span class="va">upper</span>, color <span class="op">=</span> <span class="va">algorithm</span><span class="op">)</span><span class="op">)</span> <span class="op">+</span></span>

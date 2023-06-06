@@ -22,6 +22,8 @@ navbar:
           href: articles/cv_multiple_alg.html
         - text: "User-Defined ITR"
           href: articles/user_itr.html
+        - text: "Compare Estimated and User Defined ITR"
+          href: articles/user_itr_algs.html
     - text: "Reference"
       href: reference/index.html
     - text: "Changelog"

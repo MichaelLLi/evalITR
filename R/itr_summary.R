@@ -290,17 +290,21 @@ print.summary.itr <- function(x, ...) {
   print(as.data.frame(x[["PAPE"]]), digits = 2)
   cli::cat_line("")
 
-  # PAPE
+  # PAPEp
   cli::cat_rule(left = "PAPEp")
   print(as.data.frame(x[["PAPEp"]]), digits = 2)
   cli::cat_line("")
 
-  # PAPE
+  # PAPDp
   cli::cat_rule(left = "PAPDp")
-  print(as.data.frame(x[["PAPDp"]]), digits = 2)
+  if(length(x[["PAPDp"]]) == 0) {
+    cli::cat_line("Cannot compute PAPDp")
+  } else {
+    print(as.data.frame(x[["PAPDp"]]), digits = 2)
+  }
   cli::cat_line("")
 
-  # PAPE
+  # AUPEC
   cli::cat_rule(left = "AUPEC")
   print(as.data.frame(x[["AUPEC"]]), digits = 2)
   cli::cat_line("")

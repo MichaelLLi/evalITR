@@ -18,6 +18,7 @@ estimate_itr(
   trControl = caret::trainControl(method = "none"),
   tuneGrid = NULL,
   tuneLength = ifelse(trControl$method == "none", 1, 3),
+  user_model = NULL,
   ...
 )
 }
@@ -47,6 +48,8 @@ estimate_itr(
 \item{tuneGrid}{caret parameter}
 
 \item{tuneLength}{caret parameter}
+
+\item{user_model}{A user-defined function to create an ITR. The function should take the data as input and return a model to estimate the ITR.}
 
 \item{...}{Additional arguments passed to \code{caret::train}}
 }

@@ -76,6 +76,7 @@
 <span>  trControl <span class="op">=</span> <span class="fu">caret</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/caret/man/trainControl.html" class="external-link">trainControl</a></span><span class="op">(</span>method <span class="op">=</span> <span class="st">"none"</span><span class="op">)</span>,</span>
 <span>  tuneGrid <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  tuneLength <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">trControl</span><span class="op">$</span><span class="va">method</span> <span class="op">==</span> <span class="st">"none"</span>, <span class="fl">1</span>, <span class="fl">3</span><span class="op">)</span>,</span>
+<span>  user_model <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  <span class="va">...</span></span>
 <span><span class="op">)</span></span></code></pre></div>
     </div>
@@ -132,6 +133,10 @@
 
 <dt>tuneLength</dt>
 <dd><p>caret parameter</p></dd>
+
+
+<dt>user_model</dt>
+<dd><p>A user-defined function to create an ITR. The function should take the data as input and return a model to estimate the ITR.</p></dd>
 
 
 <dt>...</dt>

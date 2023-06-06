@@ -64,10 +64,9 @@
     <h2 id="ref-usage">Usage<a class="anchor" aria-label="anchor" href="#ref-usage"></a></h2>
     <div class="sourceCode"><pre class="sourceCode r"><code><span><span class="fu">evaluate_itr</span><span class="op">(</span></span>
 <span>  fit <span class="op">=</span> <span class="cn">NULL</span>,</span>
-<span>  itr_function <span class="op">=</span> <span class="cn">NULL</span>,</span>
+<span>  user_itr <span class="op">=</span> <span class="cn">NULL</span>,</span>
 <span>  outcome <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  treatment <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="op">)</span>,</span>
-<span>  tau <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  data <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span><span class="op">)</span>,</span>
 <span>  budget <span class="op">=</span> <span class="fl">1</span>,</span>
 <span>  ngates <span class="op">=</span> <span class="fl">5</span>,</span>
@@ -81,8 +80,8 @@
 <dd><p>Fitted model. Usually an output from <code>estimate_itr</code></p></dd>
 
 
-<dt>itr_function</dt>
-<dd><p>A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is <code>NULL</code>, which means the ITR will be estimated from the <code>estimate_itr</code>.</p></dd>
+<dt>user_itr</dt>
+<dd><p>A user-defined function to create an ITR. The function should take the data as input and return an unit-level continuous score for treatment assignment. We assume those that have score less than 0 should not have treatment. The default is <code>NULL</code>, which means the ITR will be estimated from the <code>estimate_itr</code>.</p></dd>
 
 
 <dt>outcome</dt>
@@ -91,10 +90,6 @@
 
 <dt>treatment</dt>
 <dd><p>A character string of the treatment variable name.</p></dd>
-
-
-<dt>tau</dt>
-<dd><p>A character string of the true treatment effect variable name.</p></dd>
 
 
 <dt>data</dt>
