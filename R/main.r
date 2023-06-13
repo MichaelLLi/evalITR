@@ -106,7 +106,7 @@ estimate_itr <- function(
   }
 
   # run
-  estimates <- itr_single_outcome(
+  estimates <- fit_itr(
     data       = data_filtered,
     algorithms = algorithms,
     params     = params,
@@ -123,7 +123,7 @@ estimate_itr <- function(
   return(out)
 
 }
-#' Evaluate ITR for Single Outcome
+#' Estimate ITR for Single Outcome
 #'
 #' @importFrom purrr map
 #' @importFrom dplyr pull
@@ -136,7 +136,7 @@ estimate_itr <- function(
 #' @param ... Additional arguments passed to \code{caret::train}
 #' @return A list of estimates.
 
-itr_single_outcome <- function(
+fit_itr <- function(
     data,
     algorithms,
     params,
