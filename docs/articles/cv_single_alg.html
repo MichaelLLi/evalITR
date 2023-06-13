@@ -88,11 +88,7 @@
     
 <p>When users choose to estimate and evaluate ITR under
 cross-validation, the package implements Algorithm 1 from <a href="https://arxiv.org/abs/1905.05389" class="external-link">Imai and Li (2023)</a> to
-estimate and evaluate ITR. Instead of specifying the
-<code>split_ratio</code> argument, we choose the number of folds
-(<code>n_folds</code>). We present an example of estimating ITR with 3
-folds cross-validation. In practice, we recommend using 10 folds to get
-a more stable model performance.</p>
+estimate and evaluate ITR.</p>
 <p><strong>Algorithm 1 Estimating and Evaluating an Individualized
 Treatment Rule (ITR) using the Same Experimental Data via
 Cross-Validation</strong></p>
@@ -188,6 +184,10 @@ k+1\)</span>
 </tr>
 </tbody>
 </table>
+<p>Instead of specifying the <code>split_ratio</code> argument, we
+choose the number of folds (<code>n_folds</code>). We present an example
+of estimating ITR with 3 folds cross-validation. In practice, we
+recommend using 10 folds to get a more stable model performance.</p>
 <table class="table">
 <colgroup>
 <col width="22%">

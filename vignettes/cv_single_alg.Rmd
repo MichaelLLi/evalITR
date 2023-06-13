@@ -36,9 +36,7 @@ user_formula <- as.formula(
 
 
 When users choose to estimate and evaluate ITR under cross-validation, the package implements Algorithm 1 from [Imai and Li
-(2023)](https://arxiv.org/abs/1905.05389) to estimate and evaluate ITR. Instead of specifying the `split_ratio` argument, 
-we choose the number of folds (`n_folds`). We present an example of estimating ITR with 3 folds cross-validation. 
-In practice, we recommend using 10 folds to get a more stable model performance. 
+(2023)](https://arxiv.org/abs/1905.05389) to estimate and evaluate ITR. 
 
 
 **Algorithm 1 Estimating and Evaluating an Individualized Treatment Rule
@@ -57,8 +55,9 @@ In practice, we recommend using 10 folds to get a more stable model performance.
 | 9.return $\hat{\tau}_F=\frac{1}{K} \sum_{k=1}^K \hat{\tau}_k$, $\widehat{\mathbb{V}\left(\hat{\tau}_F\right)}=v\left(\hat{f}_{-1}, \cdots, \hat{f}_{-k}, \mathbf{Z}_1, \cdots, \mathbf{Z}_K\right)$ | `PAPEcv()` `PAPDcv()` and `getAupecOutput()` functions inside `compute_qoi()` function within `evaluate_itr()` | averaging the results across folds |
 
 
-
-
+Instead of specifying the `split_ratio` argument, 
+we choose the number of folds (`n_folds`). We present an example of estimating ITR with 3 folds cross-validation. 
+In practice, we recommend using 10 folds to get a more stable model performance. 
 
 | Input                                                            | R package input                                               | Descriptions                                                                                                                                                         |
 |:-----------------------------------------------------------------|:---------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
