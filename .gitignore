@@ -2,8 +2,4 @@
 .Rhistory
 .RData
 *.DS_Store
-.DS_Store
-.DS_Store
-man/.DS_Store
-.DS_Store
 inst/doc
