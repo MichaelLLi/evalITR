@@ -99,12 +99,12 @@ Cross-Validation</strong></p>
 </colgroup>
 <thead><tr class="header">
 <th align="left">Input</th>
-<th align="left">R package object</th>
+<th align="left">R package input</th>
 <th align="left">Descriptions</th>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">Data <span class="math inline">\(\mathcal{Z}=\left\{\mathbf{X}_i, T_i,
+<td align="left">Data <span class="math inline">\(\mathbf{Z}=\left\{\mathbf{X}_i, T_i,
 Y_i\right\}_{i=1}^n\)</span>
 </td>
 <td align="left"><code>treatment = treatment, form = user_formula, data = star_data</code></td>
@@ -163,8 +163,8 @@ for different metrics (PAPE, PAPD, AUPEC).</p>
 </tr></thead>
 <tbody>
 <tr class="odd">
-<td align="left">1. Split data into <span class="math inline">\(K\)</span> random subsets of equal size <span class="math inline">\(\left(\mathcal{Z}_1, \cdots,
-\mathcal{Z}_k\right)\)</span>
+<td align="left">1. Split data into <span class="math inline">\(K\)</span> random subsets of equal size <span class="math inline">\(\left(\mathbf{Z}_1, \cdots,
+\mathbf{Z}_k\right)\)</span>
 </td>
 <td align="left">
 <code><a href="https://rdrr.io/pkg/caret/man/createDataPartition.html" class="external-link">caret::createFolds()</a></code> within
@@ -188,15 +188,15 @@ do</td>
 </tr>
 <tr class="even">
 <td align="left">4. <span class="math inline">\(\quad
-\mathcal{Z}_{-k}=\left[\mathcal{Z}_1, \cdots, \mathcal{Z}_{k-1},
-\mathcal{Z}_{k+1}, \cdots, \mathcal{Z}_K\right]\)</span>
+\mathbf{Z}_{-k}=\left[\mathbf{Z}_1, \cdots, \mathbf{Z}_{k-1},
+\mathbf{Z}_{k+1}, \cdots, \mathbf{Z}_K\right]\)</span>
 </td>
 <td align="left">
 <code>trainset</code> object</td>
 <td align="left">training data</td>
 </tr>
 <tr class="odd">
-<td align="left">5. <span class="math inline">\(\hat{f}_{-k}=F\left(\mathcal{Z}_{-k}\right)\)</span>
+<td align="left">5. <span class="math inline">\(\hat{f}_{-k}=F\left(\mathbf{Z}_{-k}\right)\)</span>
 </td>
 <td align="left">modulized functions for each ML algoritms (e.g.,
 <code>run_causal_forest()</code>) within
@@ -205,7 +205,7 @@ do</td>
 <td align="left">ITR (binary vector)</td>
 </tr>
 <tr class="even">
-<td align="left">6. <span class="math inline">\(\hat{\tau}_k=\hat{\tau}_{\hat{f}_{-k}}\left(\mathcal{Z}_k\right)\)</span>
+<td align="left">6. <span class="math inline">\(\hat{\tau}_k=\hat{\tau}_{\hat{f}_{-k}}\left(\mathbf{Z}_k\right)\)</span>
 </td>
 <td align="left">
 <code><a href="../reference/compute_qoi.html">compute_qoi()</a></code> function within
@@ -228,10 +228,9 @@ k+1\)</span>
 </tr>
 <tr class="odd">
 <td align="left">9.return <span class="math inline">\(\hat{\tau}_F=\frac{1}{K} \sum_{k=1}^K
-\hat{\tau}_k,
-\widehat{\mathbb{V}\left(\hat{\tau}_F\right)}=v\left(\hat{f}_{-1},
-\cdots, \hat{f}_{-k}, \mathcal{Z}_1, \cdots,
-\mathcal{Z}_K\right)\)</span>
+\hat{\tau}_k\)</span>, <span class="math inline">\(\widehat{\mathbb{V}\left(\hat{\tau}_F\right)}=v\left(\hat{f}_{-1},
+\cdots, \hat{f}_{-k}, \mathbf{Z}_1, \cdots,
+\mathbf{Z}_K\right)\)</span>
 </td>
 <td align="left">
 <code><a href="../reference/PAPEcv.html">PAPEcv()</a></code> <code><a href="../reference/PAPDcv.html">PAPDcv()</a></code> and

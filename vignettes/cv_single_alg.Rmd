@@ -36,38 +36,38 @@ user_formula <- as.formula(
 
 
 When users choose to estimate and evaluate ITR under cross-validation, the package implements Algorithm 1 from [Imai and Li
-(2023)](https://arxiv.org/abs/1905.05389)
+(2023)](https://arxiv.org/abs/1905.05389) to estimate and evaluate ITR. Instead of specifying the `split_ratio` argument, 
+we choose the number of folds (`n_folds`). We present an example of estimating ITR with 3 folds cross-validation. 
+In practice, we recommend using 10 folds to get a more stable model performance. 
 
 
 **Algorithm 1 Estimating and Evaluating an Individualized Treatment Rule
 (ITR) using the Same Experimental Data via Cross-Validation**
 
-| Input                                                            | R package object                                               | Descriptions                                                                                                                                                         |
+| Steps in Algorithm 1                                                                                                                                                                                | Function/object                                                                                                | Output                             |
+|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------|:-----------------------------------|
+| 1\. Split data into $K$ random subsets of equal size $\left(\mathbf{Z}_1, \cdots, \mathbf{Z}_k\right)$                                                                                            | `caret::createFolds()` within `estimate_itr()`                                                                 | dataframe                          |
+| 2\. k $\leftarrow$ 1                                                                                                                                                                                |                                                                                                                |                                    |
+| 3\. while $k \leq K$ do                                                                                                                                                                             | for loop in `fit_itr()` within `estimate_itr()`                                                                |                                    |
+| 4\. $\quad \mathbf{Z}_{-k}=\left[\mathbf{Z}_1, \cdots, \mathbf{Z}_{k-1}, \mathbf{Z}_{k+1}, \cdots, \mathbf{Z}_K\right]$                                                                        | `trainset` object                                                                                              | training data                      |
+| 5\. $\hat{f}_{-k}=F\left(\mathbf{Z}_{-k}\right)$                                                                                                                                                   | modulized functions for each ML algoritms (e.g., `run_causal_forest()`) within `estimate_itr()`                | ITR (binary vector)                |
+| 6\. $\hat{\tau}_k=\hat{\tau}_{\hat{f}_{-k}}\left(\mathbf{Z}_k\right)$                                                                                                                              | `compute_qoi()` function within `evaluate_itr()`                                                               | metrics for fold $k$               |
+| 7\. $k \leftarrow k+1$                                                                                                                                                                              |                                                                                                                |                                    |
+| 8\. end while                                                                                                                                                                                       |                                                                                                                |                                    |
+| 9.return $\hat{\tau}_F=\frac{1}{K} \sum_{k=1}^K \hat{\tau}_k$, $\widehat{\mathbb{V}\left(\hat{\tau}_F\right)}=v\left(\hat{f}_{-1}, \cdots, \hat{f}_{-k}, \mathbf{Z}_1, \cdots, \mathbf{Z}_K\right)$ | `PAPEcv()` `PAPDcv()` and `getAupecOutput()` functions inside `compute_qoi()` function within `evaluate_itr()` | averaging the results across folds |
+
+
+
+
+
+| Input                                                            | R package input                                               | Descriptions                                                                                                                                                         |
 |:-----------------------------------------------------------------|:---------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------------------------------------------------------------|
-| Data $\mathcal{Z}=\left\{\mathbf{X}_i, T_i, Y_i\right\}_{i=1}^n$ | `treatment = treatment, form = user_formula, data = star_data` | `treatment` is a character string specifying the treatment variable in the `data`; `form` is a formula specifying the outcome and covariates; and a dataframe `data` |
+| Data $\mathbf{Z}=\left\{\mathbf{X}_i, T_i, Y_i\right\}_{i=1}^n$ | `treatment = treatment, form = user_formula, data = star_data` | `treatment` is a character string specifying the treatment variable in the `data`; `form` is a formula specifying the outcome and covariates; and a dataframe `data` |
 | Machine learning algorithm $F$                                   | `algorithms = c("causal_forest")`                              | a character vector specifying the ML algorithms to be used                                                                                                           |
 | Evaluation metric $\tau_f$                                       | PAPE, PAPD, AUPEC, GATE                                        | By default                                                                                                                                                           |
 | Number of folds $K$                                              | `n_folds = 3`                                                  | `n_folds` is a numeric value indicating the number of folds used for cross-validation                                                                                |
 | …                                                                | `budget = 0.2`                                                 | `budget` is a numeric value specifying the maximum percentage of population that can be treated under the budget constraint                                          |
 
-The output will be an object that
-includes estimated evaluation metric $\hat{\tau}_F$ and the estimated
-variance of $\hat{\tau}_F$ for different metrics (PAPE, PAPD, AUPEC).
-
-| Steps in Algorithm 1                                                                                                                                                                                | Function/object                                                                                                | Output                             |
-|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------|:-----------------------------------|
-| 1\. Split data into $K$ random subsets of equal size $\left(\mathcal{Z}_1, \cdots, \mathcal{Z}_k\right)$                                                                                            | `caret::createFolds()` within `estimate_itr()`                                                                 | dataframe                          |
-| 2\. k $\leftarrow$ 1                                                                                                                                                                                |                                                                                                                |                                    |
-| 3\. while $k \leq K$ do                                                                                                                                                                             | for loop in `fit_itr()` within `estimate_itr()`                                                                |                                    |
-| 4\. $\quad \mathcal{Z}_{-k}=\left[\mathcal{Z}_1, \cdots, \mathcal{Z}_{k-1}, \mathcal{Z}_{k+1}, \cdots, \mathcal{Z}_K\right]$                                                                        | `trainset` object                                                                                              | training data                      |
-| 5\. $\hat{f}_{-k}=F\left(\mathcal{Z}_{-k}\right)$                                                                                                                                                   | modulized functions for each ML algoritms (e.g., `run_causal_forest()`) within `estimate_itr()`                | ITR (binary vector)                |
-| 6\. $\hat{\tau}_k=\hat{\tau}_{\hat{f}_{-k}}\left(\mathcal{Z}_k\right)$                                                                                                                              | `compute_qoi()` function within `evaluate_itr()`                                                               | metrics for fold $k$               |
-| 7\. $k \leftarrow k+1$                                                                                                                                                                              |                                                                                                                |                                    |
-| 8\. end while                                                                                                                                                                                       |                                                                                                                |                                    |
-| 9.return $\hat{\tau}_F=\frac{1}{K} \sum_{k=1}^K \hat{\tau}_k, \widehat{\mathbb{V}\left(\hat{\tau}_F\right)}=v\left(\hat{f}_{-1}, \cdots, \hat{f}_{-k}, \mathcal{Z}_1, \cdots, \mathcal{Z}_K\right)$ | `PAPEcv()` `PAPDcv()` and `getAupecOutput()` functions inside `compute_qoi()` function within `evaluate_itr()` | averaging the results across folds |
-
-
-The package allows estimate ITR with k-folds cross-validation. Instead of specifying the `split_ratio` argument, we choose the number of folds (`n_folds`). The following code presents an example of estimating ITR with 3 folds cross-validation. In practice, we recommend using 10 folds to get a more stable model performance. 
 
 ```{r cv_estimate, message = FALSE, out.width = '60%'}
 library(evalITR)
@@ -81,6 +81,14 @@ fit_cv <- estimate_itr(
                budget = 0.2,
                n_folds = 3)
 
+```
+
+The output will be an object that
+includes estimated evaluation metric $\hat{\tau}_F$ and the estimated
+variance of $\hat{\tau}_F$ for different metrics (PAPE, PAPD, AUPEC).
+
+
+```{r cv_estimate, message = FALSE, out.width = '50%'}
 # evaluate ITR 
 est_cv <- evaluate_itr(fit_cv)
 
