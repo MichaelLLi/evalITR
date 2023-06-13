@@ -27,7 +27,9 @@ outcomes <- "g3tlangss"
 treatment <- "treatment"
 
 # specifying the data (remove other outcomes)
-star_data <- star %>% dplyr::select(-c(g3treadss,g3tmathss))
+star_data <- star %>% 
+  dplyr::select(-c(g3treadss,g3tmathss)) %>%
+  mutate(SCHLURBN = as.numeric(SCHLURBN))
 
 # specifying the formula
 user_formula <- as.formula(
@@ -66,7 +68,15 @@ fit <- estimate_itr(
 
 # user's own ITR
 score_function <- function(data){
-  score <- (data$GKWHITE)/5
+  data %>% 
+    mutate(score = case_when(
+      SCHLURBN == 1 ~ 0.1, # inner-city
+      SCHLURBN == 2 ~ 0.2, # suburban
+      SCHLURBN == 3 ~ 0.4, # rural
+      SCHLURBN == 4 ~ 0.3, # urban
+    )) %>%
+    pull(score) -> score
+    
   return(score)
 }
 

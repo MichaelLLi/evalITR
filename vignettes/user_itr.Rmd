@@ -53,7 +53,16 @@ The function returns an object that contains the estimated GATE, ATE, and AUPEC 
 ```{r user_itr_summary, warning = FALSE, message = FALSE}
 # user's own ITR
 score_function <- function(data){
-  score <- (data$GKWHITE)/5
+
+  data %>% 
+    mutate(score = case_when(
+      SCHLURBN == 1 ~ 0.1, # inner-city
+      SCHLURBN == 2 ~ 0.2, # suburban
+      SCHLURBN == 3 ~ 0.4, # rural
+      SCHLURBN == 4 ~ 0.3, # urban
+    )) %>%
+    pull(score) -> score
+    
   return(score)
 }
 

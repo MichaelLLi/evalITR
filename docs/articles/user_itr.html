@@ -134,7 +134,16 @@ and AUPEC for the user defined ITR.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="co"># user's own ITR</span></span>
 <span><span class="va">score_function</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="va">score</span> <span class="op">&lt;-</span> <span class="op">(</span><span class="va">data</span><span class="op">$</span><span class="va">GKWHITE</span><span class="op">)</span><span class="op">/</span><span class="fl">5</span></span>
+<span></span>
+<span>  <span class="va">data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>score <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
+<span>      <span class="va">SCHLURBN</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">~</span> <span class="fl">0.1</span>, <span class="co"># inner-city</span></span>
+<span>      <span class="va">SCHLURBN</span> <span class="op">==</span> <span class="fl">2</span> <span class="op">~</span> <span class="fl">0.2</span>, <span class="co"># suburban</span></span>
+<span>      <span class="va">SCHLURBN</span> <span class="op">==</span> <span class="fl">3</span> <span class="op">~</span> <span class="fl">0.4</span>, <span class="co"># rural</span></span>
+<span>      <span class="va">SCHLURBN</span> <span class="op">==</span> <span class="fl">4</span> <span class="op">~</span> <span class="fl">0.3</span>, <span class="co"># urban</span></span>
+<span>    <span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
+<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">score</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">score</span></span>
+<span>    </span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">score</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
 <span></span>
@@ -154,22 +163,22 @@ and AUPEC for the user defined ITR.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── PAPEp ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1    0.032          0.66  user_itr     0.049    0.96</span></span>
+<span><span class="co">#&gt; 1      1.1          0.67  user_itr       1.6    0.11</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── PAPDp ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; Cannot compute PAPDp</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── AUPEC ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation statistic p.value</span></span>
-<span><span class="co">#&gt; 1    -0.25          0.45     -0.55    0.58</span></span>
+<span><span class="co">#&gt; 1    -0.91          0.42      -2.2   0.028</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── GATE ────────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation algorithm group statistic p.value  upper lower</span></span>
-<span><span class="co">#&gt; 1       98            58  user_itr     1      1.68   0.093    2.1   194</span></span>
-<span><span class="co">#&gt; 2      -27            59  user_itr     2     -0.46   0.644 -123.5    69</span></span>
-<span><span class="co">#&gt; 3      -20            59  user_itr     3     -0.33   0.742 -117.2    78</span></span>
-<span><span class="co">#&gt; 4       97            60  user_itr     4      1.62   0.106   -1.6   195</span></span>
-<span><span class="co">#&gt; 5     -130            59  user_itr     5     -2.20   0.028 -226.6   -33</span></span></code></pre></div>
+<span><span class="co">#&gt; 1      126            58  user_itr     1      2.16   0.031   30.2   222</span></span>
+<span><span class="co">#&gt; 2       96            59  user_itr     2      1.62   0.105   -1.4   194</span></span>
+<span><span class="co">#&gt; 3      -33            59  user_itr     3     -0.56   0.579 -129.7    64</span></span>
+<span><span class="co">#&gt; 4     -139            59  user_itr     4     -2.36   0.018 -236.5   -42</span></span>
+<span><span class="co">#&gt; 5      -32            59  user_itr     5     -0.54   0.589 -129.4    65</span></span></code></pre></div>
 <p>We can extract estimates from the <code>est</code> object. The
 following code shows how to extract the GATE estimates for the writing
 score with the causal forest algorithm.</p>

@@ -87,69 +87,15 @@
     
     
 <p>When users choose to estimate and evaluate ITR under
-cross-validation, the package implements Algorithm 1 from <a href="https://arxiv.org/abs/1905.05389" class="external-link">Imai and Li (2023)</a></p>
+cross-validation, the package implements Algorithm 1 from <a href="https://arxiv.org/abs/1905.05389" class="external-link">Imai and Li (2023)</a> to
+estimate and evaluate ITR. Instead of specifying the
+<code>split_ratio</code> argument, we choose the number of folds
+(<code>n_folds</code>). We present an example of estimating ITR with 3
+folds cross-validation. In practice, we recommend using 10 folds to get
+a more stable model performance.</p>
 <p><strong>Algorithm 1 Estimating and Evaluating an Individualized
 Treatment Rule (ITR) using the Same Experimental Data via
 Cross-Validation</strong></p>
-<table class="table">
-<colgroup>
-<col width="22%">
-<col width="21%">
-<col width="56%">
-</colgroup>
-<thead><tr class="header">
-<th align="left">Input</th>
-<th align="left">R package input</th>
-<th align="left">Descriptions</th>
-</tr></thead>
-<tbody>
-<tr class="odd">
-<td align="left">Data <span class="math inline">\(\mathbf{Z}=\left\{\mathbf{X}_i, T_i,
-Y_i\right\}_{i=1}^n\)</span>
-</td>
-<td align="left"><code>treatment = treatment, form = user_formula, data = star_data</code></td>
-<td align="left">
-<code>treatment</code> is a character string specifying
-the treatment variable in the <code>data</code>; <code>form</code> is a
-formula specifying the outcome and covariates; and a dataframe
-<code>data</code>
-</td>
-</tr>
-<tr class="even">
-<td align="left">Machine learning algorithm <span class="math inline">\(F\)</span>
-</td>
-<td align="left"><code>algorithms = c("causal_forest")</code></td>
-<td align="left">a character vector specifying the ML algorithms to be
-used</td>
-</tr>
-<tr class="odd">
-<td align="left">Evaluation metric <span class="math inline">\(\tau_f\)</span>
-</td>
-<td align="left">PAPE, PAPD, AUPEC, GATE</td>
-<td align="left">By default</td>
-</tr>
-<tr class="even">
-<td align="left">Number of folds <span class="math inline">\(K\)</span>
-</td>
-<td align="left"><code>n_folds = 3</code></td>
-<td align="left">
-<code>n_folds</code> is a numeric value indicating the
-number of folds used for cross-validation</td>
-</tr>
-<tr class="odd">
-<td align="left">…</td>
-<td align="left"><code>budget = 0.2</code></td>
-<td align="left">
-<code>budget</code> is a numeric value specifying the
-maximum percentage of population that can be treated under the budget
-constraint</td>
-</tr>
-</tbody>
-</table>
-<p>The output will be an object that includes estimated evaluation
-metric <span class="math inline">\(\hat{\tau}_F\)</span> and the
-estimated variance of <span class="math inline">\(\hat{\tau}_F\)</span>
-for different metrics (PAPE, PAPD, AUPEC).</p>
 <table style="width:100%;" class="table">
 <colgroup>
 <col width="57%">
@@ -181,7 +127,7 @@ for different metrics (PAPE, PAPD, AUPEC).</p>
 <tr class="odd">
 <td align="left">3. while <span class="math inline">\(k \leq K\)</span>
 do</td>
-<td align="left">for loop in <code>fit_itr()</code> within
+<td align="left">for loop in <code><a href="../reference/fit_itr.html">fit_itr()</a></code> within
 <code><a href="../reference/estimate_itr.html">estimate_itr()</a></code>
 </td>
 <td align="left"></td>
@@ -242,11 +188,61 @@ k+1\)</span>
 </tr>
 </tbody>
 </table>
-<p>The package allows estimate ITR with k-folds cross-validation.
-Instead of specifying the <code>split_ratio</code> argument, we choose
-the number of folds (<code>n_folds</code>). The following code presents
-an example of estimating ITR with 3 folds cross-validation. In practice,
-we recommend using 10 folds to get a more stable model performance.</p>
+<table class="table">
+<colgroup>
+<col width="22%">
+<col width="21%">
+<col width="56%">
+</colgroup>
+<thead><tr class="header">
+<th align="left">Input</th>
+<th align="left">R package input</th>
+<th align="left">Descriptions</th>
+</tr></thead>
+<tbody>
+<tr class="odd">
+<td align="left">Data <span class="math inline">\(\mathbf{Z}=\left\{\mathbf{X}_i, T_i,
+Y_i\right\}_{i=1}^n\)</span>
+</td>
+<td align="left"><code>treatment = treatment, form = user_formula, data = star_data</code></td>
+<td align="left">
+<code>treatment</code> is a character string specifying
+the treatment variable in the <code>data</code>; <code>form</code> is a
+formula specifying the outcome and covariates; and a dataframe
+<code>data</code>
+</td>
+</tr>
+<tr class="even">
+<td align="left">Machine learning algorithm <span class="math inline">\(F\)</span>
+</td>
+<td align="left"><code>algorithms = c("causal_forest")</code></td>
+<td align="left">a character vector specifying the ML algorithms to be
+used</td>
+</tr>
+<tr class="odd">
+<td align="left">Evaluation metric <span class="math inline">\(\tau_f\)</span>
+</td>
+<td align="left">PAPE, PAPD, AUPEC, GATE</td>
+<td align="left">By default</td>
+</tr>
+<tr class="even">
+<td align="left">Number of folds <span class="math inline">\(K\)</span>
+</td>
+<td align="left"><code>n_folds = 3</code></td>
+<td align="left">
+<code>n_folds</code> is a numeric value indicating the
+number of folds used for cross-validation</td>
+</tr>
+<tr class="odd">
+<td align="left">…</td>
+<td align="left"><code>budget = 0.2</code></td>
+<td align="left">
+<code>budget</code> is a numeric value specifying the
+maximum percentage of population that can be treated under the budget
+constraint</td>
+</tr>
+</tbody>
+</table>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MichaelLLi/evalITR" class="external-link">evalITR</a></span><span class="op">)</span></span>
 <span><span class="co"># estimate ITR </span></span>
@@ -258,9 +254,13 @@ we recommend using 10 folds to get a more stable model performance.</p>
 <span>               algorithms <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"causal_forest"</span><span class="op">)</span>,</span>
 <span>               budget <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>               n_folds <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
-<span><span class="co">#&gt; Evaluate ITR with cross-validation ...</span></span>
-<span></span>
-<span><span class="co"># evaluate ITR </span></span>
+<span><span class="co">#&gt; Evaluate ITR with cross-validation ...</span></span></code></pre></div>
+<p>The output will be an object that includes estimated evaluation
+metric <span class="math inline">\(\hat{\tau}_F\)</span> and the
+estimated variance of <span class="math inline">\(\hat{\tau}_F\)</span>
+for different metrics (PAPE, PAPD, AUPEC).</p>
+<div class="sourceCode" id="cb2"><pre class="downlit sourceCode r">
+<code class="sourceCode R"><span><span class="co"># evaluate ITR </span></span>
 <span><span class="va">est_cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_itr.html">evaluate_itr</a></span><span class="op">(</span><span class="va">fit_cv</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Cannot compute PAPDp</span></span>
 <span></span>
@@ -287,11 +287,7 @@ we recommend using 10 folds to get a more stable model performance.</p>
 <span><span class="co">#&gt; 2       40            59 causal_forest     2      0.68    0.50   157   -76</span></span>
 <span><span class="co">#&gt; 3       29            59 causal_forest     3      0.50    0.62   145   -86</span></span>
 <span><span class="co">#&gt; 4       13            59 causal_forest     4      0.22    0.82   129  -103</span></span>
-<span><span class="co">#&gt; 5       21           102 causal_forest     5      0.20    0.84   220  -179</span></span>
-<span></span>
-<span><span class="co"># plot the AUPEC </span></span>
-<span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">est_cv</span><span class="op">)</span></span></code></pre></div>
-<p><img src="../reference/figures/README-cv_estimate-1.png" width="60%"></p>
+<span><span class="co">#&gt; 5       21           102 causal_forest     5      0.20    0.84   220  -179</span></span></code></pre></div>
   </main>
 </div>
 

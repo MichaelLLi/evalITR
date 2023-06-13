@@ -88,13 +88,10 @@ includes estimated evaluation metric $\hat{\tau}_F$ and the estimated
 variance of $\hat{\tau}_F$ for different metrics (PAPE, PAPD, AUPEC).
 
 
-```{r cv_estimate, message = FALSE, out.width = '50%'}
+```{r cv_eval, message = FALSE, out.width = '50%'}
 # evaluate ITR 
 est_cv <- evaluate_itr(fit_cv)
 
 # summarize estimates
 summary(est_cv)
-
-# plot the AUPEC 
-plot(est_cv)
 ```
