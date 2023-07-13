@@ -93,8 +93,8 @@ We can also plot the estimates using the `plot_estimate()` function and specify 
 library(ggplot2)
 gate_est <- summary(est)$GATE
 
-plot_estimate(gate_est, type = "GATE") %>%
-  scale_color_manual(values = c("#0072B2"))
+plot_estimate(gate_est, type = "GATE") +
+  scale_color_manual(values = c("#0072B2", "#D55E00"))
 ```  
 
 

@@ -162,7 +162,8 @@ plot_estimate <- function(x, type, ...){
 estimate = x
 
 if(type == "GATE"){
-  estimate %>%
+
+out = estimate %>%
     ggplot(., aes(
       x = group, y = estimate,
       ymin = lower , ymax = upper, color = algorithm)) +
@@ -180,7 +181,7 @@ if(type == "GATE"){
 
 if(type %in% c("PAPE", "PAPEp", "PAPDp")){
 
-  estimate %>%
+  out = estimate %>%
     mutate(
       algorithm = as.factor(algorithm),
     lower = estimate - 1.96 * std.deviation,
@@ -200,5 +201,7 @@ if(type %in% c("PAPE", "PAPEp", "PAPDp")){
     geom_hline(yintercept = 0, linetype = "dashed", color = "#4e4e4e")
 
   }
+
+return(out)
 
 }

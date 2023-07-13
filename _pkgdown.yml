@@ -30,31 +30,31 @@ navbar:
       href: news/index.html
 
 
-
-reference:
-- title: Fitting models
-  desc: ~
-  contents:
-  - '`estimate_itr`'
-  - '`evaluate_itr`'
-- title: Checking results
-  desc: ~
-  contents:
-  - '`plot`'
-  - '`plot_estimate`'
-  - '`summary`'
-- title: Additional analyses
-  desc: ~
-  contents:
-  - '`test_itr`'
-- title: Built-in data
-  desc: ~
-  contents:
-  - '`start`'
-# - title: Misc.
+# reference:
+# - title: Fitting models
 #   desc: ~
 #   contents:
-#   - '`keyATM-package`'
+#   - '`estimate_itr`'
+#   - '`evaluate_itr`'
+# - title: Checking results
+#   desc: ~
+#   contents:
+#   - '`plot.itr`'
+#   - '`plot_estimate`'
+#   - '`summary.itr`'
+#   - '`summary.test_itr`'
+# - title: Additional analyses
+#   desc: ~
+#   contents:
+#   - '`test_itr`'
+# - title: Built-in data
+#   desc: ~
+#   contents:
+#   - '`star`'
+# # - title: Misc.
+# #   desc: ~
+# #   contents:
+# #   - '`keyATM-package`'
 
-toc:
-  depth: 2
+# toc:
+#   depth: 2

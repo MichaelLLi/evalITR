@@ -183,26 +183,26 @@ machine learning algorithms)</td>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── PAPE ────────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     0.25          0.82 causal_forest       0.3    0.76</span></span>
+<span><span class="co">#&gt; 1    -0.45           1.2 causal_forest     -0.37    0.71</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── PAPEp ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1      2.2           1.2 causal_forest       1.8   0.075</span></span>
+<span><span class="co">#&gt; 1      1.5           1.1 causal_forest       1.4    0.16</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── PAPDp ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; Cannot compute PAPDp</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── AUPEC ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1      1.7          0.89 causal_forest       1.9   0.056</span></span>
+<span><span class="co">#&gt; 1     0.94          0.93 causal_forest         1    0.31</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── GATE ────────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm group statistic p.value upper lower</span></span>
-<span><span class="co">#&gt; 1      -32           107 causal_forest     1     -0.30    0.77  -208   145</span></span>
-<span><span class="co">#&gt; 2       54           109 causal_forest     2      0.50    0.62  -125   233</span></span>
-<span><span class="co">#&gt; 3      -26           109 causal_forest     3     -0.24    0.81  -205   152</span></span>
-<span><span class="co">#&gt; 4     -145           107 causal_forest     4     -1.36    0.17  -321    30</span></span>
-<span><span class="co">#&gt; 5      147           108 causal_forest     5      1.36    0.17   -31   325</span></span></code></pre></div>
+<span><span class="co">#&gt; 1     37.0           109 causal_forest     1     0.340    0.73  -142   216</span></span>
+<span><span class="co">#&gt; 2    -45.9           108 causal_forest     2    -0.426    0.67  -223   132</span></span>
+<span><span class="co">#&gt; 3     33.9           109 causal_forest     3     0.311    0.76  -145   213</span></span>
+<span><span class="co">#&gt; 4      6.1           108 causal_forest     4     0.056    0.96  -172   184</span></span>
+<span><span class="co">#&gt; 5    -15.2           107 causal_forest     5    -0.143    0.89  -191   160</span></span></code></pre></div>
 <p>We can extract estimates from the <code>est</code> object. The
 following code shows how to extract the GATE estimates for the writing
 score with the causal forest algorithm. We can also plot the estimates
@@ -214,48 +214,9 @@ estimates to be plotted (<code>GATE</code>, <code>PAPE</code>,
 <span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://ggplot2.tidyverse.org" class="external-link">ggplot2</a></span><span class="op">)</span></span>
 <span><span class="va">gate_est</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est</span><span class="op">)</span><span class="op">$</span><span class="va">GATE</span></span>
 <span></span>
-<span><span class="fu"><a href="../reference/plot_estimate.html">plot_estimate</a></span><span class="op">(</span><span class="va">gate_est</span>, type <span class="op">=</span> <span class="st">"GATE"</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#0072B2"</span><span class="op">)</span><span class="op">)</span></span>
-<span><span class="co">#&gt; &lt;ggproto object: Class ScaleDiscrete, Scale, gg&gt;</span></span>
-<span><span class="co">#&gt;     aesthetics: colour</span></span>
-<span><span class="co">#&gt;     axis_order: function</span></span>
-<span><span class="co">#&gt;     break_info: function</span></span>
-<span><span class="co">#&gt;     break_positions: function</span></span>
-<span><span class="co">#&gt;     breaks: waiver</span></span>
-<span><span class="co">#&gt;     call: call</span></span>
-<span><span class="co">#&gt;     clone: function</span></span>
-<span><span class="co">#&gt;     dimension: function</span></span>
-<span><span class="co">#&gt;     drop: TRUE</span></span>
-<span><span class="co">#&gt;     expand: waiver</span></span>
-<span><span class="co">#&gt;     get_breaks: function</span></span>
-<span><span class="co">#&gt;     get_breaks_minor: function</span></span>
-<span><span class="co">#&gt;     get_labels: function</span></span>
-<span><span class="co">#&gt;     get_limits: function</span></span>
-<span><span class="co">#&gt;     guide: legend</span></span>
-<span><span class="co">#&gt;     is_discrete: function</span></span>
-<span><span class="co">#&gt;     is_empty: function</span></span>
-<span><span class="co">#&gt;     labels: waiver</span></span>
-<span><span class="co">#&gt;     limits: NULL</span></span>
-<span><span class="co">#&gt;     make_sec_title: function</span></span>
-<span><span class="co">#&gt;     make_title: function</span></span>
-<span><span class="co">#&gt;     map: function</span></span>
-<span><span class="co">#&gt;     map_df: function</span></span>
-<span><span class="co">#&gt;     n.breaks.cache: NULL</span></span>
-<span><span class="co">#&gt;     na.translate: TRUE</span></span>
-<span><span class="co">#&gt;     na.value: grey50</span></span>
-<span><span class="co">#&gt;     name: NULL</span></span>
-<span><span class="co">#&gt;     palette: function</span></span>
-<span><span class="co">#&gt;     palette.cache: NULL</span></span>
-<span><span class="co">#&gt;     position: left</span></span>
-<span><span class="co">#&gt;     range: environment</span></span>
-<span><span class="co">#&gt;     rescale: function</span></span>
-<span><span class="co">#&gt;     reset: function</span></span>
-<span><span class="co">#&gt;     scale_name: manual</span></span>
-<span><span class="co">#&gt;     train: function</span></span>
-<span><span class="co">#&gt;     train_df: function</span></span>
-<span><span class="co">#&gt;     transform: function</span></span>
-<span><span class="co">#&gt;     transform_df: function</span></span>
-<span><span class="co">#&gt;     super:  &lt;ggproto object: Class ScaleDiscrete, Scale, gg&gt;</span></span></code></pre></div>
+<span><span class="fu"><a href="../reference/plot_estimate.html">plot_estimate</a></span><span class="op">(</span><span class="va">gate_est</span>, type <span class="op">=</span> <span class="st">"GATE"</span><span class="op">)</span> <span class="op">+</span></span>
+<span>  <span class="fu"><a href="https://ggplot2.tidyverse.org/reference/scale_manual.html" class="external-link">scale_color_manual</a></span><span class="op">(</span>values <span class="op">=</span> <span class="fu"><a href="https://rdrr.io/r/base/c.html" class="external-link">c</a></span><span class="op">(</span><span class="st">"#0072B2"</span>, <span class="st">"#D55E00"</span><span class="op">)</span><span class="op">)</span></span></code></pre></div>
+<p><img src="../reference/figures/README-est_extract-1.png" width="576"></p>
 <p>We plot the estimated Area Under the Prescriptive Effect Curve for
 the writing score across a range of budget constraints for causal
 forest.</p>
