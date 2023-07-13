@@ -152,14 +152,14 @@ and AUPEC for the user defined ITR.</p>
 <span></span>
 <span><span class="co"># user's own ITR</span></span>
 <span><span class="va">score_function</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="va">data</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span> </span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/mutate.html" class="external-link">mutate</a></span><span class="op">(</span>score <span class="op">=</span> <span class="fu"><a href="https://dplyr.tidyverse.org/reference/case_when.html" class="external-link">case_when</a></span><span class="op">(</span></span>
-<span>      <span class="va">SCHLURBN</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">~</span> <span class="fl">0.1</span>, <span class="co"># inner-city</span></span>
-<span>      <span class="va">SCHLURBN</span> <span class="op">==</span> <span class="fl">2</span> <span class="op">~</span> <span class="fl">0.2</span>, <span class="co"># suburban</span></span>
-<span>      <span class="va">SCHLURBN</span> <span class="op">==</span> <span class="fl">3</span> <span class="op">~</span> <span class="fl">0.4</span>, <span class="co"># rural</span></span>
-<span>      <span class="va">SCHLURBN</span> <span class="op">==</span> <span class="fl">4</span> <span class="op">~</span> <span class="fl">0.3</span>, <span class="co"># urban</span></span>
-<span>    <span class="op">)</span><span class="op">)</span> <span class="op"><a href="https://magrittr.tidyverse.org/reference/pipe.html" class="external-link">%&gt;%</a></span></span>
-<span>    <span class="fu"><a href="https://dplyr.tidyverse.org/reference/pull.html" class="external-link">pull</a></span><span class="op">(</span><span class="va">score</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">score</span></span>
+<span>  <span class="va">data</span> <span class="op">%&gt;%</span> </span>
+<span>    <span class="fu">mutate</span><span class="op">(</span>score <span class="op">=</span> <span class="fu">case_when</span><span class="op">(</span></span>
+<span>      <span class="va">school_urban</span> <span class="op">==</span> <span class="fl">1</span> <span class="op">~</span> <span class="fl">0.1</span>, <span class="co"># inner-city</span></span>
+<span>      <span class="va">school_urban</span> <span class="op">==</span> <span class="fl">2</span> <span class="op">~</span> <span class="fl">0.2</span>, <span class="co"># suburban</span></span>
+<span>      <span class="va">school_urban</span> <span class="op">==</span> <span class="fl">3</span> <span class="op">~</span> <span class="fl">0.4</span>, <span class="co"># rural</span></span>
+<span>      <span class="va">school_urban</span> <span class="op">==</span> <span class="fl">4</span> <span class="op">~</span> <span class="fl">0.3</span>, <span class="co"># urban</span></span>
+<span>    <span class="op">)</span><span class="op">)</span> <span class="op">%&gt;%</span></span>
+<span>    <span class="fu">pull</span><span class="op">(</span><span class="va">score</span><span class="op">)</span> <span class="op">-&gt;</span> <span class="va">score</span></span>
 <span>    </span>
 <span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">score</span><span class="op">)</span></span>
 <span><span class="op">}</span></span>
@@ -178,34 +178,34 @@ and AUPEC for the user defined ITR.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">compare_itr</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── PAPE ────────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     0.18           1.2 causal_forest      0.14    0.89</span></span>
-<span><span class="co">#&gt; 2     0.00           0.0      user_itr       NaN     NaN</span></span>
+<span><span class="co">#&gt; 1     0.89             1 causal_forest      0.89    0.37</span></span>
+<span><span class="co">#&gt; 2     0.00             0      user_itr       NaN     NaN</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── PAPEp ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1      1.2          1.09 causal_forest       1.1    0.28</span></span>
-<span><span class="co">#&gt; 2      1.1          0.67      user_itr       1.6    0.11</span></span>
+<span><span class="co">#&gt; 1      4.7          1.30 causal_forest       3.6 0.00027</span></span>
+<span><span class="co">#&gt; 2      1.1          0.67      user_itr       1.6 0.11485</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── PAPDp ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt; Cannot compute PAPDp</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── AUPEC ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     0.48          0.94 causal_forest      0.51   0.613</span></span>
-<span><span class="co">#&gt; 2    -0.91          0.42          &lt;NA&gt;     -2.19   0.028</span></span>
+<span><span class="co">#&gt; 1     2.37          0.92 causal_forest       2.6   0.010</span></span>
+<span><span class="co">#&gt; 2    -0.91          0.42          &lt;NA&gt;      -2.2   0.028</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── GATE ────────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;    estimate std.deviation     algorithm group statistic p.value  upper lower</span></span>
-<span><span class="co">#&gt; 1        31           108 causal_forest     1      0.29   0.775 -147.3   209</span></span>
-<span><span class="co">#&gt; 2      -129           107 causal_forest     2     -1.20   0.229 -305.5    47</span></span>
-<span><span class="co">#&gt; 3        32           107 causal_forest     3      0.30   0.767 -144.6   208</span></span>
-<span><span class="co">#&gt; 4        43           107 causal_forest     4      0.40   0.690 -133.6   219</span></span>
-<span><span class="co">#&gt; 5        48           106 causal_forest     5      0.45   0.650 -126.4   223</span></span>
-<span><span class="co">#&gt; 6       126            58      user_itr     1      2.16   0.031   30.2   222</span></span>
-<span><span class="co">#&gt; 7        96            59      user_itr     2      1.62   0.105   -1.4   194</span></span>
-<span><span class="co">#&gt; 8       -33            59      user_itr     3     -0.56   0.579 -129.7    64</span></span>
-<span><span class="co">#&gt; 9      -139            59      user_itr     4     -2.36   0.018 -236.5   -42</span></span>
-<span><span class="co">#&gt; 10      -32            59      user_itr     5     -0.54   0.589 -129.4    65</span></span></code></pre></div>
+<span><span class="co">#&gt; 1      -104           108 causal_forest     1     -0.96 0.33606 -281.1    74</span></span>
+<span><span class="co">#&gt; 2        75           109 causal_forest     2      0.69 0.49334 -104.9   255</span></span>
+<span><span class="co">#&gt; 3       369           110 causal_forest     3      3.36 0.00077  188.6   550</span></span>
+<span><span class="co">#&gt; 4      -299           106 causal_forest     4     -2.82 0.00478 -473.6  -125</span></span>
+<span><span class="co">#&gt; 5       -22           108 causal_forest     5     -0.20 0.83937 -199.7   156</span></span>
+<span><span class="co">#&gt; 6       126            58      user_itr     1      2.16 0.03063   30.2   222</span></span>
+<span><span class="co">#&gt; 7        96            59      user_itr     2      1.62 0.10491   -1.4   194</span></span>
+<span><span class="co">#&gt; 8       -33            59      user_itr     3     -0.56 0.57859 -129.7    64</span></span>
+<span><span class="co">#&gt; 9      -139            59      user_itr     4     -2.36 0.01813 -236.5   -42</span></span>
+<span><span class="co">#&gt; 10      -32            59      user_itr     5     -0.54 0.58875 -129.4    65</span></span></code></pre></div>
 <p>We plot the estimated Area Under the Prescriptive Effect Curve
 (AUPEC) for the writing score across a range of budget constraints for
 user defined ITR and estimated ITRs. The plot shows that the estimated
@@ -270,13 +270,45 @@ model</td>
 </tr>
 </tbody>
 </table>
+<p>The <code>user_model</code> input should be a function that takes two
+arguments: <code>training_data</code> and <code>test_data</code>. The
+function will make use of the <code>training_data</code> to fit a model
+and then use the <code>test_data</code> to estimate CATE or other
+metrics of interest. It should also specify the way to get the ITR,
+based on the estimated effects. In the following example, we fit a
+linear model with sample splitting and use the estimated CATE. We
+compute the ITR by assigning treatment to those with positive CATE and
+no treatment to those with negative CATE. Note that the user defined
+model can be any model that returns a unit-level continuous score for
+treatment assignment. It do not have to be a linear model or model that
+estimate CATE. In addition, the scoring rule can be any rule that
+assigns treatment based on the score and map the score to a binary
+indicator of treatment assignment. In the end, the function should
+return a list that contains (1) an ITR; (2) a fitted model; and (3) a
+score.</p>
+<p>If <code>split_ratio</code> is specified, the function will split the
+data into training and test data. The <code>split_ratio</code> should be
+a numeric value between 0 and 1. Alternatively, if <code>n_folds</code>
+is specified, the function will use the entire data to fit the user
+defined model via cross-validation.</p>
 <div class="sourceCode" id="cb3"><pre class="downlit sourceCode r">
-<code class="sourceCode R"><span></span>
-<span><span class="co"># user's own model</span></span>
-<span><span class="va">user_model</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">data</span><span class="op">)</span><span class="op">{</span></span>
-<span>  <span class="va">model</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="cn">T</span><span class="op">*</span><span class="op">(</span><span class="va">GKWHITE</span> <span class="op">+</span> <span class="va">GKBUSED</span> <span class="op">+</span> <span class="va">GKFRLNCH</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">data</span><span class="op">)</span></span>
-<span>  <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="va">model</span><span class="op">)</span></span>
-<span>  <span class="op">}</span></span>
+<code class="sourceCode R"><span><span class="co"># user's own model </span></span>
+<span><span class="va">user_model</span> <span class="op">&lt;-</span> <span class="kw">function</span><span class="op">(</span><span class="va">training_data</span>, <span class="va">test_data</span><span class="op">)</span><span class="op">{</span></span>
+<span></span>
+<span> <span class="co"># model fit on training data</span></span>
+<span> <span class="va">fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/lm.html" class="external-link">lm</a></span><span class="op">(</span><span class="va">Y</span> <span class="op">~</span> <span class="cn">T</span><span class="op">*</span><span class="op">(</span><span class="va">cov1</span> <span class="op">+</span> <span class="va">cov1</span> <span class="op">+</span> <span class="va">cov3</span><span class="op">)</span>, data <span class="op">=</span> <span class="va">training_data</span><span class="op">)</span></span>
+<span></span>
+<span> <span class="co"># estimate CATE on test data </span></span>
+<span> <span class="va">score</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/stats/predict.html" class="external-link">predict</a></span><span class="op">(</span><span class="va">fit</span>, <span class="va">test_data</span><span class="op">)</span>  </span>
+<span></span>
+<span> <span class="co"># get ITR</span></span>
+<span> <span class="va">itr</span> <span class="op">&lt;-</span> <span class="fu"><a href="https://rdrr.io/r/base/ifelse.html" class="external-link">ifelse</a></span><span class="op">(</span><span class="va">score</span> <span class="op">&gt;</span> <span class="fl">0</span>, <span class="fl">1</span>, <span class="fl">0</span><span class="op">)</span></span>
+<span></span>
+<span> <span class="kw"><a href="https://rdrr.io/r/base/function.html" class="external-link">return</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/r/base/list.html" class="external-link">list</a></span><span class="op">(</span></span>
+<span>  itr <span class="op">=</span> <span class="va">itr</span>, </span>
+<span>  fit <span class="op">=</span> <span class="va">fit</span>, </span>
+<span>  score <span class="op">=</span> <span class="va">score</span><span class="op">)</span><span class="op">)</span></span>
+<span><span class="op">}</span></span>
 <span></span>
 <span><span class="co"># estimate ITR</span></span>
 <span><span class="va">compare_fit</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/estimate_itr.html">estimate_itr</a></span><span class="op">(</span></span>
@@ -297,35 +329,35 @@ model</td>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">compare_est</span><span class="op">)</span></span>
 <span><span class="co">#&gt; ── PAPE ────────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1      1.3             1 causal_forest       1.3     0.2</span></span>
-<span><span class="co">#&gt; 2      0.0             0    user_model       NaN     NaN</span></span>
+<span><span class="co">#&gt; 1     0.33           1.4 causal_forest      0.24    0.81</span></span>
+<span><span class="co">#&gt; 2     0.00           0.0    user_model       NaN     NaN</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── PAPEp ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     2.25           1.2 causal_forest      1.96   0.051</span></span>
-<span><span class="co">#&gt; 2     0.44           1.1    user_model      0.39   0.697</span></span>
+<span><span class="co">#&gt; 1     1.82           1.1 causal_forest       1.6    0.10</span></span>
+<span><span class="co">#&gt; 2    -0.98           1.1    user_model      -0.9    0.37</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── PAPDp ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation                  algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1      1.8           1.8 causal_forest x user_model         1    0.31</span></span>
+<span><span class="co">#&gt; 1      2.8           1.7 causal_forest x user_model       1.7   0.092</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── AUPEC ───────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     2.12          0.88 causal_forest      2.42   0.016</span></span>
-<span><span class="co">#&gt; 2    -0.71          0.82    user_model     -0.87   0.386</span></span>
+<span><span class="co">#&gt; 1     0.27          1.07 causal_forest      0.25    0.80</span></span>
+<span><span class="co">#&gt; 2    -0.12          0.79    user_model     -0.15    0.88</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; ── GATE ────────────────────────────────────────────────────────────────────────</span></span>
 <span><span class="co">#&gt;    estimate std.deviation     algorithm group statistic p.value upper lower</span></span>
-<span><span class="co">#&gt; 1       -49           107 causal_forest     1     -0.46 6.5e-01  -226   127</span></span>
-<span><span class="co">#&gt; 2        61           108 causal_forest     2      0.56 5.7e-01  -117   238</span></span>
-<span><span class="co">#&gt; 3       125           109 causal_forest     3      1.15 2.5e-01   -54   305</span></span>
-<span><span class="co">#&gt; 4       -25           108 causal_forest     4     -0.23 8.2e-01  -202   153</span></span>
-<span><span class="co">#&gt; 5      -111           106 causal_forest     5     -1.05 2.9e-01  -285    63</span></span>
-<span><span class="co">#&gt; 6      -211           105    user_model     1     -2.01 4.5e-02  -384   -38</span></span>
-<span><span class="co">#&gt; 7      -434           106    user_model     2     -4.08 4.4e-05  -609  -259</span></span>
-<span><span class="co">#&gt; 8      -386           106    user_model     3     -3.62 2.9e-04  -561  -211</span></span>
-<span><span class="co">#&gt; 9       412           107    user_model     4      3.84 1.2e-04   236   589</span></span>
-<span><span class="co">#&gt; 10      619           106    user_model     5      5.87 4.3e-09   446   793</span></span>
+<span><span class="co">#&gt; 1       -98           108 causal_forest     1     -0.91  0.3635  -276    79</span></span>
+<span><span class="co">#&gt; 2       116           108 causal_forest     2      1.07  0.2840   -62   294</span></span>
+<span><span class="co">#&gt; 3       117           109 causal_forest     3      1.07  0.2840   -63   296</span></span>
+<span><span class="co">#&gt; 4       -46           106 causal_forest     4     -0.43  0.6674  -220   129</span></span>
+<span><span class="co">#&gt; 5       -59           106 causal_forest     5     -0.56  0.5769  -234   115</span></span>
+<span><span class="co">#&gt; 6      -175           105    user_model     1     -1.66  0.0962  -348    -2</span></span>
+<span><span class="co">#&gt; 7      -279           107    user_model     2     -2.62  0.0088  -455  -104</span></span>
+<span><span class="co">#&gt; 8       -32           108    user_model     3     -0.29  0.7689  -209   146</span></span>
+<span><span class="co">#&gt; 9       231           108    user_model     4      2.14  0.0325    53   408</span></span>
+<span><span class="co">#&gt; 10      285           108    user_model     5      2.63  0.0085   107   463</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">compare_est</span><span class="op">)</span></span></code></pre></div>
 <p><img src="../reference/figures/README-compare_itr_model_summary-1.png" width="700"></p>
 </div>
