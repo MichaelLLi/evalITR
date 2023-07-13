@@ -29,3 +29,32 @@ navbar:
     - text: "Changelog"
       href: news/index.html
 
+
+
+reference:
+- title: Fitting models
+  desc: ~
+  contents:
+  - '`estimate_itr`'
+  - '`evaluate_itr`'
+- title: Checking results
+  desc: ~
+  contents:
+  - '`plot`'
+  - '`plot_estimate`'
+  - '`summary`'
+- title: Additional analyses
+  desc: ~
+  contents:
+  - '`test_itr`'
+- title: Built-in data
+  desc: ~
+  contents:
+  - '`start`'
+# - title: Misc.
+#   desc: ~
+#   contents:
+#   - '`keyATM-package`'
+
+toc:
+  depth: 2
