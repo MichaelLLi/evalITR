@@ -28,6 +28,10 @@ treatment <- "treatment"
 # specifying the data (remove other outcomes)
 star_data <- star %>% dplyr::select(-c(g3treadss,g3tmathss))
 
+star_data = star_data %>% mutate(
+  school_urban = SCHLURBN
+)
+
 # specifying the formula
 user_formula <- as.formula(
   "g3tlangss ~ treatment + gender + race + birthmonth + 
@@ -56,10 +60,10 @@ score_function <- function(data){
 
   data %>% 
     mutate(score = case_when(
-      SCHLURBN == 1 ~ 0.1, # inner-city
-      SCHLURBN == 2 ~ 0.2, # suburban
-      SCHLURBN == 3 ~ 0.4, # rural
-      SCHLURBN == 4 ~ 0.3, # urban
+      school_urban == 1 ~ 0.1, # inner-city
+      school_urban == 2 ~ 0.2, # suburban
+      school_urban == 3 ~ 0.4, # rural
+      school_urban == 4 ~ 0.3, # urban
     )) %>%
     pull(score) -> score
     
@@ -80,26 +84,16 @@ summary(user_itr)
 
 
 We can extract estimates from the `est` object. The following code shows how to extract the GATE estimates for the writing score with the causal forest algorithm. 
+We can also plot the estimates using the `plot_estimate()` function and specify the type of estimates to be plotted 
+(`GATE`, `PAPE`, `PAPEp`, `PAPDp`).
 
 ```{r user_itr_gate, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
 # plot GATE estimates
 library(ggplot2)
-summary(user_itr)$GATE %>%
-  mutate(group = forcats::as_factor(group)) %>%
-  ggplot(., aes(
-    x = group, y = estimate,
-    ymin = lower , ymax = upper, color = algorithm)) +
-  ggdist::geom_pointinterval(
-    width = 0.5,
-    position = position_dodge(0.5),
-    interval_size_range = c(0.8, 1.5),
-    fatten_point = 2.5) +  
-  theme_bw() +
-  theme(panel.grid = element_blank(),
-        panel.background = element_blank()) +
-  labs(x = "Group", y = "GATE estimate") +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "#4e4e4e") +
-  scale_color_manual(values = c("#0072B2", "#E69F00", "#56B4E9", "#009E73", "#076f00"))
+gate_est <- summary(user_itr)$GATE
+
+plot_estimate(gate_est, type = "GATE") +
+  scale_color_manual(values = c("#0072B2"))
 ```  
 
 

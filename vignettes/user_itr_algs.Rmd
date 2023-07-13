@@ -125,12 +125,13 @@ The package also allows to compare the performance of estimated ITRs of existing
 
 The `user_model` input should be a function that takes two arguments: `training_data` and `test_data`. 
 The function will make use of the `training_data` to fit a model and then use the `test_data` to estimate CATE or other metrics of interest.
-It should also specify the way to get the ITR, based on the estimated effects. In the following 
-example, we fit a linear model with sample splitting and use the estimated CATE. We compute the ITR by
+It should also specify the way to get the ITR, based on the estimated effects. 
+
+In the following example, we fit a linear model with sample splitting and use the estimated CATE. We compute the ITR by
 assigning treatment to those with positive CATE and no treatment to those with negative CATE. Note that the 
 user defined model can be any model that returns a unit-level continuous score for treatment assignment. 
-It do not have to be a linear model or model that estimate CATE. In addition, the scoring rule can be
-any rule that assigns treatment based on the score and map the score to a binary indicator of treatment assignment.
+It does not have to be a linear model or model that estimate CATE. In addition, users can also choose their own scoring rule
+ that assigns treatment based on the score and map the score to a binary indicator of treatment assignment.
 In the end, the function should return a list that contains (1) an ITR; (2) a fitted model; and (3) a score.
 
 If `split_ratio` is specified, the function will split the data into training and test data. The `split_ratio` should be a numeric value between 0 and 1. 

@@ -145,3 +145,60 @@ ggplot(data, aes(x=fraction,y=aupec,group=type)) +
 
   return(out)
 }
+
+
+#' Plot the GATE estimate
+#' @import ggplot2
+#' @import ggthemes
+#' @importFrom stats sd
+#' @importFrom rlang .data
+#' @param x An table object. This is typically an output of \code{evaluate_itr()} function. 
+#' @param ... Further arguments passed to the function.
+#' @return A plot of ggplot2 object.
+#' @export 
+plot_estimate <- function(x, type, ...){
+
+# parameters
+estimate = x
+
+if(type == "GATE"){
+  estimate %>%
+    ggplot(., aes(
+      x = group, y = estimate,
+      ymin = lower , ymax = upper, color = algorithm)) +
+    ggdist::geom_pointinterval(
+      width = 0.5,
+      position = position_dodge(0.5),
+      interval_size_range = c(0.8, 1.5),
+      fatten_point = 2.5) +  
+    theme_bw() +
+    theme(panel.grid = element_blank(),
+          panel.background = element_blank()) +
+    labs(x = "Group", y = "GATE estimate") +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "#4e4e4e")
+}
+
+if(type %in% c("PAPE", "PAPEp", "PAPDp")){
+
+  estimate %>%
+    mutate(
+      algorithm = as.factor(algorithm),
+    lower = estimate - 1.96 * std.deviation,
+    upper = estimate + 1.96 * std.deviation) %>%
+    ggplot(., aes(
+      x = algorithm, y = estimate,
+      ymin = lower , ymax = upper, color = algorithm)) +
+    ggdist::geom_pointinterval(
+      width = 0.5,
+      position = position_dodge(0.5),
+      interval_size_range = c(0.8, 1.5),
+      fatten_point = 2.5) +  
+    theme_bw() +
+    theme(panel.grid = element_blank(),
+          panel.background = element_blank()) +
+    labs(x = "Algorithm", y = type) +
+    geom_hline(yintercept = 0, linetype = "dashed", color = "#4e4e4e")
+
+  }
+
+}

@@ -84,26 +84,17 @@ summary(est)
 
 
 We can extract estimates from the `est` object. The following code shows how to extract the GATE estimates for the writing score with the causal forest algorithm. 
+We can also plot the estimates using the `plot_estimate()` function and specify the type of estimates to be plotted 
+(`GATE`, `PAPE`, `PAPEp`, `PAPDp`).
+
 
 ```{r est_extract, warning = FALSE, message = FALSE, fig.width = 6, fig.height = 4}
 # plot GATE estimates
 library(ggplot2)
-summary(est)$GATE %>%
-  mutate(group = forcats::as_factor(group)) %>%
-  ggplot(., aes(
-    x = group, y = estimate,
-    ymin = lower , ymax = upper, color = algorithm)) +
-  ggdist::geom_pointinterval(
-    width = 0.5,
-    position = position_dodge(0.5),
-    interval_size_range = c(0.8, 1.5),
-    fatten_point = 2.5) +  
-  theme_bw() +
-  theme(panel.grid = element_blank(),
-        panel.background = element_blank()) +
-  labs(x = "Group", y = "GATE estimate") +
-  geom_hline(yintercept = 0, linetype = "dashed", color = "#4e4e4e") +
-  scale_color_manual(values = c("#0072B2", "#E69F00", "#56B4E9", "#009E73", "#076f00"))
+gate_est <- summary(est)$GATE
+
+plot_estimate(gate_est, type = "GATE") %>%
+  scale_color_manual(values = c("#0072B2"))
 ```  
 
 
