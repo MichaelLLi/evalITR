@@ -1,10 +1,10 @@
 #' Estimate individual treatment rules (ITR)
 #' @param treatment Treatment variable
-#' @param form a formula object that takes the form \code{y ~ T + x1 + x2 + ...}. 
+#' @param form a formula object that takes the form \code{y ~ T + x1 + x2 + ...}.
 #' @param data
-#'   A data frame that contains the outcome \code{y} and the treatment \code{T}. 
+#'   A data frame that contains the outcome \code{y} and the treatment \code{T}.
 #' @param algorithms
-#'   List of machine learning algorithms to be used. 
+#'   List of machine learning algorithms to be used.
 #' @param budget The maximum percentage of population that can be treated under the budget constraint.
 #' @param n_folds
 #'   Number of cross-validation folds. Default is 5.
@@ -17,7 +17,7 @@
 #' @param trControl caret parameter
 #' @param tuneGrid caret parameter
 #' @param tuneLength caret parameter
-#' @param user_model A user-defined function to create an ITR. The function should take the data as input and return a model to estimate the ITR. 
+#' @param user_model A user-defined function to create an ITR. The function should take the data as input and return a model to estimate the ITR.
 #' @param SL_library A list of machine learning algorithms to be used in the super learner.
 #' @param ... Additional arguments passed to \code{caret::train}
 #' @import dplyr
@@ -83,14 +83,14 @@ estimate_itr <- function(
   cv <- ifelse(split_ratio > 0, FALSE, TRUE)
 
   params <- list(
-    n_df = n_df, n_folds = n_folds, n_alg = n_alg, split_ratio = split_ratio, ngates = ngates, cv = cv, 
+    n_df = n_df, n_folds = n_folds, n_alg = n_alg, split_ratio = split_ratio, ngates = ngates, cv = cv,
     train_params = train_params, caret_algorithms = caret_algorithms, rlearner_algorithms = rlearner_algorithms, SL_library = SL_library)
 
   df <- list(algorithms = algorithms, outcome = outcome, data = data, treatment = treatment)
 
   # loop over all outcomes
   estimates <- vector("list", length = length(outcome))
-  
+
   # data to use
   data_filtered <- data %>%
     select(Y = !!sym(outcome), T = !!sym(treatment), all_of(covariates))
@@ -218,7 +218,7 @@ fit_itr <- function(
 
       # check if algorithm is in the caret package
       if (algorithms[i] %in% caret_algorithms) {
-        
+
         # set the train_method to the algorithm
         train_method = algorithms[i]
 
@@ -243,7 +243,7 @@ fit_itr <- function(
 
       # check if algorithm is in the rlearner package
       if (algorithms[i] %in% rlearner_algorithms) {
-        
+
         # set the train_method to the algorithm
         train_method = algorithms[i]
 
@@ -263,7 +263,7 @@ fit_itr <- function(
         models[[algorithms[i]]] <- rlearner_est$train
 
       }
-    
+
     }
 
     # user defined algorithm
@@ -487,13 +487,13 @@ fit_itr <- function(
       ##
       ## run each ML algorithm
       ##
-      
+
       # loop over all algorithms
       for (i in seq_along(algorithms)) {
 
         # check if algorithm is in the caret package
         if (algorithms[i] %in% caret_algorithms) {
-          
+
           # set the train_method to the algorithm
           train_method = algorithms[i]
 
@@ -560,7 +560,7 @@ fit_itr <- function(
 
       # store the results
       model_names <- as.character(substitute(user_model))
-      
+
       fit_ml[[model_names]][[j]] <- user_est$test
       models[[model_names]][[j]] <- user_est$train
 
@@ -730,17 +730,17 @@ fit_itr <- function(
 #' @param data A data frame containing the variables specified in \code{outcome}, \code{treatment}, and \code{tau}.
 #' @param budget The maximum percentage of population that can be treated under the budget constraint.
 #' @param ngates The number of gates to use for the ITR. The default is 5.
-#' A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}. 
+#' A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}.
 #' See \code{?evaluate_itr} for an example.
 #' @param ... Further arguments passed to the function.
 #' @return An object of \code{itr} class
 #' @export
 evaluate_itr <- function(
-  fit = NULL, 
+  fit = NULL,
   user_itr = NULL,
-  outcome = c(), 
-  treatment = c(), 
-  data = list(), 
+  outcome = c(),
+  treatment = c(),
+  data = list(),
   budget = 1,
   ngates = 5,
   ...){
@@ -765,23 +765,23 @@ evaluate_itr <- function(
 
     # store the results
     out_algs <- list(
-      qoi = qoi, 
-      cv = cv, 
-      df = df, 
-      estimates = estimates)    
-  } 
+      qoi = qoi,
+      cv = cv,
+      df = df,
+      estimates = estimates)
+  }
 
   # get ITR from the user-defined function
   if(!is.null(user_itr)){
-    df  = data 
+    df  = data
     Ycv = data[, outcome]
     Tcv = data[, treatment]
 
     estimates <- list(
-      Ycv = Ycv, 
-      Tcv = Tcv, 
+      Ycv = Ycv,
+      Tcv = Tcv,
       algorithms = "user-defined")
-    cv   <- FALSE    
+    cv   <- FALSE
 
     # compute qoi
     qoi   <- vector("list", length = length(outcome))
@@ -790,10 +790,10 @@ evaluate_itr <- function(
 
     # store the results
     out_user <- list(
-      qoi = qoi, 
-      cv = cv, 
-      df = df, 
-      estimates = estimates)      
+      qoi = qoi,
+      cv = cv,
+      df = df,
+      estimates = estimates)
   }
 
   # store the results
@@ -807,11 +807,17 @@ evaluate_itr <- function(
 
 }
 
-#' Conduct hypothesis tests
-#' @param fit Fitted model. Usually an output from \code{estimate_itr}
+#' Conduct Nonparametric Statistical Tests with fitted ITRs
+#'
+#' This function takes estimated ITRs from \code{estimate_itr}'s output to conduct nonparametric statistical tests of 1) treatment effect heterogeneity, and of 2) rank-consistent treatment effect heterogeneity.
+#' The details of the design of the two tests are given in Imai and Li (2022).
+#'
+#' @param fit Estimated ITRs in a fitted model. Usually an output from \code{estimate_itr}.
 #' @param nsim Number of Monte Carlo simulations used to simulate the null distributions. Default is 1000.
 #' @param ... Further arguments passed to the function.
-#' @return An object of \code{test_itr} class
+#' @return A list of \code{test_itr} class that contains the following items: \item{dataframe.het}{The estimated
+#' p-value of the null hypothesis, and the test statistic for the test of group-level heterogeneity for each fitted machine learning models.} \item{dataframe.consist}{The estimated
+#' p-value of the null hypothesis, and the test statistic for the test of rank consistency for each fitted machine learning models.}
 #' @export
 test_itr <- function(
     fit,
@@ -839,7 +845,7 @@ test_itr <- function(
   SL_library <- estimates$params$SL_library
 
   # run tests
-  
+
   ## =================================
   ## sample splitting
   ## =================================
@@ -866,11 +872,11 @@ test_itr <- function(
         Y   = Ycv,
         ngates = ngates)
     }
-   
+
 
     # return a list of consist and het
     out <- list(consist = consist, het = het)
-  
+
   }
 
   ## =================================
@@ -900,7 +906,7 @@ test_itr <- function(
         Y   = Ycv,
         ind = indcv,
         ngates = ngates)
-    
+
     }
 
   # return a list of consistcv and hetcv
