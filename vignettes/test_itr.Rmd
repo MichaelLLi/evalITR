@@ -1,0 +1,124 @@
+---
+title: "Nonparametric Tests of Causal Heterogeneity"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Nonparametric Tests of Causal Heterogeneity}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "../man/figures/README-"
+  )
+
+library(dplyr)
+library(evalITR)
+
+load("../data/star.rda")
+
+# specifying the outcome
+outcomes <- "g3tlangss"
+
+# specifying the treatment
+treatment <- "treatment"
+
+# specifying the data (remove other outcomes)
+star_data <- star %>% 
+  dplyr::select(-c(g3treadss,g3tmathss)) %>%
+  mutate(SCHLURBN = as.numeric(SCHLURBN))
+
+star_data = star_data %>% mutate(
+  cov1 = GKWHITE,
+  cov2 = GKBUSED,
+  cov3 = GKFRLNCH,
+  school_urban = SCHLURBN
+)
+
+# specifying the formula
+user_formula <- as.formula(
+  "g3tlangss ~ treatment + gender + race + birthmonth + 
+  birthyear + school_urban + GRDRANGE + GKENRMNT + cov3 + 
+  cov2 + cov1 ")
+
+```
+
+Heterogeneous treatment effects that are estimated by causal machine learning models are imprecise in many applications. 
+
+### Test of Treatment Effect Heterogeneity
+
+Users can conduct test of treatment effect heterogeneity, which evaluates whether if average treatment effects between groups differ. We consider the null hypothesis that all GATEs (group-level average treatment effects) are equal to one another. 
+
+### Test of Rank-Consistent Treatment Effect Heterogeneity 
+
+In `evalITR`, each machine learning algorithm estimates a scoring rule that ranks individuals in an order of priority for receiving the individualized treatments. To evaluate the quality of the scoring rule, we provide functions that test whether or not the rank of estimated GATEs is consistent with that of the true GATEs. We consider the null hypothesis of:
+
+
+### Running the tests
+
+`evalITR` provides a function `test_itr` that perform both nonparametric statistical tests that evaluates treatment effect heterogeneity at once. The function takes the following arguments:
+
+| Argument | Description              |
+|:-------- | :------------------------|
+| `fit`    | A fitted object that contains estimated ITRs. This object is often an output of `estimate_itr`. |
+| `nsim`   | Number of Monte Carlo simulations used to simulate the null distributions. Default is 1000. | 
+
+
+```{r test_itr_summary, warning = FALSE, message = FALSE}
+library(evalITR)
+
+# estimate ITR with 3 machine learning algorithms
+fit <- estimate_itr(
+  treatment = "T",
+  form = user_formula,
+  data = star_data,
+  algorithms = c("causal_forest",
+                 "bagging",
+                 "bartc"),
+  budget = 0.2,
+  split_ratio = 0.7)
+
+# test group-level treatment effect heterogeneity and rank consistency
+test <- test_itr(fit)
+
+# summarize estimates for test statistics and p-values
+summary(test)
+```
+
+The `test_itr` function also takes in ITRs estimated under cross-validation.
+
+```{r test_itr_summary_cv, warning = FALSE, message = FALSE}
+library(evalITR)
+
+# estimate the ITRs with under cross-validation
+
+# specify the trainControl method
+fitControl <- caret::trainControl(
+                           method = "repeatedcv",
+                           number = 3,
+                           repeats = 3)
+# estimate ITR
+set.seed(2021)
+fit_cv <- estimate_itr(
+               treatment = "treatment",
+               form = user_formula,
+               data = star_data,
+               trControl = fitControl,
+               algorithms = c(
+                  "causal_forest", 
+                  "bartc",
+                  "lasso", # from caret package
+                  "rf"), # from caret package
+               budget = 0.2,
+               n_folds = 3)
+
+# estimate test statistics 
+test_cv <- test_itr(fit_cv)
+
+# summarize estimates
+summary(test)
+```
+
+
