@@ -23,13 +23,11 @@ load("../data/star.rda")
 # specifying the outcome
 outcomes <- "g3tlangss"
 
-# specifying the treatment
-treatment <- "treatment"
-
 # specifying the data (remove other outcomes)
 star_data <- star %>% 
   dplyr::select(-c(g3treadss,g3tmathss)) %>%
-  mutate(SCHLURBN = as.numeric(SCHLURBN))
+  mutate(SCHLURBN = as.numeric(SCHLURBN)) %>%
+  rename(T = treatment)
 
 star_data = star_data %>% mutate(
   cov1 = GKWHITE,
@@ -40,8 +38,8 @@ star_data = star_data %>% mutate(
 
 # specifying the formula
 user_formula <- as.formula(
-  "g3tlangss ~ treatment + gender + race + birthmonth + 
-  birthyear + school_urban + GRDRANGE + GKENRMNT + cov3 + 
+  "g3tlangss ~ T + gender + race + birthmonth + 
+  birthyear + SCHLURBN + GRDRANGE + GKENRMNT + cov3 + 
   cov2 + cov1 ")
 
 ```
@@ -66,7 +64,7 @@ The function returns an object that contains the estimated GATE, ATE, and AUPEC 
 
 # estimate ITR 
 fit <- estimate_itr(
-  treatment = treatment,
+  treatment = "T",
   form = user_formula,
   data = star_data,
   algorithms = c("causal_forest"),
@@ -92,7 +90,7 @@ compare_itr <- evaluate_itr(
   fit = fit,
   user_itr = score_function,
   data = star_data,
-  treatment = treatment,
+  treatment = "T",
   outcome = outcomes,
   budget = 0.2)
 
@@ -128,37 +126,75 @@ The function will make use of the `training_data` to fit a model and then use th
 It should also specify the way to get the ITR, based on the estimated effects. 
 
 In the following example, we fit a linear model with sample splitting and use the estimated CATE. We compute the ITR by
-assigning treatment to those with positive CATE and no treatment to those with negative CATE. Note that the 
-user defined model can be any model that returns a unit-level continuous score for treatment assignment. 
-It does not have to be a linear model or model that estimate CATE. In addition, users can also choose their own scoring rule
- that assigns treatment based on the score and map the score to a binary indicator of treatment assignment.
-In the end, the function should return a list that contains (1) an ITR; (2) a fitted model; and (3) a score.
+assigning treatment to those with positive CATE and no treatment to those with negative CATE. The function `user_model` takes in the training data and test data and return a list that contains (1) an ITR; (2) a fitted model; and (3) a continuous score with the same length as the input data.
+
+```{r compare_itr_model, warning = FALSE, message = FALSE}
+# user-defined model
+user_model <- function(training_data, test_data){
+
+  # model fit on training data
+  fit <- train_model(training_data)
+  
+  # estimate CATE on test data
+  compute_hatf <- function(fit, test_data){
+
+    score <- fit_predict(fit, test_data)  
+    itr   <- score_function(score)
+    
+    return(list(itr = itr, score = score))
+  }
+
+  hatf <- compute_hatf(fit, test_data)
+  
+  return(list(
+    itr = hatf$itr, 
+    fit = fit, 
+    score = hatf$score))
+}
+```
+
+Note that the user defined model can be any model that returns a unit-level continuous score for treatment assignment. 
+It does not have to be a linear model or model that estimate CATE. We can specify custom functions in the `train_model` function and the `fit_predict` function to compute the score. If the model does not have a default `predict` function, we need to write up a custom function with `fit_predict`.
+
+```{r compare_itr_model_train, warning = FALSE, message = FALSE}
+# train model
+train_model <- function(data){
+
+  fit <- lm(Y ~ T*(cov1 + cov1 + cov3), data = data)
+
+  return(fit)
+}
+
+# predict function
+fit_predict <- function(fit, data){
+
+  # need to change this if the model does not have a default predict function
+  score <- predict(fit, data) 
+
+  return(score)
+}
+```
+
+In addition, we can also choose any scoring rule that maps the score to a binary indicator of treatment assignment.
+
+```{r compare_itr_model_score, warning = FALSE, message = FALSE}
+# score function
+score_function <- function(score){
+
+  itr <- (score >= 0) * 1
+
+  return(itr)
+}
+```
 
 If `split_ratio` is specified, the function will split the data into training and test data. The `split_ratio` should be a numeric value between 0 and 1. 
 Alternatively, if `n_folds` is specified, the function will use the entire data to fit the user defined model via cross-validation.
 
+
 ```{r compare_itr_model_summary, warning = FALSE, message = FALSE}
-# user's own model 
-user_model <- function(training_data, test_data){
-
- # model fit on training data
- fit <- lm(Y ~ T*(cov1 + cov1 + cov3), data = training_data)
-
- # estimate CATE on test data 
- score <- predict(fit, test_data)  
-
- # get ITR
- itr <- ifelse(score > 0, 1, 0)
-
- return(list(
-  itr = itr, 
-  fit = fit, 
-  score = score))
-}
-
 # estimate ITR
 compare_fit <- estimate_itr(
-  treatment = treatment,
+  treatment = "T",
   form = user_formula,
   data = star_data,
   algorithms = c("causal_forest"),

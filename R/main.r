@@ -18,6 +18,7 @@
 #' @param tuneGrid caret parameter
 #' @param tuneLength caret parameter
 #' @param user_model A user-defined function to create an ITR. The function should take the data as input and return a model to estimate the ITR. 
+#' @param SL_library A list of machine learning algorithms to be used in the super learner.
 #' @param ... Additional arguments passed to \code{caret::train}
 #' @import dplyr
 #' @import rlearner
@@ -39,6 +40,7 @@ estimate_itr <- function(
     tuneGrid = NULL,
     tuneLength = ifelse(trControl$method == "none", 1, 3),
     user_model = NULL,
+    SL_library = NULL,
     ...
 ) {
 
@@ -82,7 +84,7 @@ estimate_itr <- function(
 
   params <- list(
     n_df = n_df, n_folds = n_folds, n_alg = n_alg, split_ratio = split_ratio, ngates = ngates, cv = cv, 
-    train_params = train_params, caret_algorithms = caret_algorithms, rlearner_algorithms = rlearner_algorithms)
+    train_params = train_params, caret_algorithms = caret_algorithms, rlearner_algorithms = rlearner_algorithms, SL_library = SL_library)
 
   df <- list(algorithms = algorithms, outcome = outcome, data = data, treatment = treatment)
 
@@ -158,6 +160,9 @@ fit_itr <- function(
 
   # rlearn algorithms
   rlearner_algorithms = params$rlearner_algorithms
+
+  # super learner library
+  SL_library = params$SL_library
 
 ## =================================
 ## sample splitting
@@ -315,6 +320,26 @@ fit_itr <- function(
       fit_ml[["lasso"]] <- est$test
       models[["lasso"]] <- est$train
     }
+
+    if("SuperLearner" %in% algorithms){
+      # run SuperLearner
+      est <- run_superLearner(
+        dat_train = training_data_elements,
+        dat_test  = testing_data_elements,
+        dat_total = total_data_elements,
+        params    = params,
+        indcv     = 1,
+        iter      = 1,
+        budget    = budget,
+        train_method = "SuperLearner",
+        SL_library    = SL_library,
+        ...
+      )
+      # store the results
+      fit_ml[["SuperLearner"]] <- est$test
+      models[["SuperLearner"]] <- est$train
+    }
+
 
     if("bartc" %in% algorithms){
       # run bartcause
@@ -573,6 +598,25 @@ fit_itr <- function(
         models[["lasso"]][[j]] <- est$train
       }
 
+      if("SuperLearner" %in% algorithms){
+        # run SuperLearner
+        est <- run_superLearner(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          indcv     = indcv,
+          iter      = j,
+          budget    = budget,
+          train_method = "SuperLearner",
+          SL_library    = SL_library,
+          ...
+        )
+        # store the results
+        fit_ml[["SuperLearner"]][[j]] <- est$test
+        models[["SuperLearner"]][[j]] <- est$train
+      }
+
       if("bartc" %in% algorithms){
         # run bartcause
         est <- run_bartc(
@@ -790,6 +834,9 @@ test_itr <- function(
   # caret and rlearner parameters
   caret_algorithms <- estimates$params$caret_algorithms
   rlearner_algorithms <- estimates$params$rlearner_algorithms
+
+  # super learner library
+  SL_library <- estimates$params$SL_library
 
   # run tests
   

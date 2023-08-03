@@ -125,6 +125,38 @@ create_ml_args_lasso = function(data){
 }
 
 
+#' Create arguments for super learner
+#' @importFrom stats model.matrix
+#' @param data A dataset
+create_ml_args_superLearner = function(data){
+
+  Y = data[["Y"]]
+  X = data[["X"]]
+  T =data[["T"]]
+
+  X_and_T = cbind(X, T)
+  X_expand = model.matrix(~.*T, data = X_and_T) %>% as.data.frame()
+
+  # also needed for testing:
+  X0t = cbind(X, T = 0)
+  X1t = cbind(X, T = 1)
+  X0t_expand = model.matrix(~.*T, data = X0t) %>% as.data.frame()
+  X1t_expand = model.matrix(~.*T, data = X1t) %>% as.data.frame()
+
+  # remove intercept
+  X_expand = X_expand[, -1]
+  X0t_expand = X0t_expand[, -1]
+  X1t_expand = X1t_expand[, -1]
+
+  # change : in column names to _ to avoid errors in super learner
+  colnames(X_expand) = gsub(":", "_", colnames(X_expand))
+  colnames(X0t_expand) = gsub(":", "_", colnames(X0t_expand))
+  colnames(X1t_expand) = gsub(":", "_", colnames(X1t_expand))
+
+  return(list(Y = Y, X = X, T = T, X_expand = X_expand, X0t_expand = X0t_expand, X1t_expand = X1t_expand))
+}
+
+
 #' Create arguments for SVM
 #' @importFrom rlang .data
 #' @param data A dataset
