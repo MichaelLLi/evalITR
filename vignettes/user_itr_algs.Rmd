@@ -159,18 +159,17 @@ It does not have to be a linear model or model that estimate CATE. We can specif
 ```{r compare_itr_model_train, warning = FALSE, message = FALSE}
 # train model
 train_model <- function(data){
-
-  fit <- lm(Y ~ T*(cov1 + cov1 + cov3), data = data)
-
+  fit <- lm(
+    Y ~ T*(cov1 + cov1 + cov3), 
+    data = data)
   return(fit)
 }
 
 # predict function
 fit_predict <- function(fit, data){
-
-  # need to change this if the model does not have a default predict function
+  # need to change this function if 
+  # the model does not have a default predict function
   score <- predict(fit, data) 
-
   return(score)
 }
 ```
@@ -180,9 +179,7 @@ In addition, we can also choose any scoring rule that maps the score to a binary
 ```{r compare_itr_model_score, warning = FALSE, message = FALSE}
 # score function
 score_function <- function(score){
-
   itr <- (score >= 0) * 1
-
   return(itr)
 }
 ```

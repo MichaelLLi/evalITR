@@ -14,7 +14,7 @@ navbar:
           href: articles/install.html
         - text: "Sample Splitting"
           href: articles/sample_split.html
-        - text: "Sample Splitting with Caret"
+        - text: "Sample Splitting with Caret/SuperLearner"
           href: articles/sample_split_caret.html
         - text: "Cross-Validation"
           href: articles/cv_single_alg.html

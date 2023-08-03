@@ -15,7 +15,6 @@ knitr::opts_chunk$set(
   )
 
 library(dplyr)
-
 load("../data/star.rda")
 
 # specifying the outcome
@@ -112,7 +111,7 @@ Alternatively, we can train the model with the `SuperLearner` package (for furth
 
 We will compare the performance of the ITR estimated with `causal_forest` and `SuperLearner`.   
   
-```{r sp_summary}
+```{r sl_summary, message = FALSE, warning = FALSE}
 library(SuperLearner)
 
 fit_sl <- estimate_itr(
@@ -130,9 +129,9 @@ est_sl <- evaluate_itr(fit_sl)
 summary(est_sl)
 ```
 
-We plot the estimated Area Under the Prescriptive Effect Curve for the writing score across a range of budget constraints for the gradient boosting machine.
+We plot the estimated Area Under the Prescriptive Effect Curve for the writing score across a range of budget constraints, seperately for the two ITRs, estimated with `causal_forest` and `SuperLearner`. 
 
-```{r sp_plot, fig.width = 6, fig.height = 4}
+```{r sl_plot, fig.width=6, fig.height=4,fig.align = "center"}
 # plot the AUPEC 
 plot(est_sl)
 ```
