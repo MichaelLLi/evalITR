@@ -1,65 +1,65 @@
 
+## rlearner
 
-## causal-forest
-
-run_causal_forest <- function(
+run_rlearner <- function(
   dat_train,
   dat_test,
   dat_total,
   params,
   indcv,
   iter,
-  budget
+  budget,
+  train_method,
+  ...
 ) {
 
   # split/cross-validation
   cv <- params$cv
 
   ## train
-  fit_train <- train_causal_forest(dat_train)
+  fit_train <- train_rlearner(dat_train, train_method)
 
   ## test
-  fit_test <- test_causal_forest(
+  fit_test <- test_rlearner(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb,
     indcv, iter, budget, cv
   )
+
 
   return(list(test = fit_test, train = fit_train))
 }
 
 
 
-train_causal_forest <- function(dat_train) {
+train_rlearner <- function(dat_train, train_method) {
 
   ## format training data
-  training_data_elements_cf <- create_ml_args_causalforest(dat_train)
+  training_data_elements <- create_ml_args(dat_train)
+
+  ## parameters
+  outcome = training_data_elements[["Y"]]
+  treatment = training_data_elements[["T"]]
+  covs  = training_data_elements[["X"]] %>% as.matrix()
 
   ## fit
-  fit <- grf::causal_forest(
-    training_data_elements_cf[["X_expand"]],
-    training_data_elements_cf[["Y"]],
-    training_data_elements_cf[["T"]],
-    num.trees = 2000
-  )
+  fit <- do.call(train_method, list(covs, treatment, outcome))
+
   return(fit)
 }
 
 #'@importFrom stats predict runif
-test_causal_forest <- function(
+test_rlearner <- function(
   fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, budget, cv
 ) {
 
   ## format data
-  testing_data_elements_cf <- create_ml_args_causalforest(dat_test)
-
-  total_data_elements_cf   <- create_ml_args_causalforest(dat_total)
+  testing_data_elements <- create_ml_args(dat_test)
+  total_data_elements   <- create_ml_args(dat_total)
 
   if(cv == TRUE){
     ## predict
-    tau_total <- predict(
-      fit_train,
-      total_data_elements_cf[["X_expand"]]
-    )$predictions + runif(n_df,-1e-6,1e-6)
+    new_data = total_data_elements[["X"]] %>% as.matrix()
+    tau_total=predict(fit_train,new_data)
 
     ## compute quantities of interest
     tau_test <-  tau_total[indcv == iter]
@@ -73,14 +73,12 @@ test_causal_forest <- function(
       That_cv  = That,
       That_pcv = That_p
     )
-
   }
 
   if(cv == FALSE){
     ## predict
-    tau_test <- predict(
-      fit_train,
-      testing_data_elements_cf[["X_expand"]])$predictions
+    new_data = testing_data_elements[["X"]] %>% as.matrix()
+    tau_test=predict(fit_train, new_data)
 
     ## compute quantities of interest
     That     =  as.numeric(tau_test > 0)
@@ -93,9 +91,10 @@ test_causal_forest <- function(
       tau_cv   = tau_test,
       That_cv  = That,
       That_pcv = That_p
-    )
+      )
   }
 
   return(cf_output)
 }
+
 

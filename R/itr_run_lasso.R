@@ -24,7 +24,7 @@ run_lasso <- function(
   )
 
 
-  return(fit_test)
+  return(list(test = fit_test, train = fit_train))
 }
 
 

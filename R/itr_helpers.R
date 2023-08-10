@@ -33,7 +33,7 @@ create_ml_arguments = function(outcome, treatment, data){
   return(list(Y = Y, X = X, T = T, formula = formula))
 }
 
-#' Create general arguments
+#' Create general arguments 
 #' @importFrom stats model.matrix
 #' @param data A dataset
 create_ml_args = function(data){
@@ -401,32 +401,23 @@ gettaucv <- function(
     fit,
     ...
 ){
-  df <- fit$df
   estimates <- fit$estimates
-  algorithms <- df[["algorithms"]]
-  fit_ml <- estimates[[1]]$fit_ml
-  n_folds <- estimates[[1]]$params$n_folds
+  fit_ml <- estimates$fit_ml
+  n_folds <- estimates$params$n_folds
   tau_cv <- list()
 
-  # extract tau_cv for each algorithm in j
-  for (j in seq_along(algorithms)) {
-    tau_cv[[j]] <- fit_ml[[j]]
-    # Assign the name of the algorithm to the corresponding element in the tau_cv list
-    names(tau_cv)[j] <- algorithms[j]
-
-    # extract and formate tau_cv across k folds in each j
-    for (k in seq(n_folds)) {
-
-      tau_cv[[j]][[k]] <- fit_ml[[j]][[k]][["tau_cv"]]
-
-    }
-
-    # convert k folds of tau_cv to a single matrix in every algorithm j
-    tau_cv[[j]] <- do.call(cbind, tau_cv[[j]])
-
+  # for one model
+  for (k in seq(n_folds)) {
+    tau_cv[[k]] <- fit_ml[["causal_forest"]][[k]][["tau_cv"]]
   }
+
+  # convert to a single matrix
+  tau_cv <- do.call(cbind, tau_cv)
+
   return(tau_cv)
+
 }
+
 
 
 # rename the columns of the data frame with the interaction terms
@@ -454,9 +445,9 @@ convert_formula <- function(user_formula, data, treatment){
   # remove variable Intercept from covariates list by name
   covariates_vec <- colnames(interaction_df)
   covariates_vec <- covariates_vec[!covariates_vec %in% c("Intercept", paste0(treatment))]
-
+  
   # combine the interaction_df with the original data frame
-  new_data = data %>% dplyr::select(c(outcome))
+  new_data = data %>% dplyr::select(c(outcome)) 
   combined_data <- bind_cols(new_data, interaction_df)
 
   return(list(data = combined_data, covariates = covariates_vec, outcome = outcome))

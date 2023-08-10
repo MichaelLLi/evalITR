@@ -1,8 +1,7 @@
 #' Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv)
-#' @param fit_obj An output object from \code{itr_single_outcome} function.
+#' @param fit_obj An output object from \code{fit_itr} function.
 #' @param algorithms Machine learning algorithms
 #' @importFrom rlang .data
-# compute_qoi <- function(fit_obj, algorithms) {
 
 compute_qoi <- function(fit_obj, algorithms) {
 
@@ -12,10 +11,8 @@ compute_qoi <- function(fit_obj, algorithms) {
   Ycv    <- fit_obj$Ycv
   Tcv    <- fit_obj$Tcv
   indcv  <- fit_obj$indcv
-  budget   <- fit_obj$budget
+  budget <- fit_obj$budget
   cv     <- fit_obj$params$cv
-
-
 
   ## -----------------------------------------
   ## compute quantities under cross validation
@@ -98,7 +95,6 @@ compute_qoi <- function(fit_obj, algorithms) {
   }
 
 
-
   ## -----------------------------------------
   ## compute quantities under sample splitting
   ## -----------------------------------------
@@ -117,7 +113,6 @@ compute_qoi <- function(fit_obj, algorithms) {
       ## name
       PAPE[[i]]$alg <-  PAPEp[[i]]$alg <- algorithms[i]
     }
-
 
     ## PAPDp
     PAPDp <- list()
@@ -149,6 +144,7 @@ compute_qoi <- function(fit_obj, algorithms) {
     for (i in seq_along(algorithms)) {
 
       aupec[[i]] <- AUPEC(Tcv, fit_ml[[i]][["tau"]], Ycv, centered = TRUE)
+      
     }
 
     ## GATE
@@ -170,6 +166,82 @@ compute_qoi <- function(fit_obj, algorithms) {
         PAPE = PAPE,
         PAPEp = PAPEp,
         PAPDp = PAPDp,
+        AUPEC = aupec,
+        GATE = GATE)
+
+  return(out)
+}
+
+
+
+#' Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv) with user defined functions
+#' @param user_itr A user-defined function to create an ITR. The function should take the data as input and return an unit-level continuous score for treatment assignment. We assume those that have score less than 0 should not have treatment. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}. 
+#' @param Tcv A vector of the unit-level binary treatment.
+#' @param Ycv A vector of the unit-level continuous outcome.
+#' @param data A data frame containing the variables of interest.
+#' @param ngates The number of gates to be used in the GATE function.
+#' @param budget The maximum percentage of population that can be treated under the budget constraint.
+#' @param ... Additional arguments to be passed to the user-defined function.
+#' @importFrom rlang .data
+compute_qoi_user <- function(user_itr, Tcv, Ycv, data, ngates, budget, ...) {
+
+  # parameters
+  function_name <- as.character(substitute(user_itr))
+
+  # ITR
+  tau <- do.call(user_itr, list(data))
+  That <- ifelse(tau >= 0, 1, 0)
+
+  # ITR with budget constraint
+  That_p <- numeric(length(That))
+  That_p[sort(tau,decreasing =TRUE,index.return=TRUE)$ix[1:(floor(budget*length(tau))+1)]] = 1
+
+  # PAPE 
+  PAPE <- PAPEp <- vector("list", length(user_itr))
+  for (i in seq_len(length(user_itr))) {
+
+    ## compute PAPE
+    PAPE[[i]] <- PAPE(Tcv, That, Ycv, centered = TRUE)
+
+    ## compute PAPEp
+    PAPEp[[i]] <- PAPE(Tcv, That_p, Ycv, centered = TRUE, budget)
+
+    ## name
+    PAPE[[i]]$alg <- function_name[i]
+    
+    PAPEp[[i]]$alg <- function_name[i]
+
+  }
+
+  ## AUPEC
+  aupec <- vector("list", length = length(user_itr))
+  for (i in seq_along(length(user_itr))) {
+    
+    # compute AUPEC
+    aupec[[i]] <- AUPEC(Tcv, tau, Ycv, centered = TRUE)
+
+    # name
+    aupec[[i]]$alg <- function_name[i]
+  }
+
+  ## GATE
+  GATE <- vector("list", length = length(user_itr))
+  for (i in seq_along(length(user_itr))) {
+
+    ## Compute GATE
+    GATE[[i]] <- GATE(Tcv, tau, Ycv, ngates)
+
+    ## indicate algorithm
+    GATE[[i]]$alg <- function_name[i]
+
+    ## indicate group number
+    GATE[[i]]$group <- seq_along(GATE[[i]]$gate)
+  }
+  
+  out <- list(
+        PAPE = PAPE,
+        PAPEp = PAPEp,
+        PAPDp = NULL, # single algorithm
         AUPEC = aupec,
         GATE = GATE)
 
