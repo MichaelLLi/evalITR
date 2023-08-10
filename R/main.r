@@ -5,8 +5,7 @@
 #'   A data frame that contains the outcome \code{y} and the treatment \code{T}.
 #' @param algorithms
 #'   List of machine learning algorithms to be used.
-#' @param budget
-#'   Proportion of treated units.
+#' @param budget The maximum percentage of population that can be treated under the budget constraint.
 #' @param n_folds
 #'   Number of cross-validation folds. Default is 5.
 #' @param split_ratio
@@ -18,6 +17,8 @@
 #' @param trControl caret parameter
 #' @param tuneGrid caret parameter
 #' @param tuneLength caret parameter
+#' @param user_model A user-defined function to create an ITR. The function should take the data as input and return a model to estimate the ITR.
+#' @param SL_library A list of machine learning algorithms to be used in the super learner.
 #' @param ... Additional arguments passed to \code{caret::train}
 #' @import dplyr
 #' @import rlearner
@@ -38,23 +39,25 @@ estimate_itr <- function(
     trControl = caret::trainControl(method = "none"),
     tuneGrid = NULL,
     tuneLength = ifelse(trControl$method == "none", 1, 3),
+    user_model = NULL,
+    SL_library = NULL,
     ...
 ) {
 
   # specify the outcome and covariates
-  convert_data <- convert_formula(form, data, treatment)
+  convert_data <- convert_formula(as.formula(form), data, treatment)
 
   outcome <- convert_data$outcome
   covariates <- convert_data$covariates
   data <- convert_data$data
 
-  ## caret parameters
+  # caret parameters
   metric = ifelse(is.factor(data[outcome]), "Accuracy", "RMSE")
   maximize = ifelse(metric %in% c("RMSE", "logLoss", "MAE", "logLoss"), FALSE, TRUE)
 
   caret_algorithms <- names(caret::getModelInfo())
 
-  ## rlearn algorithms
+  # rlearn algorithms
   rlearner_algorithms <- c("rkern", "rlasso","rboost", "tkern", "tlasso", "tboost", "skern", "slasso", "sboost", "xkern", "xlasso", "xboost", "ukern", "ulasso", "uboost")
 
   # caret train parameters
@@ -69,10 +72,11 @@ estimate_itr <- function(
     tuneLength = tuneLength
   )
 
-  ## number of algorithms
-  n_alg <- length(algorithms)
+  # combine package algs with user's own function
+  algorithms <- c(algorithms, user_model)
 
-  ## some working variables
+  # some working variables
+  n_alg <- length(algorithms)
   n_df <- nrow(data)
   n_X  <- length(data) - 1
   n_folds <- n_folds
@@ -80,37 +84,37 @@ estimate_itr <- function(
 
   params <- list(
     n_df = n_df, n_folds = n_folds, n_alg = n_alg, split_ratio = split_ratio, ngates = ngates, cv = cv,
-    train_params = train_params, caret_algorithms = caret_algorithms, rlearner_algorithms = rlearner_algorithms)
+    train_params = train_params, caret_algorithms = caret_algorithms, rlearner_algorithms = rlearner_algorithms, SL_library = SL_library)
 
   df <- list(algorithms = algorithms, outcome = outcome, data = data, treatment = treatment)
 
-  ## loop over all outcomes
+  # loop over all outcomes
   estimates <- vector("list", length = length(outcome))
 
-  ## data to use
-  ## rename outcome and treatment variable
+  # data to use
   data_filtered <- data %>%
-    select(Y = !!sym(outcome), Treat = !!sym(treatment), all_of(covariates))
+    select(Y = !!sym(outcome), T = !!sym(treatment), all_of(covariates))
 
-  ## cross-validation
+  # cross-validation
   if(cv == TRUE){
-    ## create folds
-    treatment_vec <- data_filtered %>% dplyr::pull(Treat)
+    # create folds
+    treatment_vec <- data_filtered %>% dplyr::pull(T)
     folds <- caret::createFolds(treatment_vec, k = n_folds)
   }
 
-  ## sample splitting
+  # sample splitting
   if(cv == FALSE){
     folds = n_folds
   }
 
-  ## run
-  estimates <- itr_single_outcome(
+  # run
+  estimates <- fit_itr(
     data       = data_filtered,
     algorithms = algorithms,
     params     = params,
     folds      = folds,
     budget     = budget,
+    user_model = user_model,
     ...
   )
 
@@ -121,7 +125,7 @@ estimate_itr <- function(
   return(out)
 
 }
-#' Evaluate ITR for Single Outcome
+#' Estimate ITR for Single Outcome
 #'
 #' @importFrom purrr map
 #' @importFrom dplyr pull
@@ -130,30 +134,35 @@ estimate_itr <- function(
 #' @param params A list of parameters.
 #' @param folds Number of folds.
 #' @param budget The maximum percentage of population that can be treated under the budget constraint.
+#' @param user_model User's own function to estimated the ITR.
 #' @param ... Additional arguments passed to \code{caret::train}
 #' @return A list of estimates.
 
-itr_single_outcome <- function(
+fit_itr <- function(
     data,
     algorithms,
     params,
     folds,
     budget,
+    user_model,
     ...
 ) {
 
-  ## obj to store outputs
+  # obj to store outputs
   fit_ml <- lapply(1:params$n_alg, function(x) vector("list", length = params$n_folds))
   names(fit_ml) <- algorithms
 
   models <- lapply(1:params$n_alg, function(x) vector("list", length = params$n_folds))
   names(models) <- algorithms
 
-  ## caret parameters
+  # caret parameters
   caret_algorithms = params$caret_algorithms
 
-  ## rlearn algorithms
+  # rlearn algorithms
   rlearner_algorithms = params$rlearner_algorithms
+
+  # super learner library
+  SL_library = params$SL_library
 
 ## =================================
 ## sample splitting
@@ -168,14 +177,16 @@ itr_single_outcome <- function(
     ## ---------------------------------
 
     # create split series of test/training partitions
-    split <- caret::createDataPartition(data$Treat,
-                                        p = params$split_ratio,
-                                        list = FALSE)
+    split <- caret::createDataPartition(
+      data$T,
+      p = params$split_ratio,
+      list = FALSE)
+
     trainset = data[split,]
     testset = data[-split,]
 
 
-    Tcv <- dplyr::pull(testset, "Treat")
+    Tcv <- dplyr::pull(testset, "T")
     Ycv <- dplyr::pull(testset, "Y")
     indcv <- rep(0, length(Ycv))
 
@@ -187,15 +198,15 @@ itr_single_outcome <- function(
 
     # prepare data
     training_data_elements <- create_ml_arguments(
-      outcome = "Y", treatment = "Treat", data = trainset
+      outcome = "Y", treatment = "T", data = trainset
     )
 
     testing_data_elements <- create_ml_arguments(
-      outcome = "Y", treatment = "Treat", data = testset
+      outcome = "Y", treatment = "T", data = testset
     )
 
     total_data_elements <- create_ml_arguments(
-      outcome = "Y", treatment = "Treat", data = data
+      outcome = "Y", treatment = "T", data = data
     )
 
     ##
@@ -255,6 +266,29 @@ itr_single_outcome <- function(
 
     }
 
+    # user defined algorithm
+    if (!is.null(user_model)){
+
+    # run the algorithm
+    user_est <- run_user(
+      dat_train = trainset,
+      dat_test  = testset,
+      dat_total = data,
+      params    = params,
+      budget    = budget,
+      indcv     = 1,
+      iter      = 1,
+      train_method = user_model,
+      ...
+      )
+
+    # store the results
+    model_names = as.character(substitute(user_model))
+    fit_ml[[model_names]] <- user_est$test
+    models[[model_names]] <- user_est$train
+
+    }
+
     if ("causal_forest" %in% algorithms) {
       # run causal forest
       est <- run_causal_forest(
@@ -287,69 +321,24 @@ itr_single_outcome <- function(
       models[["lasso"]] <- est$train
     }
 
-    # if("rlasso" %in% algorithms){
-    #   # run lasso
-    #   est <- run_rlasso(
-    #     dat_train = training_data_elements,
-    #     dat_test  = testing_data_elements,
-    #     dat_total = total_data_elements,
-    #     params    = params,
-    #     indcv     = 1,
-    #     iter      = 1,
-    #     budget    = budget
-    #   )
-    #   # store the results
-    #   fit_ml[["rlasso"]] <- est$test
-    #   models[["rlasso"]] <- est$train
-    # }
-
-    # if("rboost" %in% algorithms){
-    #   # run rboost
-    #   est <- run_rboost(
-    #     dat_train = training_data_elements,
-    #     dat_test  = testing_data_elements,
-    #     dat_total = total_data_elements,
-    #     params    = params,
-    #     indcv     = 1,
-    #     iter      = 1,
-    #     budget    = budget
-    #   )
-    #   # store the results
-    #   fit_ml[["rboost"]] <- est$test
-    #   models[["rboost"]] <- est$train
-    # }
-
-    # if("rkern" %in% algorithms){
-    #   # run rkern
-    #   est <- run_rboost(
-    #     dat_train = training_data_elements,
-    #     dat_test  = testing_data_elements,
-    #     dat_total = total_data_elements,
-    #     params    = params,
-    #     indcv     = 1,
-    #     iter      = 1,
-    #     budget    = budget
-    #   )
-    #   # store the results
-    #   fit_ml[["rkern"]] <- est$test
-    #   models[["rkern"]] <- est$train
-    # }
-
-    # if("svm" %in% algorithms){
-    #   # run svm
-    #   est <- run_svm(
-    #     dat_train = training_data_elements,
-    #     dat_test  = testing_data_elements,
-    #     dat_total = total_data_elements,
-    #     params    = params,
-    #     indcv     = 1,
-    #     iter      = 1,
-    #     budget    = budget
-    #   )
-    #   # store the results
-    #   fit_ml[["svm"]] <- est$test
-    #   models[["svm"]] <- est$train
-    # }
+    if("SuperLearner" %in% algorithms){
+      # run SuperLearner
+      est <- run_superLearner(
+        dat_train = training_data_elements,
+        dat_test  = testing_data_elements,
+        dat_total = total_data_elements,
+        params    = params,
+        indcv     = 1,
+        iter      = 1,
+        budget    = budget,
+        train_method = "SuperLearner",
+        SL_library    = SL_library,
+        ...
+      )
+      # store the results
+      fit_ml[["SuperLearner"]] <- est$test
+      models[["SuperLearner"]] <- est$train
+    }
 
 
     if("bartc" %in% algorithms){
@@ -458,14 +447,14 @@ itr_single_outcome <- function(
 
     cat('Evaluate ITR with cross-validation ...\n')
 
-    Tcv <- dplyr::pull(data, "Treat")
+    Tcv <- dplyr::pull(data, "T")
     Ycv <- dplyr::pull(data, "Y")
     indcv <- rep(0, length(Ycv))
 
     params$n_tb <- max(table(indcv))
 
 
-    ## loop over j number of folds
+    # loop over j number of folds
 
     for (j in seq_len(params$n_folds)) {
 
@@ -481,17 +470,17 @@ itr_single_outcome <- function(
       ## run ML
       ## ---------------------------------
 
-      ## prepare data
+      # prepare data
       training_data_elements <- create_ml_arguments(
-        outcome = "Y", treatment = "Treat", data = trainset
+        outcome = "Y", treatment = "T", data = trainset
       )
 
       testing_data_elements <- create_ml_arguments(
-        outcome = "Y", treatment = "Treat", data = testset
+        outcome = "Y", treatment = "T", data = testset
       )
 
       total_data_elements <- create_ml_arguments(
-        outcome = "Y", treatment = "Treat", data = data
+        outcome = "Y", treatment = "T", data = data
       )
 
 
@@ -553,6 +542,30 @@ itr_single_outcome <- function(
         }
       }
 
+      # user defined algorithm
+      if (!is.null(user_model)){
+
+      # run the algorithm
+      user_est <- run_user(
+        dat_train = trainset,
+        dat_test  = testset,
+        dat_total = data,
+        params    = params,
+        budget    = budget,
+        indcv     = indcv,
+        iter      = j,
+        train_method = user_model,
+        ...
+      )
+
+      # store the results
+      model_names <- as.character(substitute(user_model))
+
+      fit_ml[[model_names]][[j]] <- user_est$test
+      models[[model_names]][[j]] <- user_est$train
+
+      }
+
       if ("causal_forest" %in% algorithms) {
         # run causal forest
         est <- run_causal_forest(
@@ -585,70 +598,24 @@ itr_single_outcome <- function(
         models[["lasso"]][[j]] <- est$train
       }
 
-      # if("rlasso" %in% algorithms){
-      #   # run lasso
-      #   est <- run_rlasso(
-      #     dat_train = training_data_elements,
-      #     dat_test  = testing_data_elements,
-      #     dat_total = total_data_elements,
-      #     params    = params,
-      #     indcv     = indcv,
-      #     iter      = j,
-      #     budget    = budget
-      #   )
-      #   # store the results
-      #   fit_ml[["rlasso"]][[j]] <- est$test
-      #   models[["rlasso"]][[j]] <- est$train
-      # }
-
-      # if("rboost" %in% algorithms){
-      #   # run lasso
-      #   est <- run_rboost(
-      #     dat_train = training_data_elements,
-      #     dat_test  = testing_data_elements,
-      #     dat_total = total_data_elements,
-      #     params    = params,
-      #     indcv     = indcv,
-      #     iter      = j,
-      #     budget    = budget
-      #   )
-      #   # store the results
-      #   fit_ml[["rboost"]][[j]] <- est$test
-      #   models[["rboost"]][[j]] <- est$train
-      # }
-
-      # if("rkern" %in% algorithms){
-      #   # run rkern
-      #   est <- run_rkern(
-      #     dat_train = training_data_elements,
-      #     dat_test  = testing_data_elements,
-      #     dat_total = total_data_elements,
-      #     params    = params,
-      #     indcv     = indcv,
-      #     iter      = j,
-      #     budget    = budget
-      #   )
-      #   # store the results
-      #   fit_ml[["rkern"]][[j]] <- est$test
-      #   models[["rkern"]][[j]] <- est$train
-      # }
-
-      # if("svm" %in% algorithms){
-      #   # run svm
-      #   est <- run_svm(
-      #     dat_train = training_data_elements,
-      #     dat_test  = testing_data_elements,
-      #     dat_total = total_data_elements,
-      #     params    = params,
-      #     indcv     = indcv,
-      #     iter      = j,
-      #     budget    = budget
-      #   )
-      #   # store the results
-      #   fit_ml[["svm"]][[j]] <- est$test
-      #   models[["svm"]][[j]] <- est$train
-      # }
-
+      if("SuperLearner" %in% algorithms){
+        # run SuperLearner
+        est <- run_superLearner(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          indcv     = indcv,
+          iter      = j,
+          budget    = budget,
+          train_method = "SuperLearner",
+          SL_library    = SL_library,
+          ...
+        )
+        # store the results
+        fit_ml[["SuperLearner"]][[j]] <- est$test
+        models[["SuperLearner"]][[j]] <- est$train
+      }
 
       if("bartc" %in% algorithms){
         # run bartcause
@@ -745,7 +712,7 @@ itr_single_outcome <- function(
         fit_ml[["cart"]][[j]] <- est$test
         models[["cart"]][[j]] <- est$train
       }
-    } ## end of fold
+    } # end of fold
   }
 
   return(list(
@@ -757,23 +724,82 @@ itr_single_outcome <- function(
 
 #' Evaluate ITR
 #' @param fit Fitted model. Usually an output from \code{estimate_itr}
+#' @param user_itr  A user-defined function to create an ITR. The function should take the data as input and return an unit-level continuous score for treatment assignment. We assume those that have score less than 0 should not have treatment. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}.
+#' @param outcome A character string of the outcome variable name.
+#' @param treatment A character string of the treatment variable name.
+#' @param data A data frame containing the variables specified in \code{outcome}, \code{treatment}, and \code{tau}.
+#' @param budget The maximum percentage of population that can be treated under the budget constraint.
+#' @param ngates The number of gates to use for the ITR. The default is 5.
+#' A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}.
+#' See \code{?evaluate_itr} for an example.
 #' @param ... Further arguments passed to the function.
 #' @return An object of \code{itr} class
 #' @export
-evaluate_itr <- function(fit, ...){
+evaluate_itr <- function(
+  fit = NULL,
+  user_itr = NULL,
+  outcome = c(),
+  treatment = c(),
+  data = list(),
+  budget = 1,
+  ngates = 5,
+  ...){
 
-  estimates  <- fit$estimates
-  cv         <- estimates$params$cv
-  df         <- fit$df
-  algorithms <- fit$df$algorithms
-  outcome    <- fit$df$outcome
+  # parameters
+  out_algs <- list()
+  out_user  <- list()
 
-  ## compute qoi
-  qoi      <- vector("list", length = length(outcome))
-  qoi <- compute_qoi(estimates, algorithms)
+  # estimate ITR from ML algorithms
+  if(!is.null(fit)){
 
+    # estimate ITR from the fitted model
+    estimates  <- fit$estimates
+    cv         <- estimates$params$cv
+    df         <- fit$df
+    algorithms <- fit$df$algorithms
+    outcome    <- fit$df$outcome
+
+    # compute qoi
+    qoi <- vector("list", length = length(outcome))
+    qoi <- compute_qoi(estimates, algorithms)
+
+    # store the results
+    out_algs <- list(
+      qoi = qoi,
+      cv = cv,
+      df = df,
+      estimates = estimates)
+  }
+
+  # get ITR from the user-defined function
+  if(!is.null(user_itr)){
+    df  = data
+    Ycv = data[, outcome]
+    Tcv = data[, treatment]
+
+    estimates <- list(
+      Ycv = Ycv,
+      Tcv = Tcv,
+      algorithms = "user-defined")
+    cv   <- FALSE
+
+    # compute qoi
+    qoi   <- vector("list", length = length(outcome))
+    qoi   <- compute_qoi_user(
+      user_itr, Tcv, Ycv, data, ngates, budget, ...)
+
+    # store the results
+    out_user <- list(
+      qoi = qoi,
+      cv = cv,
+      df = df,
+      estimates = estimates)
+  }
+
+  # store the results
   out <- list(
-    qoi = qoi, cv = cv, df = df, estimates = estimates)
+    out_algs = out_algs,
+    out_user = out_user)
 
   class(out) <- c("itr", class(out))
 
@@ -787,7 +813,7 @@ evaluate_itr <- function(fit, ...){
 #' The details of the design of the two tests are given in Imai and Li (2022).
 #'
 #' @param fit Estimated ITRs in a fitted model. Usually an output from \code{estimate_itr}.
-#' @param nsim Number of Monte Carlo simulations used to simulate the null distributions. Default is 1000.
+#' @param nsim Number of Monte Carlo simulations used to simulate the null distributions. Default is 10000.
 #' @param ... Further arguments passed to the function.
 #' @return A list of \code{test_itr} class that contains the following items: \item{data frame}{The estimated
 #' p-value of the null hypothesis, and the test statistic for the test of group-level heterogeneity for each fitted machine learning models} \item{data frame}{The estimated
@@ -795,7 +821,7 @@ evaluate_itr <- function(fit, ...){
 #' @export
 test_itr <- function(
     fit,
-    nsim = 1000,
+    nsim = 10000,
     ...
 ) {
 
@@ -880,8 +906,8 @@ test_itr <- function(
 
     }
 
-  # return a list of consistcv and hetcv
-  out <- list(consistcv = consistcv, hetcv = hetcv)
+    # return a list of consistcv and hetcv
+    out <- list(consistcv = consistcv, hetcv = hetcv)
   }
 
   class(out) <- c("test_itr", class(out))
@@ -890,6 +916,5 @@ test_itr <- function(
 
 }
 
-
-utils::globalVariables(c("Treat", "aupec", "sd", "pval", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm", "vec", "Y", "algorithm", "statistic", "p.value"))
+utils::globalVariables(c("T", "aupec", "sd", "pval", "Pval", "aupec.y", "fraction", "AUPECmin", "AUPECmax", ".", "fit", "out", "pape", "alg", "papep", "papd", "type", "gate", "group", "qnorm", "vec", "Y", "algorithm", "statistic", "p.value"))
 

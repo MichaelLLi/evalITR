@@ -45,7 +45,7 @@ user_formula <- as.formula(
 
 ```
 
-Heterogeneous treatment effects that are estimated by causal machine learning models are imprecise in many applications. 
+Heterogeneous treatment effects that are estimated by causal machine learning models could be imprecise in many applications. This R package provides the following nonparametric statistical tests to evaluate whether if the machine learning algorithms are picking up real heterogeneity, instead of noise. 
 
 ### Test of Treatment Effect Heterogeneity
 
@@ -63,7 +63,7 @@ In `evalITR`, each machine learning algorithm estimates a scoring rule that rank
 | Argument | Description              |
 |:-------- | :------------------------|
 | `fit`    | A fitted object that contains estimated ITRs. This object is often an output of `estimate_itr`. |
-| `nsim`   | Number of Monte Carlo simulations used to simulate the null distributions. Default is 1000. | 
+| `nsim`   | Number of Monte Carlo simulations used to simulate the null distributions. Default is 10000. | 
 
 
 ```{r test_itr_summary, warning = FALSE, message = FALSE}
@@ -71,7 +71,7 @@ library(evalITR)
 
 # estimate ITR with 3 machine learning algorithms
 fit <- estimate_itr(
-  treatment = "T",
+  treatment = "treatment",
   form = user_formula,
   data = star_data,
   algorithms = c("causal_forest",
@@ -86,39 +86,4 @@ test <- test_itr(fit)
 # summarize estimates for test statistics and p-values
 summary(test)
 ```
-
-The `test_itr` function also takes in ITRs estimated under cross-validation.
-
-```{r test_itr_summary_cv, warning = FALSE, message = FALSE}
-library(evalITR)
-
-# estimate the ITRs with under cross-validation
-
-# specify the trainControl method
-fitControl <- caret::trainControl(
-                           method = "repeatedcv",
-                           number = 3,
-                           repeats = 3)
-# estimate ITR
-set.seed(2021)
-fit_cv <- estimate_itr(
-               treatment = "treatment",
-               form = user_formula,
-               data = star_data,
-               trControl = fitControl,
-               algorithms = c(
-                  "causal_forest", 
-                  "bartc",
-                  "lasso", # from caret package
-                  "rf"), # from caret package
-               budget = 0.2,
-               n_folds = 3)
-
-# estimate test statistics 
-test_cv <- test_itr(fit_cv)
-
-# summarize estimates
-summary(test)
-```
-
 
