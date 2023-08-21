@@ -8,10 +8,10 @@
 <meta name="description" content="evalITR">
 <title>Cross-validation with multiple ML algorithms • evalITR</title>
 <script src="../deps/jquery-3.6.0/jquery-3.6.0.min.js"></script><meta name="viewport" content="width=device-width, initial-scale=1, shrink-to-fit=no">
-<link href="../deps/bootstrap-5.1.3/bootstrap.min.css" rel="stylesheet">
-<script src="../deps/bootstrap-5.1.3/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
+<link href="../deps/bootstrap-5.2.2/bootstrap.min.css" rel="stylesheet">
+<script src="../deps/bootstrap-5.2.2/bootstrap.bundle.min.js"></script><!-- Font Awesome icons --><link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/all.min.css" integrity="sha256-mmgLkCYLUQbXn0B1SRqzHar6dCnv9oZFPEC1g1cwlkk=" crossorigin="anonymous">
 <link rel="stylesheet" href="https://cdnjs.cloudflare.com/ajax/libs/font-awesome/5.12.1/css/v4-shims.min.css" integrity="sha256-wZjR52fzng1pJHwx4aV2AO3yyTOXrcDW7jBpJtTwVxw=" crossorigin="anonymous">
-<!-- bootstrap-toc --><script src="https://cdn.rawgit.com/afeld/bootstrap-toc/v1.0.1/dist/bootstrap-toc.min.js"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Cross-validation with multiple ML algorithms">
+<!-- bootstrap-toc --><script src="https://cdn.jsdelivr.net/gh/afeld/bootstrap-toc@v1.0.1/dist/bootstrap-toc.min.js" integrity="sha256-4veVQbu7//Lk5TSmc7YV48MxtMy98e26cf5MrgZYnwo=" crossorigin="anonymous"></script><!-- headroom.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/headroom.min.js" integrity="sha256-AsUX4SJE1+yuDu5+mAVzJbuYNPHj/WroHuZ8Ir/CkE0=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/headroom/0.11.0/jQuery.headroom.min.js" integrity="sha256-ZX/yNShbjqsohH1k95liqY9Gd8uOiE1S4vZc+9KQ1K4=" crossorigin="anonymous"></script><!-- clipboard.js --><script src="https://cdnjs.cloudflare.com/ajax/libs/clipboard.js/2.0.6/clipboard.min.js" integrity="sha256-inc5kl9MA1hkeYUt+EC3BhlIgyp/2jDIyBLS6k3UxPI=" crossorigin="anonymous"></script><!-- search --><script src="https://cdnjs.cloudflare.com/ajax/libs/fuse.js/6.4.6/fuse.js" integrity="sha512-zv6Ywkjyktsohkbp9bb45V6tEMoWhzFzXis+LrMehmJZZSys19Yxf1dopHx7WzIKxr5tK2dVcYmaCk2uqdjF4A==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/autocomplete.js/0.38.0/autocomplete.jquery.min.js" integrity="sha512-GU9ayf+66Xx2TmpxqJpliWbT5PiGYxpaG8rfnBEk1LL8l1KGkRShhngwdXK1UgqhAzWpZHSiYPc09/NwDQIGyg==" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mark.js/8.11.1/mark.min.js" integrity="sha512-5CYOlHXGh6QpOFA/TeTylKLWfB3ftPsde7AnmhuitiTX4K5SqCLBeKro6sPS8ilsz1Q4NRx3v8Ko2IBiszzdww==" crossorigin="anonymous"></script><!-- pkgdown --><script src="../pkgdown.js"></script><meta property="og:title" content="Cross-validation with multiple ML algorithms">
 <meta property="og:description" content="evalITR">
 <!-- mathjax --><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/MathJax.js" integrity="sha256-nvJJv9wWKEm88qvoQl9ekL2J+k/RWIsaSScxxlsrv8k=" crossorigin="anonymous"></script><script src="https://cdnjs.cloudflare.com/ajax/libs/mathjax/2.7.5/config/TeX-AMS-MML_HTMLorMML.js" integrity="sha256-84DKXVJXs0/F8OTMzX4UR909+jtl4G7SPypPavF+GfA=" crossorigin="anonymous"></script><!--[if lt IE 9]>
 <script src="https://oss.maxcdn.com/html5shiv/3.7.3/html5shiv.min.js"></script>
@@ -26,7 +26,7 @@
     
     <a class="navbar-brand me-2" href="../index.html">evalITR</a>
 
-    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">0.3.0</small>
+    <small class="nav-text text-muted me-auto" data-bs-toggle="tooltip" data-bs-placement="bottom" title="">1.0.0</small>
 
     
     <button class="navbar-toggler" type="button" data-bs-toggle="collapse" data-bs-target="#navbar" aria-controls="navbar" aria-expanded="false" aria-label="Toggle navigation">
@@ -40,7 +40,7 @@
   <div class="dropdown-menu" aria-labelledby="dropdown-user-s-guide">
     <a class="dropdown-item" href="../articles/install.html">Installation</a>
     <a class="dropdown-item" href="../articles/sample_split.html">Sample Splitting</a>
-    <a class="dropdown-item" href="../articles/sample_split_caret.html">Sample Splitting with Caret</a>
+    <a class="dropdown-item" href="../articles/sample_split_caret.html">Sample Splitting with Caret/SuperLearner</a>
     <a class="dropdown-item" href="../articles/cv_single_alg.html">Cross-Validation</a>
     <a class="dropdown-item" href="../articles/cv_multiple_alg.html">Cross-Validation with Multiple Algorithms</a>
     <a class="dropdown-item" href="../articles/user_itr.html">User-Defined ITR</a>
@@ -99,6 +99,14 @@ group-level, we specify the number of groups through <code>ngates</code>
 and estimating heterogeneous treatment effects across groups.</p>
 <div class="sourceCode" id="cb1"><pre class="downlit sourceCode r">
 <code class="sourceCode R"><span><span class="kw"><a href="https://rdrr.io/r/base/library.html" class="external-link">library</a></span><span class="op">(</span><span class="va"><a href="https://github.com/MichaelLLi/evalITR" class="external-link">evalITR</a></span><span class="op">)</span></span>
+<span><span class="co">#&gt; Loading required package: MASS</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'MASS'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:dplyr':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     select</span></span>
+<span><span class="co">#&gt; Loading required package: Matrix</span></span>
+<span><span class="co">#&gt; Loading required package: quadprog</span></span>
 <span></span>
 <span><span class="co"># specify the trainControl method</span></span>
 <span><span class="va">fitControl</span> <span class="op">&lt;-</span> <span class="fu">caret</span><span class="fu">::</span><span class="fu"><a href="https://rdrr.io/pkg/caret/man/trainControl.html" class="external-link">trainControl</a></span><span class="op">(</span></span>
@@ -118,10 +126,13 @@ and estimating heterogeneous treatment effects across groups.</p>
 <span>                  <span class="co"># "rlasso", # from rlearner </span></span>
 <span>                  <span class="co"># "ulasso", # from rlearner </span></span>
 <span>                  <span class="st">"lasso"</span>, <span class="co"># from caret package</span></span>
-<span>                  <span class="st">"rf"</span><span class="op">)</span>, <span class="co"># from caret package</span></span>
+<span>                  <span class="st">"rf"</span></span>
+<span>                  <span class="op">)</span>, <span class="co"># from caret package</span></span>
 <span>               budget <span class="op">=</span> <span class="fl">0.2</span>,</span>
 <span>               n_folds <span class="op">=</span> <span class="fl">3</span><span class="op">)</span></span>
 <span><span class="co">#&gt; Evaluate ITR with cross-validation ...</span></span>
+<span><span class="co">#&gt; Loading required package: lattice</span></span>
+<span><span class="co">#&gt; Loading required package: ggplot2</span></span>
 <span><span class="co">#&gt; fitting treatment model via method 'bart'</span></span>
 <span><span class="co">#&gt; fitting response model via method 'bart'</span></span>
 <span><span class="co">#&gt; fitting treatment model via method 'bart'</span></span>
@@ -131,51 +142,56 @@ and estimating heterogeneous treatment effects across groups.</p>
 <span></span>
 <span><span class="co"># evaluate ITR</span></span>
 <span><span class="va">est_cv</span> <span class="op">&lt;-</span> <span class="fu"><a href="../reference/evaluate_itr.html">evaluate_itr</a></span><span class="op">(</span><span class="va">fit_cv</span><span class="op">)</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt; Attaching package: 'purrr'</span></span>
+<span><span class="co">#&gt; The following object is masked from 'package:caret':</span></span>
+<span><span class="co">#&gt; </span></span>
+<span><span class="co">#&gt;     lift</span></span>
 <span></span>
 <span><span class="co"># summarize estimates</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_cv</span><span class="op">)</span></span>
-<span><span class="co">#&gt; ── PAPE ────────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; -- PAPE ------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     0.95          0.82 causal_forest      1.17    0.24</span></span>
-<span><span class="co">#&gt; 2     0.14          0.50         bartc      0.29    0.77</span></span>
+<span><span class="co">#&gt; 1     0.27          0.82 causal_forest      0.33    0.74</span></span>
+<span><span class="co">#&gt; 2    -0.24          0.26         bartc     -0.93    0.35</span></span>
 <span><span class="co">#&gt; 3     0.17          1.07         lasso      0.16    0.87</span></span>
 <span><span class="co">#&gt; 4     1.27          0.95            rf      1.33    0.18</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── PAPEp ───────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; -- PAPEp -----------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     2.55          0.65 causal_forest      3.91 9.2e-05</span></span>
-<span><span class="co">#&gt; 2     1.51          0.64         bartc      2.36 1.8e-02</span></span>
-<span><span class="co">#&gt; 3    -0.21          0.63         lasso     -0.33 7.4e-01</span></span>
-<span><span class="co">#&gt; 4     1.69          1.11            rf      1.52 1.3e-01</span></span>
+<span><span class="co">#&gt; 1     2.32          0.68 causal_forest      3.39  0.0007</span></span>
+<span><span class="co">#&gt; 2     1.51          1.02         bartc      1.49  0.1371</span></span>
+<span><span class="co">#&gt; 3    -0.21          0.63         lasso     -0.33  0.7406</span></span>
+<span><span class="co">#&gt; 4     1.69          1.11            rf      1.52  0.1287</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── PAPDp ───────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; -- PAPDp -----------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation             algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     1.05          0.62 causal_forest x bartc      1.69 0.09117</span></span>
-<span><span class="co">#&gt; 2     2.76          0.80 causal_forest x lasso      3.46 0.00054</span></span>
-<span><span class="co">#&gt; 3     0.87          0.71    causal_forest x rf      1.22 0.22292</span></span>
-<span><span class="co">#&gt; 4     1.71          1.23         bartc x lasso      1.39 0.16484</span></span>
-<span><span class="co">#&gt; 5    -0.18          0.82            bartc x rf     -0.22 0.82706</span></span>
-<span><span class="co">#&gt; 6    -1.89          0.72            lasso x rf     -2.62 0.00892</span></span>
+<span><span class="co">#&gt; 1     0.81          0.62 causal_forest x bartc      1.29  0.1969</span></span>
+<span><span class="co">#&gt; 2     2.52          0.80 causal_forest x lasso      3.14  0.0017</span></span>
+<span><span class="co">#&gt; 3     0.63          0.73    causal_forest x rf      0.86  0.3906</span></span>
+<span><span class="co">#&gt; 4     1.72          1.07         bartc x lasso      1.61  0.1069</span></span>
+<span><span class="co">#&gt; 5    -0.17          1.18            bartc x rf     -0.15  0.8830</span></span>
+<span><span class="co">#&gt; 6    -1.89          0.72            lasso x rf     -2.62  0.0089</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── AUPEC ───────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; -- AUPEC -----------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     1.43           1.5 causal_forest      0.92    0.36</span></span>
-<span><span class="co">#&gt; 2     0.91           1.5         bartc      0.62    0.54</span></span>
+<span><span class="co">#&gt; 1     1.23           1.6 causal_forest      0.79    0.43</span></span>
+<span><span class="co">#&gt; 2     0.77           1.4         bartc      0.53    0.59</span></span>
 <span><span class="co">#&gt; 3     0.18           1.4         lasso      0.13    0.90</span></span>
 <span><span class="co">#&gt; 4     1.37           1.6            rf      0.88    0.38</span></span>
 <span><span class="co">#&gt; </span></span>
-<span><span class="co">#&gt; ── GATE ────────────────────────────────────────────────────────────────────────</span></span>
+<span><span class="co">#&gt; -- GATE ------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;    estimate std.deviation     algorithm group statistic p.value upper lower</span></span>
-<span><span class="co">#&gt; 1    -118.1            59 causal_forest     1    -2.013   0.044  -3.1  -233</span></span>
-<span><span class="co">#&gt; 2      27.0            59 causal_forest     2     0.454   0.650 143.5   -90</span></span>
-<span><span class="co">#&gt; 3      60.9            59 causal_forest     3     1.034   0.301 176.4   -55</span></span>
-<span><span class="co">#&gt; 4       7.6            59 causal_forest     4     0.128   0.898 123.7  -109</span></span>
-<span><span class="co">#&gt; 5      40.9            99 causal_forest     5     0.411   0.681 235.8  -154</span></span>
-<span><span class="co">#&gt; 6       6.2            69         bartc     1     0.091   0.928 141.3  -129</span></span>
-<span><span class="co">#&gt; 7    -144.7            59         bartc     2    -2.445   0.014 -28.7  -261</span></span>
-<span><span class="co">#&gt; 8      58.6           100         bartc     3     0.587   0.557 253.9  -137</span></span>
-<span><span class="co">#&gt; 9      42.7            59         bartc     4     0.723   0.470 158.4   -73</span></span>
-<span><span class="co">#&gt; 10     55.5            88         bartc     5     0.627   0.530 228.9  -118</span></span>
+<span><span class="co">#&gt; 1    -110.1            59 causal_forest     1    -1.871   0.061   5.2  -225</span></span>
+<span><span class="co">#&gt; 2      45.8            59 causal_forest     2     0.771   0.441 162.2   -71</span></span>
+<span><span class="co">#&gt; 3     101.7            59 causal_forest     3     1.721   0.085 217.6   -14</span></span>
+<span><span class="co">#&gt; 4     -38.1            74 causal_forest     4    -0.519   0.604 106.0  -182</span></span>
+<span><span class="co">#&gt; 5      18.9            95 causal_forest     5     0.199   0.843 205.7  -168</span></span>
+<span><span class="co">#&gt; 6     -21.3            59         bartc     1    -0.359   0.720  95.1  -138</span></span>
+<span><span class="co">#&gt; 7     -68.5            59         bartc     2    -1.161   0.245  47.1  -184</span></span>
+<span><span class="co">#&gt; 8      -9.5            94         bartc     3    -0.101   0.920 174.7  -194</span></span>
+<span><span class="co">#&gt; 9      81.9            69         bartc     4     1.195   0.232 216.3   -52</span></span>
+<span><span class="co">#&gt; 10     35.6            98         bartc     5     0.363   0.716 227.4  -156</span></span>
 <span><span class="co">#&gt; 11    -14.4            94         lasso     1    -0.154   0.878 169.2  -198</span></span>
 <span><span class="co">#&gt; 12    -94.5            90         lasso     2    -1.051   0.293  81.8  -271</span></span>
 <span><span class="co">#&gt; 13     87.9            99         lasso     3     0.886   0.376 282.4  -107</span></span>
@@ -199,12 +215,12 @@ the writing score across different ML algorithms.</p>
 
     <footer><div class="pkgdown-footer-left">
   <p></p>
-<p>Developed by Michael Lingzhi Li, Kosuke Imai.</p>
+<p>Developed by Michael Lingzhi Li, Kosuke Imai, Jialu Li, Xiaolong Yang.</p>
 </div>
 
 <div class="pkgdown-footer-right">
   <p></p>
-<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.6.</p>
+<p>Site built with <a href="https://pkgdown.r-lib.org/" class="external-link">pkgdown</a> 2.0.7.</p>
 </div>
 
     </footer>

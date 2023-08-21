@@ -2,7 +2,7 @@
 title: "Cross-validation with single algorithm"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{cv_single_alg}
+  %\VignetteIndexEntry{Cross-validation with single algorithm}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

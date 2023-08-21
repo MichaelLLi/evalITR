@@ -38,7 +38,7 @@ pavlist$sd
 Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 }
 \author{
-Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
-\email{mili@hbs.edu}, \url{http://michaellz.com};
+Michael Lingzhi Li, Technology and Operations Management, Harvard Business School
+\email{mili@hbs.edu}, \url{https://www.michaellz.com/};
 }
 \keyword{evaluation}

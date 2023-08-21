@@ -21,8 +21,8 @@
 #' pavlist <- PAV(T,That,Y)
 #' pavlist$pav
 #' pavlist$sd
-#' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
-#' \email{mili@hbs.edu}, \url{http://michaellz.com};
+#' @author Michael Lingzhi Li, Technology and Operations Management, Harvard Business School
+#' \email{mili@hbs.edu}, \url{https://www.michaellz.com/};
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
 #' @export PAV

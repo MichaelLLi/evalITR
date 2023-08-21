@@ -43,7 +43,7 @@ consisttestlist$pval
 Imai and Li (2022). \dQuote{Statistical Inference for Heterogeneous Treatment Effects Discovered by Generic Machine Learning in Randomized Experiments},
 }
 \author{
-Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
-\email{mili@hbs.edu}, \url{http://michaellz.com};
+Michael Lingzhi Li, Technology and Operations Management, Harvard Business School
+\email{mili@hbs.edu}, \url{https://www.michaellz.com/};
 }
 \keyword{evaluation}

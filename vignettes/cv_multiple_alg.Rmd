@@ -2,7 +2,7 @@
 title: "Cross-validation with multiple ML algorithms"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{cv_multiple_alg}
+  %\VignetteIndexEntry{Cross-validation with multiple ML algorithms}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
@@ -38,7 +38,7 @@ We can estimate ITR with various machine learning algorithms and then compare th
 
 The package also allows estimate heterogeneous treatment effects on the individual and group-level. On the individual-level, the summary statistics and the AUPEC plot show whether assigning individualized treatment rules may outperform complete random experiment. On the group-level, we specify the number of groups through `ngates` and estimating heterogeneous treatment effects across groups. 
 
-```{r multiple, message = FALSE, warning = FALSE}
+```{r multiple, message=TRUE, warning=TRUE}
 library(evalITR)
 
 # specify the trainControl method
@@ -59,7 +59,8 @@ fit_cv <- estimate_itr(
                   # "rlasso", # from rlearner 
                   # "ulasso", # from rlearner 
                   "lasso", # from caret package
-                  "rf"), # from caret package
+                  "rf"
+                  ), # from caret package
                budget = 0.2,
                n_folds = 3)
 

@@ -1,7 +1,7 @@
 Package: evalITR
 Title: Evaluating Individualized Treatment Rules
 Version: 1.0.0
-Date: 2022-03-27
+Date: 2023-08-20
 Authors@R: c(
     person("Michael Lingzhi", "Li", , "mili@hbs.edu", role = c("aut", "cre")),
     person("Kosuke", "Imai", , "imai@harvard.edu", role = "aut"),
@@ -56,8 +56,11 @@ Suggests:
     testthat,
     rlearner,
     bartMachine,
+    elasticnet,
     randomForest,
     spelling
+VignetteBuilder: 
+    knitr
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.2

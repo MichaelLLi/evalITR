@@ -16,6 +16,9 @@
     <loc>/articles/install.html</loc>
   </url>
   <url>
+    <loc>/articles/paper_alg1.html</loc>
+  </url>
+  <url>
     <loc>/articles/sample_split.html</loc>
   </url>
   <url>
@@ -41,30 +44,6 @@
   </url>
   <url>
     <loc>/reference/AUPECcv.html</loc>
-  </url>
-  <url>
-    <loc>/reference/GATE.html</loc>
-  </url>
-  <url>
-    <loc>/reference/GATEcv.html</loc>
-  </url>
-  <url>
-    <loc>/reference/PAPD.html</loc>
-  </url>
-  <url>
-    <loc>/reference/PAPDcv.html</loc>
-  </url>
-  <url>
-    <loc>/reference/PAPE.html</loc>
-  </url>
-  <url>
-    <loc>/reference/PAPEcv.html</loc>
-  </url>
-  <url>
-    <loc>/reference/PAV.html</loc>
-  </url>
-  <url>
-    <loc>/reference/PAVcv.html</loc>
   </url>
   <url>
     <loc>/reference/compute_qoi.html</loc>
@@ -94,6 +73,9 @@
     <loc>/reference/create_ml_args_lasso.html</loc>
   </url>
   <url>
+    <loc>/reference/create_ml_args_superLearner.html</loc>
+  </url>
+  <url>
     <loc>/reference/create_ml_args_svm.html</loc>
   </url>
   <url>
@@ -112,6 +94,12 @@
     <loc>/reference/fit_itr.html</loc>
   </url>
   <url>
+    <loc>/reference/GATE.html</loc>
+  </url>
+  <url>
+    <loc>/reference/GATEcv.html</loc>
+  </url>
+  <url>
     <loc>/reference/het.test.html</loc>
   </url>
   <url>
@@ -124,7 +112,28 @@
     <loc>/reference/itr_single_outcome.html</loc>
   </url>
   <url>
+    <loc>/reference/PAPD.html</loc>
+  </url>
+  <url>
+    <loc>/reference/PAPDcv.html</loc>
+  </url>
+  <url>
+    <loc>/reference/PAPE.html</loc>
+  </url>
+  <url>
+    <loc>/reference/PAPEcv.html</loc>
+  </url>
+  <url>
+    <loc>/reference/PAV.html</loc>
+  </url>
+  <url>
+    <loc>/reference/PAVcv.html</loc>
+  </url>
+  <url>
     <loc>/reference/plot.itr.html</loc>
+  </url>
+  <url>
+    <loc>/reference/plot_estimate.html</loc>
   </url>
   <url>
     <loc>/reference/print.summary.itr.html</loc>

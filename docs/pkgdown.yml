@@ -1,5 +1,5 @@
-pandoc: 2.19.2
-pkgdown: 2.0.6
+pandoc: 2.17.0.1
+pkgdown: 2.0.7
 pkgdown_sha: ~
 articles:
   cv_multiple_alg: cv_multiple_alg.html
@@ -10,5 +10,5 @@ articles:
   sample_split_caret: sample_split_caret.html
   user_itr: user_itr.html
   user_itr_algs: user_itr_algs.html
-last_built: 2023-07-13T08:14Z
+last_built: 2023-08-21T03:51Z
 

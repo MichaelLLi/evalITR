@@ -2,7 +2,7 @@
 title: "Sample Splitting"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{sample_split}
+  %\VignetteIndexEntry{Sample Splitting}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

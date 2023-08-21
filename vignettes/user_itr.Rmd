@@ -2,7 +2,7 @@
 title: "User Defined ITR"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{user_itr}
+  %\VignetteIndexEntry{User Defined ITR}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---

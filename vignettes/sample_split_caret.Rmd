@@ -2,7 +2,7 @@
 title: "Sample Splitting with Caret/SuperLearner"
 output: rmarkdown::html_vignette
 vignette: >
-  %\VignetteIndexEntry{sample_split_caret}
+  %\VignetteIndexEntry{Sample Splitting with Caret/SuperLearner}
   %\VignetteEngine{knitr::rmarkdown}
   %\VignetteEncoding{UTF-8}
 ---
