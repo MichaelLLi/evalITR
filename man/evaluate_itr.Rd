@@ -29,7 +29,7 @@ evaluate_itr(
 \item{budget}{The maximum percentage of population that can be treated under the budget constraint.}
 
 \item{ngates}{The number of gates to use for the ITR. The default is 5.
-A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}. 
+A user-defined function to create an ITR. The function should take the data as input and return an ITR. The output is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}.
 See \code{?evaluate_itr} for an example.}
 
 \item{...}{Further arguments passed to the function.}

@@ -1,7 +1,7 @@
 #' The Consistency Test for Grouped Average Treatment Effects (GATEs) in Randomized Experiments
 #'
-#' This function calculates statistics related to the test of treatment effect consistency across groups. 
-#' 
+#' This function calculates statistics related to the test of treatment effect consistency across groups.
+#'
 #' The details of the methods for this design are given in Imai and Li (2022).
 #'
 #'
@@ -11,7 +11,7 @@
 #' @param ngates The number of groups to separate the data into. The groups are determined by \code{tau}. Default is 5.
 #' @param nsim Number of Monte Carlo simulations used to simulate the null distributions. Default is 10000.
 #' @return A list that contains the following items: \item{stat}{The estimated
-#' statistic for the test of consistency} \item{pval}{The p-value of the null 
+#' statistic for the test of consistency} \item{pval}{The p-value of the null
 #' hypothesis (that the treatment effects are consistent)}
 #' @examples
 #' T = c(1,0,1,0,1,0,1,0)
@@ -21,7 +21,7 @@
 #' consisttestlist$stat
 #' consisttestlist$pval
 #' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
-#' \email{mlli@mit.edu}, \url{http://mlli.mit.edu};
+#' \email{mili@hbs.edu}, \url{http://michaellz.com};
 #' @references Imai and Li (2022). \dQuote{Statistical Inference for Heterogeneous Treatment Effects Discovered by Generic Machine Learning in Randomized Experiments},
 #' @keywords evaluation
 #' @export consist.test
@@ -57,8 +57,8 @@ consist.test <- function(T, tau, Y, ngates = 5, nsim = 10000) {
   }
   for (i in 1:ngates) {
     for (j in 1:ngates) {
-      mcov[i,j] = ngates ^ 2 * (cov(Sfp1s[[i]],Sfp1s[[j]]) / n1 + cov(Sfp0s[[i]],Sfp0s[[j]]) / n0) + 
-        1/ (ngates * (n - 1)) *((ngates - 1)*(kf1s[i]^2-kf1s[i]*kf0s[i]+kf1s[j]^2-kf1s[j]*kf0s[j]) - ngates * (ngates - 1)* kf1s[i] * kf1s[j]) 
+      mcov[i,j] = ngates ^ 2 * (cov(Sfp1s[[i]],Sfp1s[[j]]) / n1 + cov(Sfp0s[[i]],Sfp0s[[j]]) / n0) +
+        1/ (ngates * (n - 1)) *((ngates - 1)*(kf1s[i]^2-kf1s[i]*kf0s[i]+kf1s[j]^2-kf1s[j]*kf0s[j]) - ngates * (ngates - 1)* kf1s[i] * kf1s[j])
     }
   }
   mcov[is.nan(mcov)] = 0

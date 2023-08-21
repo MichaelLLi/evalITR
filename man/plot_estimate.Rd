@@ -9,6 +9,8 @@ plot_estimate(x, type, ...)
 \arguments{
 \item{x}{An table object. This is typically an output of \code{evaluate_itr()} function.}
 
+\item{type}{The metric that you wish to plot. One of GATE, PAPE, PAPEp, or PAPDp.}
+
 \item{...}{Further arguments passed to the function.}
 }
 \value{

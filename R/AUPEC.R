@@ -23,7 +23,7 @@
 #' aupeclist$sd
 #' aupeclist$vec
 #' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
-#' \email{mlli@mit.edu}, \url{http://mlli.mit.edu};
+#' \email{mili@hbs.edu}, \url{http://michaellz.com};
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
 #' @export AUPEC

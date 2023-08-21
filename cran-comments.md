@@ -1,6 +1,6 @@
 ## Test environments
-* local Windows 10 install, R 3.6.3
-* local Windows 10 install, R 3.5.0
+* local Windows 10 install, R 4.0.5
+* local Windows 10 install, R 3.6.5
 * win-builder (devel and release)
 * Mac OS X 10.11 (on Rhub), R-release
 * Ubuntu 16.04 (on travis-ci), R-release

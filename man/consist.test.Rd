@@ -19,7 +19,7 @@ consist.test(T, tau, Y, ngates = 5, nsim = 10000)
 }
 \value{
 A list that contains the following items: \item{stat}{The estimated
-statistic for the test of consistency} \item{pval}{The p-value of the null 
+statistic for the test of consistency} \item{pval}{The p-value of the null
 hypothesis (that the treatment effects are consistent)}
 }
 \description{
@@ -41,6 +41,6 @@ Imai and Li (2022). \dQuote{Statistical Inference for Heterogeneous Treatment Ef
 }
 \author{
 Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
-\email{mlli@mit.edu}, \url{http://mlli.mit.edu};
+\email{mili@hbs.edu}, \url{http://michaellz.com};
 }
 \keyword{evaluation}

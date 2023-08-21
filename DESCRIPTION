@@ -1,12 +1,14 @@
 Package: evalITR
 Title: Evaluating Individualized Treatment Rules
-Version: 0.3.0
+Version: 1.0.0
 Date: 2022-03-27
 Authors@R: c(
-    person("Michael Lingzhi", "Li", , "mlli@mit.edu", role = c("aut", "cre")),
-    person("Kosuke", "Imai", , "imai@harvard.edu", role = "aut")
+    person("Michael Lingzhi", "Li", , "mili@hbs.edu", role = c("aut", "cre")),
+    person("Kosuke", "Imai", , "imai@harvard.edu", role = "aut"),
+    person("Jialu", "Li", , "jialu_li@g.harvard.edu", role = "aut"),
+    person("Xiaolong", "Yang", , "xiaolong_yang@g.harvard.edu", role = "aut")
   )
-Maintainer: Michael Lingzhi Li <mlli@mit.edu>
+Maintainer: Michael Lingzhi Li <mili@hbs.edu>
 Description: Provides various statistical methods for evaluating
     Individualized Treatment Rules under randomized data. The provided
     metrics include Population Average Value (PAV), Population Average
@@ -27,8 +29,6 @@ Depends:
     R (>= 3.5.0),
     stats
 Imports:
-    bartCause,
-    bartMachine,
     caret,
     cli,
     e1071,
@@ -41,22 +41,24 @@ Imports:
     grf,
     haven,
     purrr,
-    randomForest,
     rlang,
-    rlearner,
     rpart,
     rqPen,
     scales,
-    SuperLearner,
-    utils
+    utils,
+    bartCause,
+    SuperLearner
 Suggests: 
     doParallel,
     furrr,
     knitr,
     rmarkdown,
-    testthat
-VignetteBuilder: 
-    knitr
+    testthat,
+    rlearner,
+    bartMachine,
+    randomForest,
+    spelling
 Encoding: UTF-8
 LazyData: true
 RoxygenNote: 7.2.2
+Language: en-US

@@ -23,7 +23,7 @@
 #' consisttestlist$stat
 #' consisttestlist$pval
 #' @author Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
-#' \email{mlli@mit.edu}, \url{http://mlli.mit.edu};
+#' \email{mili@hbs.edu}, \url{http://michaellz.com};
 #' @references Imai and Li (2022). \dQuote{Statistical Inference for Heterogeneous Treatment Effects Discovered by Generic Machine Learning in Randomized Experiments},
 #' @keywords evaluation
 #' @export consistcv.test

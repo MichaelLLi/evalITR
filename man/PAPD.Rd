@@ -46,6 +46,6 @@ Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment 
 }
 \author{
 Michael Lingzhi Li, Operations Research Center, Massachusetts Institute of Technology
-\email{mlli@mit.edu}, \url{http://mlli.mit.edu};
+\email{mili@hbs.edu}, \url{http://michaellz.com};
 }
 \keyword{evaluation}

@@ -1,5 +1,4 @@
 ## superLearner
-
 run_superLearner <- function(
   dat_train,
   dat_test,
@@ -18,8 +17,8 @@ run_superLearner <- function(
 
   ## train
   fit_train <- train_superLearner(
-    dat_train, 
-    train_method, 
+    dat_train,
+    train_method,
     SL_library)
 
   ## test
@@ -32,7 +31,8 @@ run_superLearner <- function(
 }
 
 
-
+#' @importFrom stats binomial gaussian
+#' @importFrom SuperLearner SuperLearner
 train_superLearner <- function(dat_train, train_method, SL_library) {
 
   ## format training data
@@ -46,16 +46,16 @@ train_superLearner <- function(dat_train, train_method, SL_library) {
    if(length(unique(Y)) > 2){
 
       fit <- SuperLearner(
-        Y = Y, 
-        X = X, 
+        Y = Y,
+        X = X,
         family = gaussian(),
         SL.library = SL_library)
 
     }else {
-      
+
       fit <- SuperLearner(
-        Y = Y, 
-        X = X, 
+        Y = Y,
+        X = X,
         family = binomial(),
         SL.library = SL_library)
   }

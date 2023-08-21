@@ -33,7 +33,7 @@ create_ml_arguments = function(outcome, treatment, data){
   return(list(Y = Y, X = X, T = T, formula = formula))
 }
 
-#' Create general arguments 
+#' Create general arguments
 #' @importFrom stats model.matrix
 #' @param data A dataset
 create_ml_args = function(data){
@@ -445,10 +445,9 @@ convert_formula <- function(user_formula, data, treatment){
   # remove variable Intercept from covariates list by name
   covariates_vec <- colnames(interaction_df)
   covariates_vec <- covariates_vec[!covariates_vec %in% c("Intercept", paste0(treatment))]
-  
   # combine the interaction_df with the original data frame
-  new_data = data %>% dplyr::select(c(outcome)) 
-  combined_data <- bind_cols(new_data, interaction_df)
+  new_data = data %>% dplyr::select(all_of(outcome))
+  combined_data <- cbind(new_data, interaction_df)
 
   return(list(data = combined_data, covariates = covariates_vec, outcome = outcome))
 }
