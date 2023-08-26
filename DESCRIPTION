@@ -5,8 +5,8 @@ Date: 2023-08-20
 Authors@R: c(
     person("Michael Lingzhi", "Li", , "mili@hbs.edu", role = c("aut", "cre")),
     person("Kosuke", "Imai", , "imai@harvard.edu", role = "aut"),
-    person("Jialu", "Li", , "jialu_li@g.harvard.edu", role = "aut"),
-    person("Xiaolong", "Yang", , "xiaolong_yang@g.harvard.edu", role = "aut")
+    person("Jialu", "Li", , "jialu_li@g.harvard.edu", role = "ctb"),
+    person("Xiaolong", "Yang", , "xiaolong_yang@g.harvard.edu", role = "ctb")
   )
 Maintainer: Michael Lingzhi Li <mili@hbs.edu>
 Description: Provides various statistical methods for evaluating
@@ -54,7 +54,6 @@ Suggests:
     knitr,
     rmarkdown,
     testthat,
-    rlearner,
     bartMachine,
     elasticnet,
     randomForest,

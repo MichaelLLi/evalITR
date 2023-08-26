@@ -40,14 +40,14 @@ We can train the model with the `caret` package (for further information about `
 ```{r parallel, message = FALSE, eval = FALSE}
 # parallel computing
 library(doParallel)
-cl <- makePSOCKcluster(5)
+cl <- makePSOCKcluster(2)
 registerDoParallel(cl)
 
 # stop after finishing the computation
 stopCluster(cl)
 ```
 
-The following example shows how to estimate the ITR with grandient boosting machine (GBM) using the `caret` package. Note that we have already loaded the data and specify the treatment, outcome, and covariates as shown in the [Sample Splitting](docs/articles/sample_split.html) vignette. Since we are using the `caret` package, we need to specify the `trainControl` and/or `tuneGrid` arguments. The `trainControl` argument specifies the cross-validation method and the `tuneGrid` argument specifies the tuning grid. For more information about these arguments, please refer to the [caret website](http://topepo.github.io/caret/model-training-and-tuning.html).
+The following example shows how to estimate the ITR with gradient boosting machine (GBM) using the `caret` package. Note that we have already loaded the data and specify the treatment, outcome, and covariates as shown in the [Sample Splitting](sample_split.html) vignette. Since we are using the `caret` package, we need to specify the `trainControl` and/or `tuneGrid` arguments. The `trainControl` argument specifies the cross-validation method and the `tuneGrid` argument specifies the tuning grid. For more information about these arguments, please refer to the [caret website](http://topepo.github.io/caret/model-training-and-tuning.html).
 
 We estimate the ITR with only one machine learning algorithm (GBM) and evaluate the ITR with the `evaluate_itr()` function. To compute `PAPDp`, we need to specify the `algorithms` argument with more than 2 machine learning algorithms.
 
@@ -65,8 +65,8 @@ fitControl <- caret::trainControl(
 
 # specify the tuning grid
 gbmGrid <- expand.grid(
-  interaction.depth = c(1, 5, 9), 
-  n.trees = (1:30)*50, 
+  interaction.depth = c(5,9), 
+  n.trees = (5:10)*100, 
   shrinkage = 0.1,
   n.minobsinnode = 20)
 
@@ -107,7 +107,7 @@ plot(
 
 ### Train the model with SuperLearner
 
-Alternatively, we can train the model with the `SuperLearner` package (for further information about `SuperLearner`, see [the original website](https://cran.r-project.org/web/packages/SuperLearner/vignettes/Guide-to-SuperLearner.html#fit-individual-models)). SuperLearner utilizes ensemble method by taking optimal weighted average of multiple machine learning algorithms to improve model performance. 
+Alternatively, we can train the model with the `SuperLearner` package (for further information about `SuperLearner`, see [the original website](https://CRAN.R-project.org/package=SuperLearner/vignettes/Guide-to-SuperLearner.html)). SuperLearner utilizes ensemble method by taking optimal weighted average of multiple machine learning algorithms to improve model performance. 
 
 We will compare the performance of the ITR estimated with `causal_forest` and `SuperLearner`.   
   

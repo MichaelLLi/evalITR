@@ -100,15 +100,16 @@ website</a>). We use parallel computing to speed up the computation.</p>
 <span></span>
 <span><span class="co"># stop after finishing the computation</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/parallel/makeCluster.html" class="external-link">stopCluster</a></span><span class="op">(</span><span class="va">cl</span><span class="op">)</span></span></code></pre></div>
-<p>The following example shows how to estimate the ITR with grandient
+<p>The following example shows how to estimate the ITR with gradient
 boosting machine (GBM) using the <code>caret</code> package. Note that
 we have already loaded the data and specify the treatment, outcome, and
-covariates as shown in the <a href="docs/articles/sample_split.html">Sample Splitting</a> vignette.
-Since we are using the <code>caret</code> package, we need to specify
-the <code>trainControl</code> and/or <code>tuneGrid</code> arguments.
-The <code>trainControl</code> argument specifies the cross-validation
-method and the <code>tuneGrid</code> argument specifies the tuning grid.
-For more information about these arguments, please refer to the <a href="http://topepo.github.io/caret/model-training-and-tuning.html" class="external-link">caret
+covariates as shown in the <a href="sample_split.html">Sample
+Splitting</a> vignette. Since we are using the <code>caret</code>
+package, we need to specify the <code>trainControl</code> and/or
+<code>tuneGrid</code> arguments. The <code>trainControl</code> argument
+specifies the cross-validation method and the <code>tuneGrid</code>
+argument specifies the tuning grid. For more information about these
+arguments, please refer to the <a href="http://topepo.github.io/caret/model-training-and-tuning.html" class="external-link">caret
 website</a>.</p>
 <p>We estimate the ITR with only one machine learning algorithm (GBM)
 and evaluate the ITR with the <code><a href="../reference/evaluate_itr.html">evaluate_itr()</a></code> function. To
@@ -158,8 +159,8 @@ applied to the training model.</p>
 <span><span class="va">caret_model</span> <span class="op">&lt;-</span> <span class="va">fit_caret</span><span class="op">$</span><span class="va">estimates</span><span class="op">$</span><span class="va">models</span><span class="op">$</span><span class="va">gbm</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/base/print.html" class="external-link">print</a></span><span class="op">(</span><span class="va">caret_model</span><span class="op">$</span><span class="va">finalModel</span><span class="op">)</span></span>
 <span><span class="co">#&gt; A gradient boosted model with gaussian loss function.</span></span>
-<span><span class="co">#&gt; 300 iterations were performed.</span></span>
-<span><span class="co">#&gt; There were 53 predictors of which 37 had non-zero influence.</span></span>
+<span><span class="co">#&gt; 100 iterations were performed.</span></span>
+<span><span class="co">#&gt; There were 53 predictors of which 24 had non-zero influence.</span></span>
 <span></span>
 <span><span class="co"># check model performance</span></span>
 <span><span class="fu"><a href="https://rdrr.io/pkg/lattice/man/trellis.par.get.html" class="external-link">trellis.par.set</a></span><span class="op">(</span><span class="fu"><a href="https://rdrr.io/pkg/caret/man/caret-internal.html" class="external-link">caretTheme</a></span><span class="op">(</span><span class="op">)</span><span class="op">)</span> <span class="co"># theme</span></span>
@@ -178,7 +179,7 @@ applied to the training model.</p>
 </h3>
 <p>Alternatively, we can train the model with the
 <code>SuperLearner</code> package (for further information about
-<code>SuperLearner</code>, see <a href="https://cran.r-project.org/web/packages/SuperLearner/vignettes/Guide-to-SuperLearner.html#fit-individual-models" class="external-link">the
+<code>SuperLearner</code>, see <a href="https://CRAN.R-project.org/package=SuperLearner/vignettes/Guide-to-SuperLearner.html" class="external-link">the
 original website</a>). SuperLearner utilizes ensemble method by taking
 optimal weighted average of multiple machine learning algorithms to
 improve model performance.</p>
@@ -203,35 +204,35 @@ improve model performance.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">est_sl</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- PAPE ------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1   -0.089           1.3 causal_forest    -0.067    0.95</span></span>
-<span><span class="co">#&gt; 2    1.977           1.5  SuperLearner     1.343    0.18</span></span>
+<span><span class="co">#&gt; 1      1.9           1.4 causal_forest       1.4    0.17</span></span>
+<span><span class="co">#&gt; 2      2.3           1.4  SuperLearner       1.6    0.11</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- PAPEp -----------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1      2.9           1.2 causal_forest       2.4   0.015</span></span>
-<span><span class="co">#&gt; 2      2.3           1.3  SuperLearner       1.8   0.071</span></span>
+<span><span class="co">#&gt; 1      1.8           1.1 causal_forest       1.6   0.112</span></span>
+<span><span class="co">#&gt; 2      2.1           1.2  SuperLearner       1.8   0.071</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- PAPDp -----------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation                    algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1      0.6           1.3 causal_forest x SuperLearner      0.47    0.64</span></span>
+<span><span class="co">#&gt; 1     -0.3          0.97 causal_forest x SuperLearner     -0.31    0.76</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- AUPEC -----------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     0.76           1.0 causal_forest      0.75    0.45</span></span>
-<span><span class="co">#&gt; 2     1.74           1.2  SuperLearner      1.51    0.13</span></span>
+<span><span class="co">#&gt; 1      1.5           1.0 causal_forest       1.5    0.14</span></span>
+<span><span class="co">#&gt; 2      1.6           1.1  SuperLearner       1.5    0.14</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- GATE ------------------------------------------------------------------------</span></span>
-<span><span class="co">#&gt;    estimate std.deviation     algorithm group statistic p.value   upper lower</span></span>
-<span><span class="co">#&gt; 1    -120.6           107 causal_forest     1    -1.125    0.26 -297.07    56</span></span>
-<span><span class="co">#&gt; 2      -4.3           109 causal_forest     2    -0.039    0.97 -183.69   175</span></span>
-<span><span class="co">#&gt; 3      60.8           108 causal_forest     3     0.564    0.57 -116.43   238</span></span>
-<span><span class="co">#&gt; 4     -89.2           108 causal_forest     4    -0.828    0.41 -266.40    88</span></span>
-<span><span class="co">#&gt; 5     178.6           109 causal_forest     5     1.643    0.10   -0.21   357</span></span>
-<span><span class="co">#&gt; 6       3.0           108  SuperLearner     1     0.028    0.98 -174.11   180</span></span>
-<span><span class="co">#&gt; 7     -44.1           109  SuperLearner     2    -0.404    0.69 -223.72   136</span></span>
-<span><span class="co">#&gt; 8    -114.3           107  SuperLearner     3    -1.066    0.29 -290.55    62</span></span>
-<span><span class="co">#&gt; 9      49.3           108  SuperLearner     4     0.458    0.65 -127.64   226</span></span>
-<span><span class="co">#&gt; 10    131.2           109  SuperLearner     5     1.204    0.23  -48.08   311</span></span></code></pre></div>
+<span><span class="co">#&gt;    estimate std.deviation     algorithm group statistic p.value upper lower</span></span>
+<span><span class="co">#&gt; 1      -172           107 causal_forest     1     -1.61    0.11  -347     4</span></span>
+<span><span class="co">#&gt; 2      -145           108 causal_forest     2     -1.35    0.18  -323    32</span></span>
+<span><span class="co">#&gt; 3       102           109 causal_forest     3      0.94    0.35   -76   281</span></span>
+<span><span class="co">#&gt; 4       142           109 causal_forest     4      1.31    0.19   -37   321</span></span>
+<span><span class="co">#&gt; 5       103           108 causal_forest     5      0.95    0.34   -76   281</span></span>
+<span><span class="co">#&gt; 6       -59           108  SuperLearner     1     -0.55    0.58  -237   118</span></span>
+<span><span class="co">#&gt; 7       -79           107  SuperLearner     2     -0.73    0.46  -255    98</span></span>
+<span><span class="co">#&gt; 8        36           109  SuperLearner     3      0.33    0.74  -143   214</span></span>
+<span><span class="co">#&gt; 9        28           108  SuperLearner     4      0.26    0.79  -150   207</span></span>
+<span><span class="co">#&gt; 10      104           109  SuperLearner     5      0.95    0.34   -75   283</span></span></code></pre></div>
 <p>We plot the estimated Area Under the Prescriptive Effect Curve for
 the writing score across a range of budget constraints, seperately for
 the two ITRs, estimated with <code>causal_forest</code> and

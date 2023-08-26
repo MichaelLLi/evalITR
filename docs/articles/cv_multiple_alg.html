@@ -90,7 +90,7 @@
 compare the performance of each model. The package includes all ML
 algorithms in the <code>caret</code> package and 2 additional algorithms
 (<a href="https://grf-labs.github.io/grf/reference/causal_forest.html" class="external-link">causal
-forest</a> and <a href="https://cran.r-project.org/web/packages/bartCause/index.html" class="external-link">bartCause</a>).</p>
+forest</a> and <a href="https://CRAN.R-project.org/package=bartCause" class="external-link">bartCause</a>).</p>
 <p>The package also allows estimate heterogeneous treatment effects on
 the individual and group-level. On the individual-level, the summary
 statistics and the AUPEC plot show whether assigning individualized
@@ -153,30 +153,30 @@ and estimating heterogeneous treatment effects across groups.</p>
 <span><span class="co">#&gt; -- PAPE ------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
 <span><span class="co">#&gt; 1     0.27          0.82 causal_forest      0.33    0.74</span></span>
-<span><span class="co">#&gt; 2    -0.24          0.26         bartc     -0.93    0.35</span></span>
+<span><span class="co">#&gt; 2    -0.09          0.66         bartc     -0.14    0.89</span></span>
 <span><span class="co">#&gt; 3     0.17          1.07         lasso      0.16    0.87</span></span>
 <span><span class="co">#&gt; 4     1.27          0.95            rf      1.33    0.18</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- PAPEp -----------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
 <span><span class="co">#&gt; 1     2.32          0.68 causal_forest      3.39  0.0007</span></span>
-<span><span class="co">#&gt; 2     1.51          1.02         bartc      1.49  0.1371</span></span>
+<span><span class="co">#&gt; 2     1.71          1.07         bartc      1.59  0.1123</span></span>
 <span><span class="co">#&gt; 3    -0.21          0.63         lasso     -0.33  0.7406</span></span>
 <span><span class="co">#&gt; 4     1.69          1.11            rf      1.52  0.1287</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- PAPDp -----------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation             algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     0.81          0.62 causal_forest x bartc      1.29  0.1969</span></span>
-<span><span class="co">#&gt; 2     2.52          0.80 causal_forest x lasso      3.14  0.0017</span></span>
-<span><span class="co">#&gt; 3     0.63          0.73    causal_forest x rf      0.86  0.3906</span></span>
-<span><span class="co">#&gt; 4     1.72          1.07         bartc x lasso      1.61  0.1069</span></span>
-<span><span class="co">#&gt; 5    -0.17          1.18            bartc x rf     -0.15  0.8830</span></span>
-<span><span class="co">#&gt; 6    -1.89          0.72            lasso x rf     -2.62  0.0089</span></span>
+<span><span class="co">#&gt; 1    0.609          0.63 causal_forest x bartc     0.960  0.3371</span></span>
+<span><span class="co">#&gt; 2    2.524          0.80 causal_forest x lasso     3.145  0.0017</span></span>
+<span><span class="co">#&gt; 3    0.631          0.73    causal_forest x rf     0.859  0.3906</span></span>
+<span><span class="co">#&gt; 4    1.914          1.00         bartc x lasso     1.916  0.0554</span></span>
+<span><span class="co">#&gt; 5    0.022          1.35            bartc x rf     0.016  0.9873</span></span>
+<span><span class="co">#&gt; 6   -1.893          0.72            lasso x rf    -2.615  0.0089</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- AUPEC -----------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
 <span><span class="co">#&gt; 1     1.23           1.6 causal_forest      0.79    0.43</span></span>
-<span><span class="co">#&gt; 2     0.77           1.4         bartc      0.53    0.59</span></span>
+<span><span class="co">#&gt; 2     0.86           1.4         bartc      0.60    0.55</span></span>
 <span><span class="co">#&gt; 3     0.18           1.4         lasso      0.13    0.90</span></span>
 <span><span class="co">#&gt; 4     1.37           1.6            rf      0.88    0.38</span></span>
 <span><span class="co">#&gt; </span></span>
@@ -187,11 +187,11 @@ and estimating heterogeneous treatment effects across groups.</p>
 <span><span class="co">#&gt; 3     101.7            59 causal_forest     3     1.721   0.085 217.6   -14</span></span>
 <span><span class="co">#&gt; 4     -38.1            74 causal_forest     4    -0.519   0.604 106.0  -182</span></span>
 <span><span class="co">#&gt; 5      18.9            95 causal_forest     5     0.199   0.843 205.7  -168</span></span>
-<span><span class="co">#&gt; 6     -21.3            59         bartc     1    -0.359   0.720  95.1  -138</span></span>
-<span><span class="co">#&gt; 7     -68.5            59         bartc     2    -1.161   0.245  47.1  -184</span></span>
-<span><span class="co">#&gt; 8      -9.5            94         bartc     3    -0.101   0.920 174.7  -194</span></span>
-<span><span class="co">#&gt; 9      81.9            69         bartc     4     1.195   0.232 216.3   -52</span></span>
-<span><span class="co">#&gt; 10     35.6            98         bartc     5     0.363   0.716 227.4  -156</span></span>
+<span><span class="co">#&gt; 6      21.2            62         bartc     1     0.343   0.732 142.6  -100</span></span>
+<span><span class="co">#&gt; 7    -127.1            59         bartc     2    -2.151   0.031 -11.3  -243</span></span>
+<span><span class="co">#&gt; 8      -1.1            97         bartc     3    -0.011   0.991 189.8  -192</span></span>
+<span><span class="co">#&gt; 9      82.0            59         bartc     4     1.390   0.165 197.6   -34</span></span>
+<span><span class="co">#&gt; 10     43.2            95         bartc     5     0.457   0.648 228.8  -142</span></span>
 <span><span class="co">#&gt; 11    -14.4            94         lasso     1    -0.154   0.878 169.2  -198</span></span>
 <span><span class="co">#&gt; 12    -94.5            90         lasso     2    -1.051   0.293  81.8  -271</span></span>
 <span><span class="co">#&gt; 13     87.9            99         lasso     3     0.886   0.376 282.4  -107</span></span>

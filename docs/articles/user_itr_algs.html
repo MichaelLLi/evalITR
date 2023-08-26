@@ -178,12 +178,12 @@ and AUPEC for the user defined ITR.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">compare_itr</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- PAPE ------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1   -0.081           1.3 causal_forest    -0.062    0.95</span></span>
-<span><span class="co">#&gt; 2    0.000           0.0      user_itr       NaN     NaN</span></span>
+<span><span class="co">#&gt; 1      1.5          0.99 causal_forest       1.5    0.13</span></span>
+<span><span class="co">#&gt; 2      0.0          0.00      user_itr       NaN     NaN</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- PAPEp -----------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     0.87          1.29 causal_forest      0.68    0.50</span></span>
+<span><span class="co">#&gt; 1     0.83          1.20 causal_forest      0.69    0.49</span></span>
 <span><span class="co">#&gt; 2     1.06          0.67      user_itr      1.58    0.11</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- PAPDp -----------------------------------------------------------------------</span></span>
@@ -191,21 +191,21 @@ and AUPEC for the user defined ITR.</p>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- AUPEC -----------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     0.12          1.03 causal_forest      0.12   0.905</span></span>
-<span><span class="co">#&gt; 2    -0.91          0.42          &lt;NA&gt;     -2.19   0.028</span></span>
+<span><span class="co">#&gt; 1     2.13          0.89 causal_forest       2.4   0.017</span></span>
+<span><span class="co">#&gt; 2    -0.91          0.42          &lt;NA&gt;      -2.2   0.028</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- GATE ------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;    estimate std.deviation     algorithm group statistic p.value  upper lower</span></span>
-<span><span class="co">#&gt; 1        61           108 causal_forest     1      0.56   0.572 -116.6 238.4</span></span>
-<span><span class="co">#&gt; 2      -181           108 causal_forest     2     -1.69   0.092 -358.2  -4.5</span></span>
-<span><span class="co">#&gt; 3        71           109 causal_forest     3      0.65   0.518 -109.2 250.6</span></span>
-<span><span class="co">#&gt; 4        74           108 causal_forest     4      0.68   0.495 -104.3 252.0</span></span>
-<span><span class="co">#&gt; 5       -14           109 causal_forest     5     -0.13   0.899 -192.7 165.0</span></span>
-<span><span class="co">#&gt; 6       126            58      user_itr     1      2.16   0.031   30.2 222.2</span></span>
-<span><span class="co">#&gt; 7        96            59      user_itr     2      1.62   0.105   -1.4 193.7</span></span>
-<span><span class="co">#&gt; 8       -33            59      user_itr     3     -0.56   0.579 -129.7  64.2</span></span>
-<span><span class="co">#&gt; 9      -139            59      user_itr     4     -2.36   0.018 -236.5 -42.4</span></span>
-<span><span class="co">#&gt; 10      -32            59      user_itr     5     -0.54   0.589 -129.4  65.4</span></span></code></pre></div>
+<span><span class="co">#&gt; 1       -47           108 causal_forest     1     -0.43   0.665 -224.8   131</span></span>
+<span><span class="co">#&gt; 2      -216           107 causal_forest     2     -2.02   0.044 -392.1   -40</span></span>
+<span><span class="co">#&gt; 3       -32           108 causal_forest     3     -0.30   0.765 -210.5   146</span></span>
+<span><span class="co">#&gt; 4        74           108 causal_forest     4      0.68   0.494 -104.0   252</span></span>
+<span><span class="co">#&gt; 5       228           108 causal_forest     5      2.12   0.034   51.4   405</span></span>
+<span><span class="co">#&gt; 6       126            58      user_itr     1      2.16   0.031   30.2   222</span></span>
+<span><span class="co">#&gt; 7        96            59      user_itr     2      1.62   0.105   -1.4   194</span></span>
+<span><span class="co">#&gt; 8       -33            59      user_itr     3     -0.56   0.579 -129.7    64</span></span>
+<span><span class="co">#&gt; 9      -139            59      user_itr     4     -2.36   0.018 -236.5   -42</span></span>
+<span><span class="co">#&gt; 10      -32            59      user_itr     5     -0.54   0.589 -129.4    65</span></span></code></pre></div>
 <p>We plot the estimated Area Under the Prescriptive Effect Curve
 (AUPEC) for the writing score across a range of budget constraints for
 user defined ITR and estimated ITRs. The plot shows that the estimated
@@ -361,35 +361,35 @@ defined model via cross-validation.</p>
 <span><span class="fu"><a href="https://rdrr.io/r/base/summary.html" class="external-link">summary</a></span><span class="op">(</span><span class="va">compare_est</span><span class="op">)</span></span>
 <span><span class="co">#&gt; -- PAPE ------------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1      2.9           1.3 causal_forest       2.3    0.02</span></span>
+<span><span class="co">#&gt; 1      1.6           1.2 causal_forest       1.3     0.2</span></span>
 <span><span class="co">#&gt; 2      0.0           0.0    user_model       NaN     NaN</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- PAPEp -----------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     2.57           1.3 causal_forest      2.00   0.046</span></span>
-<span><span class="co">#&gt; 2    -0.27           1.2    user_model     -0.23   0.819</span></span>
+<span><span class="co">#&gt; 1     2.60           1.2 causal_forest      2.14   0.032</span></span>
+<span><span class="co">#&gt; 2     0.97           1.2    user_model      0.79   0.427</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- PAPDp -----------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation                  algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1      2.8           1.6 causal_forest x user_model       1.8   0.075</span></span>
+<span><span class="co">#&gt; 1      1.6           1.7 causal_forest x user_model      0.95    0.34</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- AUPEC -----------------------------------------------------------------------</span></span>
 <span><span class="co">#&gt;   estimate std.deviation     algorithm statistic p.value</span></span>
-<span><span class="co">#&gt; 1     2.60          1.00 causal_forest       2.6  0.0091</span></span>
-<span><span class="co">#&gt; 2    -0.96          0.87    user_model      -1.1  0.2711</span></span>
+<span><span class="co">#&gt; 1     2.35          0.98 causal_forest      2.40   0.016</span></span>
+<span><span class="co">#&gt; 2    -0.57          0.88    user_model     -0.65   0.515</span></span>
 <span><span class="co">#&gt; </span></span>
 <span><span class="co">#&gt; -- GATE ------------------------------------------------------------------------</span></span>
-<span><span class="co">#&gt;    estimate std.deviation     algorithm group statistic p.value upper  lower</span></span>
-<span><span class="co">#&gt; 1       -87           108 causal_forest     1     -0.81 4.2e-01  -264   90.6</span></span>
-<span><span class="co">#&gt; 2      -130           108 causal_forest     2     -1.20 2.3e-01  -308   47.5</span></span>
-<span><span class="co">#&gt; 3       193           108 causal_forest     3      1.79 7.4e-02    15  370.8</span></span>
-<span><span class="co">#&gt; 4       141           108 causal_forest     4      1.31 1.9e-01   -36  318.7</span></span>
-<span><span class="co">#&gt; 5       -99           108 causal_forest     5     -0.92 3.6e-01  -276   77.5</span></span>
-<span><span class="co">#&gt; 6      -181           106    user_model     1     -1.71 8.7e-02  -355   -7.2</span></span>
-<span><span class="co">#&gt; 7      -422           105    user_model     2     -4.00 6.3e-05  -595 -248.3</span></span>
-<span><span class="co">#&gt; 8      -284           106    user_model     3     -2.68 7.5e-03  -459 -109.5</span></span>
-<span><span class="co">#&gt; 9       164           110    user_model     4      1.48 1.4e-01   -18  345.3</span></span>
-<span><span class="co">#&gt; 10      741           105    user_model     5      7.02 2.1e-12   567  914.2</span></span>
+<span><span class="co">#&gt;    estimate std.deviation     algorithm group statistic p.value upper lower</span></span>
+<span><span class="co">#&gt; 1        35           109 causal_forest     1      0.33 7.5e-01  -143   214</span></span>
+<span><span class="co">#&gt; 2       145           109 causal_forest     2      1.34 1.8e-01   -34   324</span></span>
+<span><span class="co">#&gt; 3        56           109 causal_forest     3      0.52 6.1e-01  -123   235</span></span>
+<span><span class="co">#&gt; 4      -146           108 causal_forest     4     -1.35 1.8e-01  -322    31</span></span>
+<span><span class="co">#&gt; 5       -72           107 causal_forest     5     -0.67 5.0e-01  -247   104</span></span>
+<span><span class="co">#&gt; 6      -249           104    user_model     1     -2.39 1.7e-02  -421   -77</span></span>
+<span><span class="co">#&gt; 7      -455           104    user_model     2     -4.39 1.1e-05  -625  -284</span></span>
+<span><span class="co">#&gt; 8      -303           105    user_model     3     -2.88 4.0e-03  -477  -130</span></span>
+<span><span class="co">#&gt; 9       316           110    user_model     4      2.88 4.0e-03   135   496</span></span>
+<span><span class="co">#&gt; 10      711           109    user_model     5      6.51 7.4e-11   531   890</span></span>
 <span><span class="fu"><a href="https://rdrr.io/r/graphics/plot.default.html" class="external-link">plot</a></span><span class="op">(</span><span class="va">compare_est</span><span class="op">)</span></span></code></pre></div>
 <p><img src="../reference/figures/README-compare_itr_model_summary-1.png" width="700"></p>
 </div>

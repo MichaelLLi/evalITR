@@ -19,4 +19,4 @@ prescriptive effect curve `AUPEC`; (5) Grouped Average Treatment Effects
 and Li (2023)](https://arxiv.org/abs/1905.05389) and [Imai and
 Li](https://arxiv.org/abs/2203.14511).
 
-Documentation and website: <https://michaellli.github.io/evalITR>
+Documentation and website: <https://michaellli.github.io/evalITR/>
