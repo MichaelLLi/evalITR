@@ -818,13 +818,14 @@ evaluate_itr <- function(
 #' @return An object of \code{test_itr} class
 #' @export
 test_itr <- function(
-    fit,
+    est,
     nsim = 1000,
     ...
 ) {
 
   # test parameters
-  estimates  <- fit$estimates
+  out_algs  <- est$out_algs
+  estimates <- out_algs$estimates
   cv         <- estimates$params$cv
   fit_ml     <- estimates$fit_ml
   Tcv        <- estimates$Tcv
@@ -832,8 +833,8 @@ test_itr <- function(
   indcv      <- estimates$indcv
   n_folds    <- estimates$params$n_folds
   ngates     <- estimates$params$ngates
-  algorithms <- fit$df$algorithms
-  outcome    <- fit$df$outcome
+  algorithms <- out_algs$df$algorithms
+  outcome    <- out_algs$df$outcome
 
   # caret and rlearner parameters
   caret_algorithms <- estimates$params$caret_algorithms
@@ -849,7 +850,7 @@ test_itr <- function(
   ## =================================
 
   if(cv == FALSE){
-    cat('Conduct hypothesis tests for GATEs unde sample splitting ...\n')
+    cat('Conduct hypothesis tests for GATEs unde sample-splitting ...\n')
 
     # create empty lists to for consistcv and hetcv
     consist <- list()
@@ -893,14 +894,14 @@ test_itr <- function(
 
       consistcv[[i]] <- consistcv.test(
         T   = Tcv,
-        tau = gettaucv(fit)[[i]],
+        tau = gettaucv(estimates)[[i]],
         Y   = Ycv,
         ind = indcv,
         ngates = ngates)
 
       hetcv[[i]] <- hetcv.test(
         T   = Tcv,
-        tau = gettaucv(fit)[[i]],
+        tau = gettaucv(estimates)[[i]],
         Y   = Ycv,
         ind = indcv,
         ngates = ngates)
