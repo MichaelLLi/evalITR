@@ -1,0 +1,23 @@
+name: Publish to GitHub Pages when a branch is merged
+
+on:
+  push:
+    branches:
+      - main
+      - master      
+      - causal-ml
+
+jobs:
+  publish:
+    runs-on: ubuntu-latest
+    steps:
+      - name: Check out
+        uses: actions/checkout@v3
+        
+      - name: Publish generated content to GitHub Pages
+        uses: crazy-max/ghaction-github-pages@v3
+        with:
+          target_branch: gh-pages
+          build_dir: docs
+        env:
+          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}

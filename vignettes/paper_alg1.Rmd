@@ -1,0 +1,33 @@
+---
+title: "paper_alg1"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{paper_alg1}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>"
+)
+```
+
+
+**Algorithm 1 Estimating and Evaluating an Individualized Treatment Rule
+(ITR) using the Same Experimental Data via Cross-Validation**
+
+| Steps in Algorithm 1                                                                                                                                                                                | Function/object                                                                                                | Output                             |
+|:----------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------------|:---------------------------------------------------------------------------------------------------------------|:-----------------------------------|
+| 1\. Split data into $K$ random subsets of equal size $\left(\mathbf{Z}_1, \cdots, \mathbf{Z}_k\right)$                                                                                            | `caret::createFolds()` within `estimate_itr()`                                                                 | dataframe                          |
+| 2\. k $\leftarrow$ 1                                                                                                                                                                                |                                                                                                                |                                    |
+| 3\. while $k \leq K$ do                                                                                                                                                                             | for loop in `fit_itr()` within `estimate_itr()`                                                                |                                    |
+| 4\. $\quad \mathbf{Z}_{-k}=\left[\mathbf{Z}_1, \cdots, \mathbf{Z}_{k-1}, \mathbf{Z}_{k+1}, \cdots, \mathbf{Z}_K\right]$                                                                        | `trainset` object                                                                                              | training data                      |
+| 5\. $\hat{f}_{-k}=F\left(\mathbf{Z}_{-k}\right)$                                                                                                                                                   | modulized functions for each ML algoritms (e.g., `run_causal_forest()`) within `estimate_itr()`                | ITR (binary vector)                |
+| 6\. $\hat{\tau}_k=\hat{\tau}_{\hat{f}_{-k}}\left(\mathbf{Z}_k\right)$                                                                                                                              | `compute_qoi()` function within `evaluate_itr()`                                                               | metrics for fold $k$               |
+| 7\. $k \leftarrow k+1$                                                                                                                                                                              |                                                                                                                |                                    |
+| 8\. end while                                                                                                                                                                                       |                                                                                                                |                                    |
+| 9.return $\hat{\tau}_F=\frac{1}{K} \sum_{k=1}^K \hat{\tau}_k$, $\widehat{\mathbb{V}\left(\hat{\tau}_F\right)}=v\left(\hat{f}_{-1}, \cdots, \hat{f}_{-k}, \mathbf{Z}_1, \cdots, \mathbf{Z}_K\right)$ | `PAPEcv()` `PAPDcv()` and `getAupecOutput()` functions inside `compute_qoi()` function within `evaluate_itr()` | averaging the results across folds |
+
+

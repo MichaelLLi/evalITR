@@ -1,0 +1,11 @@
+^.*\.Rproj$
+^\.Rproj\.user$
+^cran-comments\.md$
+^\.travis\.yml$
+^CRAN-RELEASE$
+^README\.Rmd$
+^_pkgdown\.yml$
+^docs$
+^pkgdown$
+^\.github$
+^CRAN-SUBMISSION$
