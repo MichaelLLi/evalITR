@@ -812,7 +812,7 @@ evaluate_itr <- function(
 }
 
 #' Conduct hypothesis tests
-#' @param fit Fitted model. Usually an output from \code{estimate_itr}
+#' @param fit Fitted model. Usually an output from \code{evaluate_itr}
 #' @param nsim Number of Monte Carlo simulations used to simulate the null distributions. Default is 1000.
 #' @param ... Further arguments passed to the function.
 #' @return An object of \code{test_itr} class
