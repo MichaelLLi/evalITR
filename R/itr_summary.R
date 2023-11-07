@@ -1,6 +1,6 @@
-#' Summarize estimate_itr output 
+#' Summarize estimate_itr output
 #' @param object An object of \code{estimate_itr} class (typically an output of \code{estimate_itr()} function).
-#' @param ... Other parameters. 
+#' @param ... Other parameters.
 #' @importFrom stats pnorm
 #' @export
 summary.itr <- function(object, ...) {
@@ -16,7 +16,7 @@ summary.itr <- function(object, ...) {
   # fit         <- object$qoi
 
 # -----------------------------------------
-# estimate ITR from ML algorithms 
+# estimate ITR from ML algorithms
 # -----------------------------------------
 
 if(length(estimate_algs) != 0){
@@ -46,7 +46,7 @@ if(length(estimate_algs) != 0){
       map(., ~ as_tibble(.)) %>%
       bind_rows() %>%
       mutate(
-        statistic = pape / sd, 
+        statistic = pape / sd,
         p.value = 2 * pnorm(abs(pape / sd), lower.tail = FALSE)
       ) %>%
       rename(
@@ -150,7 +150,7 @@ if(length(estimate_algs) != 0){
         )
     }
 
-    aupec_algs_vec <- fit$AUPEC %>% 
+    aupec_algs_vec <- fit$AUPEC %>%
       map(., ~ .x$aupec_cv) %>%
       bind_rows() %>%
       mutate(
@@ -208,7 +208,7 @@ if(length(estimate_user) != 0){
     map(., ~ as_tibble(.)) %>%
     bind_rows() %>%
     mutate(
-      statistic = pape / sd, 
+      statistic = pape / sd,
       p.value = 2 * pnorm(abs(pape / sd), lower.tail = FALSE)
     ) %>%
     rename(
@@ -316,93 +316,104 @@ print.summary.itr <- function(x, ...) {
 }
 
 
-#' Summarize test_itr output 
+#' Summarize test_itr output
 #' @param object An object of \code{test_itr} class (typically an output of \code{test_itr()} function).
-#' @param ... Other parameters. 
-#' @importFrom stats pnorm
+#' @param ... Other parameters.
+#' @importFrom dplyr mutate rename select bind_rows %>%
+#' @importFrom purrr map_dfr
+#' @importFrom tibble as_tibble tibble
 #' @export
 summary.test_itr <- function(object, ...) {
-  out            <- list()
-  consist_tibble <- tibble()
-  het_tibble     <- tibble()
+  requireNamespace("dplyr", quietly = TRUE)
+  requireNamespace("purrr", quietly = TRUE)
+  requireNamespace("tibble", quietly = TRUE)
 
-  ## -----------------------------------------
-  ## hypothesis tests
-  ## -----------------------------------------
-  if (names(object[1]) == "consist") {
+  process_results <- function(data, names) {
+    if (length(data) == 0) {
+      stop("Data for processing is empty. Check the structure of the 'test_itr' object.")
+    }
+    if (length(names) != length(data)) {
+      stop("Mismatch between data elements and their names. Each element of data should have a corresponding name.")
+    }
+    purrr::map_dfr(data, ~ tibble::as_tibble(.x), .id = "algorithm") %>%
+      dplyr::mutate(algorithm = names) %>%
+      dplyr::rename(statistic = stat, p.value = pval) %>%
+      dplyr::select(algorithm, statistic, p.value)
+  }
 
-    # parameters for test_itr object
-    consist        <- object$consist
-    het            <- object$het
-    consist_names <- names(consist)
-    het_names <- names(het)
+  out <- list()
 
-    # reformat
-    out[["Consistency"]] <- consist %>%
-      map(., ~ as_tibble(.)) %>%
-      bind_rows() %>%
-      mutate(algorithm = consist_names) %>%
-      rename(statistic = stat,
-            p.value = pval) %>%
-      select(algorithm, statistic, p.value)
-
-
-    out[["Heterogeneity"]] <- het %>%
-      map(., ~ as_tibble(.)) %>%
-      bind_rows() %>%
-      mutate(algorithm = het_names) %>%
-      rename(statistic = stat,
-            p.value = pval) %>%
-      select(algorithm, statistic, p.value)
-  } 
-
-
-  if (names(object[1]) == "consistcv") {
-    
-    # parameters for test_itr object
-    consist <- object$consistcv
-    het <- object$hetcv
-    consist_names <- names(consist)
-    het_names <- names(het)
-
-    # reformat
-    out[["Consistency_cv"]] <- consist %>%
-      map(., ~ as_tibble(.)) %>%
-      bind_rows() %>%
-      mutate(algorithm = consist_names) %>%
-      rename(statistic = stat,
-            p.value = pval) %>%
-      select(algorithm, statistic, p.value)
-
-    out[["Heterogeneity_cv"]] <- het %>%
-      map(., ~ as_tibble(.)) %>%
-      bind_rows() %>%
-      mutate(algorithm = het_names) %>%
-      rename(statistic = stat,
-            p.value = pval) %>%
-      select(algorithm, statistic, p.value)
+  if ("consist" %in% names(object)) {
+    consist <- object$consist
+    het <- object$het
+    out[["Consistency"]] <- process_results(consist, names(consist))
+    out[["Heterogeneity"]] <- process_results(het, names(het))
+  } else if ("consistcv" %in% names(object)) {
+    consistcv <- object$consistcv
+    hetcv <- object$hetcv
+    if (is.null(consistcv) || is.null(hetcv)) {
+      stop("The 'consistcv' or 'hetcv' elements are NULL.")
+    }
+    out[["Consistency_cv"]] <- process_results(consistcv, names(consistcv))
+    out[["Heterogeneity_cv"]] <- process_results(hetcv, names(hetcv))
+  } else {
+    stop("Invalid 'test_itr' object: neither 'consist' nor 'consistcv' found in names.")
   }
 
   class(out) <- c("summary.test_itr", class(out))
-
   return(out)
 }
+
+
 
 #' Print
 #' @importFrom cli cat_rule
 #' @param x An object of \code{summary.test_itr} class. This is typically an output of \code{summary.test_itr()} function.
-#' @param ... Other parameters. 
+#' @param ... Other parameters.
 #' @export
 print.summary.test_itr <- function(x, ...) {
+  # Ensure the cli package is available
+  if (!requireNamespace("cli", quietly = TRUE)) {
+    stop("The 'cli' package is required for printing this summary. Please install it using install.packages('cli').")
+  }
 
-  # Rank Consistency Test
-  cli::cat_rule(left = "Rank Consistency Test Results")
-  print(as.data.frame(x[["Consistency"]], digits = 2))
+  # Consistency
+  cli::cat_rule(left = "The Consistency Test Results for GATEs")
+  if ("Consistency" %in% names(x)) {
+    print(as.data.frame(x[["Consistency"]]), digits = 2)
+  } else {
+    cli::cat_line("No consistency results available (sample-splitting).")
+  }
   cli::cat_line("")
 
-  # Group Heterogeneity Test
-  cli::cat_rule(left = "Group Heterogeneity Test Results")
-  print(as.data.frame(x[["Heterogeneity"]], digits = 2))
+  # Heterogeneity
+  cli::cat_rule(left = "The Heterogeneity Test Results for GATEs")
+  if ("Heterogeneity" %in% names(x)) {
+    print(as.data.frame(x[["Heterogeneity"]]), digits = 2)
+  } else {
+    cli::cat_line("No heterogeneity results available (sample-splitting).")
+  }
   cli::cat_line("")
+
+  # Consistency Cross-Validation
+  cli::cat_rule(left = "The Consistency Test Results for GATEs (Cross-validation)")
+  if ("Consistency_cv" %in% names(x)) {
+    print(as.data.frame(x[["Consistency_cv"]]), digits = 2)
+  } else {
+    cli::cat_line("No consistency results available (cross-validation).")
+  }
+  cli::cat_line("")
+
+  # Heterogeneity Cross-Validation
+  cli::cat_rule(left = "The Heterogeneity Test Results for GATEs (Cross-validation)")
+  if ("Heterogeneity_cv" %in% names(x)) {
+    print(as.data.frame(x[["Heterogeneity_cv"]]), digits = 2)
+  } else {
+    cli::cat_line("No heterogeneity results available (cross-validation).")
+  }
+  cli::cat_line("")
+
+  invisible(x)
 }
+
 
