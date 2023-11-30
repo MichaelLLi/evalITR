@@ -2,7 +2,7 @@
 % Please edit documentation in R/itr_qoi.R
 \name{compute_qoi}
 \alias{compute_qoi}
-\title{Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv)}
+\title{Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv, URATE)}
 \usage{
 compute_qoi(fit_obj, algorithms)
 }
@@ -12,5 +12,5 @@ compute_qoi(fit_obj, algorithms)
 \item{algorithms}{Machine learning algorithms}
 }
 \description{
-Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv)
+Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv, URATE)
 }

@@ -6,7 +6,7 @@
 summary.itr <- function(object, ...) {
 
   # parameters
-  out <- pape_algs_vec <- pape_user_vec <-  papep_algs_vec <- papep_user_vec <- papdp_algs_vec <- papdp_user_vec <- aupec_algs_vec <-  aupec_user_vec <- gate_algs_vec <-  gate_user_vec  <- list()
+  out <- pape_algs_vec <- pape_user_vec <-  papep_algs_vec <- papep_user_vec <- papdp_algs_vec <- papdp_user_vec <- aupec_algs_vec <-  aupec_user_vec <- gate_algs_vec <-  gate_user_vec  <- urate_algs_vec <- urate_user_vec <- list()
 
   estimate_algs = object$out_algs
   estimate_user = object$out_user
@@ -101,6 +101,19 @@ if(length(estimate_algs) != 0){
         algorithm = alg,
         group = group
       )
+
+    urate_algs_vec <- fit$URATE %>%
+      map(., ~ as_tibble(.)) %>%
+      bind_rows() %>%
+      mutate(
+        statistic = rate / sd,
+        p.value = 2 * pnorm(abs(rate / sd), lower.tail = FALSE)
+      ) %>%
+      rename(
+        estimate = rate,
+        std.deviation = sd,
+        algorithm = alg
+      )
   }
 
   # compute quantities under cross-validation -----------------------------------------
@@ -179,6 +192,19 @@ if(length(estimate_algs) != 0){
         std.deviation = sd,
         algorithm = alg,
         group = group
+      )
+
+    urate_algs_vec <- fit$URATE %>%
+      map(., ~ as_tibble(.)) %>%
+      bind_rows() %>%
+      mutate(
+        statistic = rate / sd,
+        p.value = 2 * pnorm(abs(rate / sd), lower.tail = FALSE)
+      ) %>%
+      rename(
+        estimate = rate,
+        std.deviation = sd,
+        algorithm = alg
       )
   }
 
@@ -263,6 +289,19 @@ if(length(estimate_user) != 0){
         algorithm = alg,
         group = group
       )
+    
+    urate_user_vec <- fit$URATE %>%
+      map(., ~ as_tibble(.)) %>%
+      bind_rows() %>%
+      mutate(
+        statistic = rate / sd,
+        p.value = 2 * pnorm(abs(rate / sd), lower.tail = FALSE)
+      ) %>%
+      rename(
+        estimate = rate,
+        std.deviation = sd,
+        algorithm = alg
+      )
 
 }
   out <- list(
@@ -270,7 +309,8 @@ if(length(estimate_user) != 0){
     PAPEp = bind_rows(papep_algs_vec, papep_user_vec),
     PAPDp = bind_rows(papdp_algs_vec, papdp_user_vec),
     AUPEC = bind_rows(aupec_algs_vec, aupec_user_vec),
-    GATE = bind_rows(gate_algs_vec, gate_user_vec)
+    GATE = bind_rows(gate_algs_vec, gate_user_vec),
+    URATE = bind_rows(urate_algs_vec, urate_user_vec)
   )
 
   class(out) <- c("summary.itr", class(out))
@@ -312,6 +352,11 @@ print.summary.itr <- function(x, ...) {
   # GATE
   cli::cat_rule(left = "GATE")
   print(as.data.frame(x[["GATE"]]), digits = 2)
+  cli::cat_line("")
+
+  # URATE
+  cli::cat_rule(left = "URATE")
+  print(as.data.frame(x[["URATE"]]), digits = 2)
   cli::cat_line("")
 }
 

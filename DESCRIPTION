@@ -47,7 +47,8 @@ Imports:
     scales,
     utils,
     bartCause,
-    SuperLearner
+    SuperLearner,
+    zoo
 Suggests: 
     doParallel,
     furrr,

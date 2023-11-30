@@ -2,7 +2,7 @@
 % Please edit documentation in R/itr_qoi.R
 \name{compute_qoi_user}
 \alias{compute_qoi_user}
-\title{Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv) with user defined functions}
+\title{Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv, URATE) with user defined functions}
 \usage{
 compute_qoi_user(user_itr, Tcv, Ycv, data, ngates, budget, ...)
 }
@@ -22,5 +22,5 @@ compute_qoi_user(user_itr, Tcv, Ycv, data, ngates, budget, ...)
 \item{...}{Additional arguments to be passed to the user-defined function.}
 }
 \description{
-Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv) with user defined functions
+Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv, URATE) with user defined functions
 }

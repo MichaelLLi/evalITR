@@ -1,4 +1,4 @@
-#' Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv)
+#' Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv, URATE)
 #' @param fit_obj An output object from \code{fit_itr} function.
 #' @param algorithms Machine learning algorithms
 #' @importFrom rlang .data
@@ -92,6 +92,20 @@ compute_qoi <- function(fit_obj, algorithms) {
       GATE[[i]]$group <- seq_along(GATE[[i]]$gate)
     }
 
+    ## URATE
+    URATE <- vector("list", length = length(algorithms))
+    for (i in seq_along(algorithms)) {
+      tau <- furrr::future_map(fit_ml[[i]], ~.x$tau) %>% do.call(cbind, .)
+      tau_cv <- furrr::future_map(fit_ml[[i]], ~.x$tau_cv) %>% do.call(cbind, .)
+
+      ## Compute URATE
+      URATE[[i]] <- URATEcv(Tcv, tau_cv, Ycv, indcv)
+
+      ## indicate algorithm
+      URATE[[i]]$alg <- algorithms[i]
+
+    }
+
   }
 
 
@@ -160,6 +174,19 @@ compute_qoi <- function(fit_obj, algorithms) {
       ## indicate group number
       GATE[[i]]$group <- seq_along(GATE[[i]]$gate)
     }
+
+    ## URATE
+    URATE <- vector("list", length = length(algorithms))
+    for (i in seq_along(algorithms)) {
+
+      ## Compute URATE
+      URATE[[i]] <- URATE(Tcv, fit_ml[[i]][["tau"]], Ycv)
+
+      ## indicate algorithm
+      URATE[[i]]$alg <- algorithms[i]
+
+    }
+
   }
 
   out <- list(
@@ -167,14 +194,15 @@ compute_qoi <- function(fit_obj, algorithms) {
         PAPEp = PAPEp,
         PAPDp = PAPDp,
         AUPEC = aupec,
-        GATE = GATE)
+        GATE = GATE,
+        URATE = URATE)
 
   return(out)
 }
 
 
 
-#' Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv) with user defined functions
+#' Compute Quantities of Interest (PAPE, PAPEp, PAPDp, AUPEC, GATE, GATEcv, URATE) with user defined functions
 #' @param user_itr A user-defined function to create an ITR. The function should take the data as input and return an unit-level continuous score for treatment assignment. We assume those that have score less than 0 should not have treatment. The default is \code{NULL}, which means the ITR will be estimated from the \code{estimate_itr}. 
 #' @param Tcv A vector of the unit-level binary treatment.
 #' @param Ycv A vector of the unit-level continuous outcome.
@@ -237,13 +265,26 @@ compute_qoi_user <- function(user_itr, Tcv, Ycv, data, ngates, budget, ...) {
     ## indicate group number
     GATE[[i]]$group <- seq_along(GATE[[i]]$gate)
   }
+
+  ## URATE
+  URATE <- vector("list", length = length(user_itr))
+  for (i in seq_along(length(user_itr))) {
+
+    ## Compute URATE
+    URATE[[i]] <- URATE(Tcv, tau, Ycv)
+
+    ## indicate algorithm
+    URATE[[i]]$alg <- function_name[i]
+
+  }
   
   out <- list(
         PAPE = PAPE,
         PAPEp = PAPEp,
         PAPDp = NULL, # single algorithm
         AUPEC = aupec,
-        GATE = GATE)
+        GATE = GATE,
+        URATE = URATE)
 
   return(out)
 }
