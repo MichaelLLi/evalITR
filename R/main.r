@@ -244,25 +244,25 @@ fit_itr <- function(
       if (algorithms[i] %in% rlearner_algorithms) {
 
 
-        stop("rLearner functions currently unsupported")
+        # stop("rLearner functions currently unsupported")
 
-        # # set the train_method to the algorithm
-        # train_method = algorithms[i]
-        #
-        # # run the algorithm
-        # rlearner_est <- run_rlearner(
-        #   dat_train = training_data_elements,
-        #   dat_test  = testing_data_elements,
-        #   dat_total = total_data_elements,
-        #   params    = params,
-        #   budget    = budget,
-        #   indcv     = 1,
-        #   iter      = 1,
-        #   train_method = train_method)
-        #
-        # # store the results
-        # fit_ml[[algorithms[i]]] <- rlearner_est$test
-        # models[[algorithms[i]]] <- rlearner_est$train
+        # set the train_method to the algorithm
+        train_method = algorithms[i]
+        
+        # run the algorithm
+        rlearner_est <- run_rlearner(
+          dat_train = training_data_elements,
+          dat_test  = testing_data_elements,
+          dat_total = total_data_elements,
+          params    = params,
+          budget    = budget,
+          indcv     = 1,
+          iter      = 1,
+          train_method = train_method)
+        
+        # store the results
+        fit_ml[[algorithms[i]]] <- rlearner_est$test
+        models[[algorithms[i]]] <- rlearner_est$train
 
       }
 
@@ -521,27 +521,27 @@ fit_itr <- function(
         # check if algorithm is in the rlearner package
         if (algorithms[i] %in% rlearner_algorithms) {
 
-          stop("rLearner functions currently unsupported")
+          # stop("rLearner functions currently unsupported")
 
-          # # set the train_method to the algorithm
-          # train_method = algorithms[i]
-          #
-          # # run the algorithm
-          # rlearner_est <- run_rlearner(
-          #   dat_train     = training_data_elements,
-          #   dat_test      = testing_data_elements,
-          #   dat_total     = total_data_elements,
-          #   train_method  = train_method,
-          #   params        = params,
-          #   indcv         = indcv,
-          #   iter          = j,
-          #   budget        = budget,
-          #   ...
-          # )
-          #
-          # # store the results
-          # fit_ml[[algorithms[i]]][[j]] <- rlearner_est$test
-          # models[[algorithms[i]]][[j]] <- rlearner_est$train
+          # set the train_method to the algorithm
+          train_method = algorithms[i]
+          
+          # run the algorithm
+          rlearner_est <- run_rlearner(
+            dat_train     = training_data_elements,
+            dat_test      = testing_data_elements,
+            dat_total     = total_data_elements,
+            train_method  = train_method,
+            params        = params,
+            indcv         = indcv,
+            iter          = j,
+            budget        = budget,
+            ...
+          )
+          
+          # store the results
+          fit_ml[[algorithms[i]]][[j]] <- rlearner_est$test
+          models[[algorithms[i]]][[j]] <- rlearner_est$train
 
         }
       }
