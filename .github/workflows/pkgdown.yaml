@@ -3,9 +3,8 @@ name: Publish to GitHub Pages when a branch is merged
 on:
   push:
     branches:
-      - main
       - master      
-      - causal-ml
+      - developer
 
 jobs:
   publish:

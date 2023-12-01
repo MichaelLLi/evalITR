@@ -99,7 +99,7 @@ compute_qoi <- function(fit_obj, algorithms) {
       tau_cv <- furrr::future_map(fit_ml[[i]], ~.x$tau_cv) %>% do.call(cbind, .)
 
       ## Compute URATE
-      URATE[[i]] <- URATEcv(Tcv, tau_cv, Ycv, indcv)
+      URATE[[i]] <- URATE(Tcv, tau_cv, Ycv, indcv)
 
       ## indicate algorithm
       URATE[[i]]$alg <- algorithms[i]
