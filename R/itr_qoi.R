@@ -92,19 +92,8 @@ compute_qoi <- function(fit_obj, algorithms) {
       GATE[[i]]$group <- seq_along(GATE[[i]]$gate)
     }
 
-    ## URATE
-    URATE <- vector("list", length = length(algorithms))
-    for (i in seq_along(algorithms)) {
-      tau <- furrr::future_map(fit_ml[[i]], ~.x$tau) %>% do.call(cbind, .)
-      tau_cv <- furrr::future_map(fit_ml[[i]], ~.x$tau_cv) %>% do.call(cbind, .)
-
-      ## Compute URATE
-      URATE[[i]] <- URATE(Tcv, tau_cv, Ycv, indcv)
-
-      ## indicate algorithm
-      URATE[[i]]$alg <- algorithms[i]
-
-    }
+    ## URATE not supported
+    URATE <- NULL
 
   }
 

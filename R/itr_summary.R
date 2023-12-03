@@ -194,18 +194,9 @@ if(length(estimate_algs) != 0){
         group = group
       )
 
-    urate_algs_vec <- fit$URATE %>%
-      map(., ~ as_tibble(.)) %>%
-      bind_rows() %>%
-      mutate(
-        statistic = rate / sd,
-        p.value = 2 * pnorm(abs(rate / sd), lower.tail = FALSE)
-      ) %>%
-      rename(
-        estimate = rate,
-        std.deviation = sd,
-        algorithm = alg
-      )
+    # exceptional reponders not supported for CV
+    urate_algs_vec <- NULL
+
   }
 
 }
@@ -338,7 +329,7 @@ print.summary.itr <- function(x, ...) {
   # PAPDp
   cli::cat_rule(left = "PAPDp")
   if(length(x[["PAPDp"]]) == 0) {
-    cli::cat_line("Cannot compute PAPDp")
+    cli::cat_line("Cannot compute PAPDp with only one algorithm")
   } else {
     print(as.data.frame(x[["PAPDp"]]), digits = 2)
   }
@@ -356,8 +347,13 @@ print.summary.itr <- function(x, ...) {
 
   # URATE
   cli::cat_rule(left = "URATE")
-  print(as.data.frame(x[["URATE"]]), digits = 2)
+  if(x[["URATE"]] == NULL) {
+    cli::cat_line("Not supported with cross-validation")
+  } else {
+    print(as.data.frame(x[["URATE"]]), digits = 2)
+  }
   cli::cat_line("")
+  
 }
 
 
