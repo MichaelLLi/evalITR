@@ -12,7 +12,7 @@
 #' T <- c(1, 0, 1, 0, 1, 0, 1, 0)
 #' tau <- c(0, 0.1, 0.2, 0.3, 0.4, 0.5, 0.6, 0.7)
 #' Y <- c(4, 5, 0, 2, 4, 1, -4, 3)
-#' ratelist <- URATE(z_test, tau_test1, y_test)
+#' ratelist <- URATE(T, tau, Y)
 #' ratelist$rate
 #' ratelist$sd
 #' @author Michael Lingzhi Li, Technology and Operations Management, Harvard Business School
@@ -54,7 +54,7 @@ URATE <- function(T, tau, Y) {
   EYThat0sq <- cumsum(Y0_ranked^2) / length(Y0_ranked)
   Sfp1b <- EYThat1sq - EYThat1^2
   Sfp0b <- EYThat0sq - EYThat0^2
-  # fill in the values at co‰rrect places
+  # fill in the values at correct places
   Sfp1 <- numeric(n)
   Sfp0 <- numeric(n)
   Sfp1[T[tau_sort$ix] == 1] <- Sfp1b
@@ -102,5 +102,7 @@ URATE <- function(T, tau, Y) {
   tauij <- tauij11 - 2 * tauij01 + tauij00
   varrates <- Sfp1 / n1 + Sfp0 / n0 - (seq(n, 1, -1) - 1) / (seq(n, 1, -1)^2 * (n - 1)) * kf1^2
   varrates <- varrates * (n / seq_along(temp_sorted))^2
+  # number of units treated with different urates
+  # n_treat <- cumsum(T[tau_sort$ix])[which.max(urates)]
   return(list(rate = urates, sd = sqrt(pmax(varrates, 0))))
 }
