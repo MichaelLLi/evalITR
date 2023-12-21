@@ -109,11 +109,24 @@ if(length(estimate_algs) != 0){
         statistic = rate / sd,
         p.value = 2 * pnorm(abs(rate / sd), lower.tail = FALSE)
       ) %>%
+      group_by(alg) %>%
+      mutate(
+        fraction = seq(1,length(rate))/length(rate),
+        est = rate - 1.2*sd - 0.68*sd[length(sd)] * length(sd)/seq(1, length(sd)),
+        best_ind = which.max(est),
+        # estimate
+        proportion = fraction[best_ind],
+        best_rate = rate[best_ind],
+        conf.low.uniform = rate[best_ind] - 1.2*sd[best_ind] - 0.68* sd[length(sd)] * length(sd)/best_ind
+      ) %>% 
+      filter(rate == best_rate) %>%
+       select(-c(best_ind, est, fraction, best_rate)) %>%
       rename(
         estimate = rate,
         std.deviation = sd,
         algorithm = alg
       )
+      
   }
 
   # compute quantities under cross-validation -----------------------------------------
@@ -288,6 +301,18 @@ if(length(estimate_user) != 0){
         statistic = rate / sd,
         p.value = 2 * pnorm(abs(rate / sd), lower.tail = FALSE)
       ) %>%
+      group_by(alg) %>%
+      mutate(
+        fraction = seq(1,length(rate))/length(rate),
+        est = rate - 1.2*sd - 0.68*sd[length(sd)] * length(sd)/seq(1, length(sd)),
+        best_ind = which.max(est),
+        # estimate
+        proportion = fraction[best_ind],
+        best_rate = rate[best_ind],
+        conf.low.uniform = rate[best_ind] - 1.2*sd[best_ind] - 0.68* sd[length(sd)] * length(sd)/best_ind
+      ) %>% 
+      filter(rate == best_rate) %>%
+      select(-c(best_ind, est, fraction, best_rate)) %>%
       rename(
         estimate = rate,
         std.deviation = sd,
