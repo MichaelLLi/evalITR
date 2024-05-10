@@ -223,8 +223,8 @@ PAPE_test <- function (T, That, Y, budget = NA, centered = TRUE) {
 
     #   }
 
-      return(list(pape=sape_vec,sd=sd_vec))
-    }    
+    #   return(list(pape=sape_vec,sd=sd_vec))
+    # }    
   }
 
 }
