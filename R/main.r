@@ -343,7 +343,7 @@ fit_itr <- function(
     }
 
 
-    if("bartc" %in% algorithms){
+    if("BART" %in% algorithms){
       # run bartcause
       est <- run_bartc(
         dat_train = training_data_elements,
@@ -355,8 +355,8 @@ fit_itr <- function(
         budget    = budget
       )
       # store the results
-      fit_ml[["bartc"]] <- est$test
-      models[["bartc"]] <- est$train
+      fit_ml[["BART"]] <- est$test
+      models[["BART"]] <- est$train
     }
 
     # if("bart" %in% algorithms){
@@ -621,7 +621,7 @@ fit_itr <- function(
         models[["SuperLearner"]][[j]] <- est$train
       }
 
-      if("bartc" %in% algorithms){
+      if("BART" %in% algorithms){
         # run bartcause
         est <- run_bartc(
           dat_train = training_data_elements,
@@ -633,8 +633,8 @@ fit_itr <- function(
           budget    = budget
         )
         # store the results
-        fit_ml[["bartc"]][[j]] <- est$test
-        models[["bartc"]][[j]] <- est$train
+        fit_ml[["BART"]][[j]] <- est$test
+        models[["BART"]][[j]] <- est$train
       }
 
       # if("bart" %in% algorithms){

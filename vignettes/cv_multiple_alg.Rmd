@@ -55,7 +55,7 @@ fit_cv <- estimate_itr(
                trControl = fitControl,
                algorithms = c(
                   "causal_forest", 
-                  # "bartc",
+                  # "BART",
                   # "rlasso", # from rlearner 
                   # "ulasso", # from rlearner 
                   "lasso" # from caret package
