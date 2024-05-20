@@ -41,7 +41,7 @@
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
 #' @export PAPD
-PAPD_test <- function (T, Thatfp,Thatgp , Y, budget, centered = TRUE) {
+PAPD <- function (T, Thatfp,Thatgp , Y, budget, centered = TRUE) {
 
   # check whether the treatment is binary or multi-value
   if (length(unique(T)) == 2) {

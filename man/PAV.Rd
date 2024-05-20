@@ -7,10 +7,11 @@
 PAV(T, That, Y, centered = TRUE)
 }
 \arguments{
-\item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
+\item{T}{A vector of the unit-level treatment receipt variable for each sample. Both binary treatment and multi-value treatment are supported.}
 
-\item{That}{A vector of the unit-level binary treatment that would have been assigned by the
-individualized treatment rule. If \code{budget} is specified, please ensure
+\item{That}{If the treatment is binary, the input is a vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. Alternatively, if the treatment is multi-value, the input should be a matrix where the \code{i}th column is the unit-level binary treatment that would have been assigned by the
+individualized treatment rule generated in the \code{i}th version of treatment.
+ The number of columns should be equal to the number of versions of the treatment assignment. The number of rows should be equal to the number of observations in the sample. If \code{budget} is specified, please ensure
 that the percentage of treatment units of That is lower than the budget constraint.}
 
 \item{Y}{A vector of the outcome variable of interest for each sample.}
@@ -27,12 +28,22 @@ of PAV.}
 This function estimates the Population Average Value. The details of the methods for this design are given in Imai and Li (2019).
 }
 \examples{
+# Example 1: Binary treatment
 T = c(1,0,1,0,1,0,1,0)
 That = c(0,1,1,0,0,1,1,0)
 Y = c(4,5,0,2,4,1,-4,3)
 pavlist <- PAV(T,That,Y)
 pavlist$pav
 pavlist$sd
+
+# Example 2: Multi-value treatment
+T = c(1,2,3,0,1,0,3,1)
+That = matrix(c(0,1,0,0,0,1,1,0,0,0,1,0,0,1,0,0,0,1,1,0,0,1,0,0),ncol=3)
+Y = c(4,5,0,2,4,1,-4,3)
+pavlist <- PAV(T,That,Y)
+pavlist$pav
+pavlist$sd
+
 }
 \references{
 Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},

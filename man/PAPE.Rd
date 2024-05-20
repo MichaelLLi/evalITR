@@ -7,10 +7,10 @@
 PAPE(T, That, Y, budget = NA, centered = TRUE)
 }
 \arguments{
-\item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
+\item{T}{A vector of the unit-level treatment receipt variable for each sample. Both binary treatment and multi-value treatment are supported.}
 
-\item{That}{A vector of the unit-level binary treatment that would have been assigned by the
-individualized treatment rule. If \code{budget} is specified, please ensure
+\item{That}{A vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. Multi-value treatment is also supported. 
+ If \code{budget} is specified, please ensure
 that the percentage of treatment units of That is lower than the budget constraint.}
 
 \item{Y}{A vector of the outcome variable of interest for each sample.}
@@ -32,12 +32,22 @@ This function estimates the Population Average Prescription Effect with and with
 constraint. The details of the methods for this design are given in Imai and Li (2019).
 }
 \examples{
+# Example 1: Binary treatment
 T = c(1,0,1,0,1,0,1,0)
 That = c(0,1,1,0,0,1,1,0)
 Y = c(4,5,0,2,4,1,-4,3)
 papelist <- PAPE(T,That,Y)
 papelist$pape
 papelist$sd
+
+# Example 2: Multi-value treatment
+T = c(1,2,3,0,1,0,3,2)
+That = c(1,2,1,3,2,0,3,1)
+Y = c(4,5,0,2,4,1,-4,3)
+papelist <- PAPE(T,That,Y, budget = 0.8)
+papelist$pape
+papelist$sd
+
 }
 \references{
 Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},

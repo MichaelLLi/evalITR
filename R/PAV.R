@@ -37,7 +37,7 @@
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
 #' @export PAV
-PAV_test <- function (T, That, Y, centered = TRUE) {
+PAV <- function (T, That, Y, centered = TRUE) {
 
   # check whether the treatment is binary or multi-value
   if (is.matrix(That)) {

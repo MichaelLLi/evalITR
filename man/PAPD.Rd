@@ -7,13 +7,12 @@
 PAPD(T, Thatfp, Thatgp, Y, budget, centered = TRUE)
 }
 \arguments{
-\item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
+\item{T}{A vector of the unit-level binary treatment receipt variable for each sample. Both binary treatment and multi-value treatment are supported.}
 
-\item{Thatfp}{A vector of the unit-level binary treatment that would have been assigned by the
-first individualized treatment rule. Please ensure that the percentage of treatment units of That is lower than the budget constraint.}
+\item{Thatfp}{A vector of the unit-level binary treatment that would have been assigned by the individualized treatment rule. Multi-value treatment is also supported. Please ensure that the percentage of treatment units of Thatfp is lower than the budget constraint.}
 
-\item{Thatgp}{A vector of the unit-level binary treatment that would have been assigned by the
-second individualized treatment rule. Please ensure that the percentage of treatment units of That is lower than the budget constraint.}
+\item{Thatgp}{A vector of the unit-level binary treatment that would have been assigned by the second individualized treatment rule. Multi-value treatment is also supported. 
+Please ensure that the percentage of treatment units of That is lower than the budget constraint.}
 
 \item{Y}{A vector of the outcome variable of interest for each sample.}
 
@@ -33,6 +32,7 @@ This function estimates the Population Average Prescription Difference with a bu
 constraint. The details of the methods for this design are given in Imai and Li (2019).
 }
 \examples{
+# Example 1: Binary treatment
 T = c(1,0,1,0,1,0,1,0)
 That = c(0,1,1,0,0,1,1,0)
 That2 = c(1,0,0,1,1,0,0,1)
@@ -40,6 +40,16 @@ Y = c(4,5,0,2,4,1,-4,3)
 papdlist <- PAPD(T,That,That2,Y,budget = 0.5)
 papdlist$papd
 papdlist$sd
+
+Example 2: Multi-value treatment
+T = c(1,2,3,0,1,0,3,2)
+That = c(3,2,1,3,2,0,3,1)
+That2 = c(2,0,3,3,2,3,1,2)
+Y = c(4,5,0,2,4,1,-4,3)
+papdlist <- PAPD(T,That,That2,Y,budget = 0.5)
+papdlist$papd
+papdlist$sd
+
 }
 \references{
 Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},

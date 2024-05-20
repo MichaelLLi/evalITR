@@ -37,7 +37,7 @@
 #' @references Imai and Li (2019). \dQuote{Experimental Evaluation of Individualized Treatment Rules},
 #' @keywords evaluation
 #' @export PAPE
-PAPE_test <- function (T, That, Y, budget = NA, centered = TRUE) {
+PAPE <- function (T, That, Y, budget = NA, centered = TRUE) {
 
   # check whether the treatment is binary or multi-value
   if (length(unique(T)) == 2) {

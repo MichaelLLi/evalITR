@@ -7,7 +7,7 @@
 AUPEC(T, tau, Y, centered = TRUE)
 }
 \arguments{
-\item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
+\item{T}{A vector of the unit-level binary treatment receipt variable for each sample. Muti-value treatment is not supported.}
 
 \item{tau}{A vector of the unit-level continuous score for treatment assignment. We assume those that have tau<0 should
 not have treatment. Conditional Average Treatment Effect is one possible measure.}
