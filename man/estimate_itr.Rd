@@ -13,6 +13,7 @@ estimate_itr(
   n_folds = 5,
   split_ratio = 0,
   ngates = 5,
+  c_threshold = 0,
   preProcess = NULL,
   weights = NULL,
   trControl = caret::trainControl(method = "none"),
@@ -39,6 +40,8 @@ estimate_itr(
 \item{split_ratio}{Split ratio between train and test set under sample splitting. Default is 0.}
 
 \item{ngates}{The number of groups to separate the data into. The groups are determined by tau. Default is 5.}
+
+\item{c_threshold}{The threshold for determining the treatment assignment under the ITR. Default is 0, which assumes all units with a score greater than 0 will receive treatment.}
 
 \item{preProcess}{caret parameter}
 

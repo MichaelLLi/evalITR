@@ -4,7 +4,7 @@
 \alias{fit_itr}
 \title{Estimate ITR for Single Outcome}
 \usage{
-fit_itr(data, algorithms, params, folds, budget, user_model, ...)
+fit_itr(data, algorithms, params, folds, budget, user_model, c_threshold, ...)
 }
 \arguments{
 \item{data}{A dataset.}

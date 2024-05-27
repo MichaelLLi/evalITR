@@ -8,7 +8,8 @@ run_svm <- function(
   params,
   indcv,
   iter,
-  budget
+  budget,
+  c_threshold
 ) {
 
   # split/cross-validation
@@ -20,7 +21,7 @@ run_svm <- function(
   ## test
   fit_test <- test_svm(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb,
-    indcv, iter, budget, cv
+    indcv, iter, budget, cv, c_threshold
   )
 
   return(list(test = fit_test, train = fit_train))
@@ -74,7 +75,7 @@ train_svm <- function(dat_train) {
 
 #'@importFrom stats predict runif
 test_svm <- function(
-  fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, budget, cv
+  fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, budget, cv, c_threshold
 ) {
 
   ## format data
@@ -90,7 +91,7 @@ test_svm <- function(
 
     ## compute quantities of interest
     tau_test <-  tau_total[indcv == iter]
-    That     <-  as.numeric(tau_total > 0)
+    That     <-  as.numeric(tau_total > c_threshold)
     That_p   <- as.numeric(tau_total >= sort(tau_test, decreasing = TRUE)[floor(budget*length(tau_test))+1])
 
 
@@ -111,7 +112,7 @@ test_svm <- function(
     tau_test=Y1t1_test-Y0t1_test
 
     ## compute quantities of interest
-    That     =  as.numeric(tau_test > 0)
+    That     =  as.numeric(tau_test > c_threshold)
     That_p   = numeric(length(That))
     That_p[sort(tau_test,decreasing =TRUE,index.return=TRUE)$ix[1:(floor(budget*length(tau_test))+1)]] = 1
 

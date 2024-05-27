@@ -10,6 +10,7 @@ run_user <- function(
   iter,
   budget,
   train_method,
+  c_threshold,
   ...
 ) {
 
@@ -28,7 +29,7 @@ run_user <- function(
   ## test
   fit_test <- test_user(
     fit_user, dat_test, dat_total, params$n_df, params$n_tb,
-    indcv, iter, budget, cv
+    indcv, iter, budget, cv, c_threshold
   )
 
   return(list(test = fit_test, train = fit_user$fit))
@@ -38,7 +39,7 @@ run_user <- function(
 
 #'@importFrom stats predict runif
 test_user <- function(
-  fit_user, dat_test, dat_total, n_df, n_tb, indcv, iter, budget, cv
+  fit_user, dat_test, dat_total, n_df, n_tb, indcv, iter, budget, cv, c_threshold
 ) {
 
   if(cv == TRUE){

@@ -6,6 +6,7 @@
 #' @param algorithms
 #'   List of machine learning algorithms to be used.
 #' @param budget The maximum percentage of population that can be treated under the budget constraint.
+#' @param c_threshold The threshold for determining the treatment assignment under the ITR. Default is 0, which assumes all units with a score greater than 0 will receive treatment.
 #' @param n_folds
 #'   Number of cross-validation folds. Default is 5.
 #' @param split_ratio
@@ -33,6 +34,7 @@ estimate_itr <- function(
     n_folds = 5,
     split_ratio = 0,
     ngates = 5,
+    c_threshold = 0,
     preProcess = NULL,
     weights = NULL,
     trControl = caret::trainControl(method = "none"),
@@ -114,6 +116,7 @@ estimate_itr <- function(
     folds      = folds,
     budget     = budget,
     user_model = user_model,
+    c_threshold    = c_threshold,
     ...
   )
 
@@ -144,6 +147,7 @@ fit_itr <- function(
     folds,
     budget,
     user_model,
+    c_threshold,
     ...
 ) {
 
@@ -231,6 +235,7 @@ fit_itr <- function(
           indcv     = 1,
           iter      = 1,
           train_method = train_method,
+          c_threshold = c_threshold,
           ...
         )
 
@@ -258,6 +263,7 @@ fit_itr <- function(
           budget    = budget,
           indcv     = 1,
           iter      = 1,
+          c_threshold = c_threshold,
           train_method = train_method)
         
         # store the results
@@ -280,6 +286,7 @@ fit_itr <- function(
       budget    = budget,
       indcv     = 1,
       iter      = 1,
+      c_threshold = c_threshold,
       train_method = user_model,
       ...
       )
@@ -300,7 +307,8 @@ fit_itr <- function(
         params    = params,
         budget    = budget,
         indcv     = 1, #indcv and iter set to 1 for sample splitting
-        iter      = 1
+        iter      = 1,
+        c_threshold = c_threshold
       )
       # store the results
       fit_ml[["causal_forest"]] <- est$test
@@ -316,7 +324,8 @@ fit_itr <- function(
         params    = params,
         indcv     = 1,
         iter      = 1,
-        budget    = budget
+        budget    = budget,
+        c_threshold = c_threshold
       )
       # store the results
       fit_ml[["lasso"]] <- est$test
@@ -335,6 +344,7 @@ fit_itr <- function(
         budget    = budget,
         train_method = "SuperLearner",
         SL_library    = SL_library,
+        c_threshold = c_threshold,
         ...
       )
       # store the results
@@ -352,7 +362,8 @@ fit_itr <- function(
         params    = params,
         indcv     = 1,
         iter      = 1,
-        budget    = budget
+        budget    = budget,
+        c_threshold = c_threshold
       )
       # store the results
       fit_ml[["BART"]] <- est$test
@@ -416,7 +427,8 @@ fit_itr <- function(
         params    = params,
         indcv     = 1,
         iter      = 1,
-        budget    = budget
+        budget    = budget,
+        c_threshold = c_threshold
       )
       # store the results
       fit_ml[["bagging"]] <- est$test
@@ -432,7 +444,8 @@ fit_itr <- function(
         params    = params,
         indcv     = 1,
         iter      = 1,
-        budget    = budget
+        budget    = budget,
+        c_threshold = c_threshold
       )
       # store the results
       fit_ml[["cart"]] <- est$test
@@ -509,6 +522,7 @@ fit_itr <- function(
             indcv         = indcv,
             iter          = j,
             budget        = budget,
+            c_threshold   = c_threshold,
             ...
           )
 
@@ -536,6 +550,7 @@ fit_itr <- function(
             indcv         = indcv,
             iter          = j,
             budget        = budget,
+            c_threshold   = c_threshold,
             ...
           )
           
@@ -559,6 +574,7 @@ fit_itr <- function(
         indcv     = indcv,
         iter      = j,
         train_method = user_model,
+        c_threshold = c_threshold,
         ...
       )
 
@@ -579,7 +595,8 @@ fit_itr <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          budget    = budget
+          budget    = budget,
+          c_threshold = c_threshold
         )
         # store the results
         fit_ml[["causal_forest"]][[j]] <- est$test
@@ -595,7 +612,8 @@ fit_itr <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          budget    = budget
+          budget    = budget,
+          c_threshold = c_threshold
         )
         # store the results
         fit_ml[["lasso"]][[j]] <- est$test
@@ -614,6 +632,7 @@ fit_itr <- function(
           budget    = budget,
           train_method = "SuperLearner",
           SL_library    = SL_library,
+          c_threshold = c_threshold,
           ...
         )
         # store the results
@@ -630,7 +649,8 @@ fit_itr <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          budget    = budget
+          budget    = budget,
+          c_threshold = c_threshold
         )
         # store the results
         fit_ml[["BART"]][[j]] <- est$test
@@ -694,7 +714,8 @@ fit_itr <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          budget    = budget
+          budget    = budget,
+          c_threshold = c_threshold
         )
         # store the results
         fit_ml[["bagging"]][[j]] <- est$test
@@ -710,7 +731,8 @@ fit_itr <- function(
           params    = params,
           indcv     = indcv,
           iter      = j,
-          budget    = budget
+          budget    = budget,
+          c_threshold = c_threshold
         )
         # store the results
         fit_ml[["cart"]][[j]] <- est$test
