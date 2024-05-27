@@ -372,7 +372,7 @@ print.summary.itr <- function(x, ...) {
 
   # URATE
   cli::cat_rule(left = "URATE")
-  if(x[["URATE"]] == NULL) {
+  if(is.null(x[["URATE"]])) {
     cli::cat_line("Not supported with cross-validation")
   } else {
     print(as.data.frame(x[["URATE"]]), digits = 2)
