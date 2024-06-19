@@ -146,6 +146,121 @@ ggplot(data, aes(x=fraction,y=aupec,group=type)) +
   return(out)
 }
 
+#' Plot the AUPEC curve
+#' @import ggplot2
+#' @import ggthemes
+#' @import purrr
+#' @importFrom stats sd
+#' @param x An object of \code{AUPEC()} class. This is typically an output of \code{AUPEC()} function.
+#' @param Y The outcome variable.
+#' @param T The treatment variable.
+#' @param ... Further arguments passed to the function.
+#' @return A plot of ggplot2 object. The plot shows the AUPEC curve across each possible budget point for the dataset. Each step increases the budget by 1/n where n is the number of data points. 
+#' @export
+plot.aupec <- function(x, Y, T, ...) {
+
+  estimate = x
+  
+  # format the data
+  data <- tibble(
+    fraction = seq(1,length(Y))/length(Y),
+    aupec = aupeclist$vec + mean(Y),
+    sd = aupeclist$sd,
+    AUPECmin = aupec - 1.96*aupeclist$sd,
+    AUPECmax = aupec + 1.96*aupeclist$sd
+  )
+
+  # format the labels
+  graphLabels <- data.frame(
+    Pval = paste0("AUPEC = ", round(aupeclist$aupec, 2), " (s.e. = ", round(aupeclist$sd, 2), ")"))
+
+  # plot
+  ggplot(data, aes(x=fraction,y=aupec)) +
+    geom_line(alpha=0.5,colour="red") +
+    scale_colour_few("Dark")+
+    xlab("Maximum Proportion Treated")+
+    ylab("AUPEC")+
+    scale_x_continuous(labels=scales::percent)+
+    scale_y_continuous(
+      limits = c(min(data$AUPECmin, na.rm = TRUE)-0.5, max(data$AUPECmax, na.rm = TRUE)+ 0.5))+
+    theme_few()+
+    geom_ribbon(
+      aes(ymin=AUPECmin, ymax=AUPECmax),fill="tomato1",alpha=0.2) +
+    geom_abline(
+      intercept = sum(Y*(1-T))/sum(1-T), slope = sum(Y*T)/sum(T)-sum(Y*(1-T))/sum(1-T),linewidth=0.5) +
+    geom_text(
+      data = graphLabels, aes(x = 0.57, y = max(data$AUPECmax, na.rm = TRUE)+0.35, label = Pval),size=3) +
+    theme(text = element_text(size=13.5),
+          axis.text = element_text(size=10),
+          strip.text = element_text(size = 13.5)) -> plot
+
+  return(plot)
+}
+
+
+#' Plot the AUPEC curve under cross-validation
+#' @import ggplot2
+#' @import ggthemes
+#' @import purrr
+#' @importFrom stats sd
+#' @param x An object of \code{AUPECcv()} class. This is typically an output of \code{AUPECcv()} function.
+#' @param tau A vector of the unit-level continuous score for treatment assignment. 
+#' @param tau_cv A matrix where the \code{i}th column is the unit-level continuous score for treatment assignment generated in the \code{i}th fold.
+#' @param Y The outcome variable.
+#' @param T The treatment variable.
+#' @param ind A vector of integers (between 1 and number of folds inclusive) indicating which testing set does each sample belong to.
+#' @param ... Further arguments passed to the function.
+#' @return A plot of ggplot2 object. The plot shows the AUPEC curve across each possible budget point for the dataset. Each step increases the budget by 1/n where n is the number of data points.
+#' @export
+plot.aupec_cv <- function(
+  x, tau, tau_cv, Y, T, ind, ...) {
+
+  estimate = x
+  
+  # get cross-validated AUPEC
+  get_aupec_cv(
+    tau = tau,
+    tau_cv = tau_cv,
+    Ycv = Y,
+    Tcv = T,
+    indcv = ind
+  ) -> aupec_data
+
+  # format the data
+  aupec_data$outputdf %>% as_tibble() %>%
+    mutate(
+      sd = aupec_data$aupec_cv$sd,
+      AUPECmin = aupec - 1.96*sd,
+      AUPECmax = aupec + 1.96*sd) -> data
+
+  # format the labels
+  graphLabels <- data.frame(
+    Pval = paste0("AUPEC = ", round(aupec_data$aupec_cv$aupec, 2), " (s.e. = ", round(aupec_data$aupec_cv$sd, 2), ")"))
+
+  # plot
+  data %>%
+    ggplot(aes(x=fraction,y=aupec)) +
+    geom_line(alpha=0.5,colour="red") +
+    scale_colour_few("Dark")+
+    xlab("Maximum Proportion Treated")+
+    ylab("AUPEC")+
+    scale_x_continuous(labels=scales::percent)+
+    scale_y_continuous(
+      limits = c(min(data$AUPECmin, na.rm = TRUE)-0.5, max(data$AUPECmax, na.rm = TRUE)+ 0.5))+
+    theme_few()+
+    geom_ribbon(
+      aes(ymin=AUPECmin, ymax=AUPECmax),fill="tomato1",alpha=0.2) +
+    geom_abline(
+      intercept = sum(Y*(1-T))/sum(1-T), slope = sum(Y*T)/sum(T)-sum(Y*(1-T))/sum(1-T),linewidth=0.5) +
+    geom_text(
+      data = graphLabels, aes(x = 0.57, y = max(data$AUPECmax, na.rm = TRUE)+0.35, label = Pval),size=3) +
+    theme(text = element_text(size=13.5),
+          axis.text = element_text(size=10),
+          strip.text = element_text(size = 13.5)) -> plot
+
+  return(plot)
+
+}
 
 #' Plot the GATE estimate
 #' @import ggplot2

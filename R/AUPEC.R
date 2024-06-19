@@ -101,12 +101,21 @@ AUPEC <- function (T, tau, Y, centered = TRUE) {
     SfA0=var((ThatfA2*Y)[T==0])
     varfA=SfA1/n1+SfA0/n0+covarsum1+covarsum2
     AUPEC=1/n1*sum(T*ThatfA*Y)+1/n0*sum(Y*(1-T)*(1-ThatfA))-0.5/n1*sum(T*Y)-0.5/n0*sum((1-T)*Y)
-    return(list(aupec=AUPEC,sd=sqrt(max(varfA,0)),vec=AUPECvec))
+
+    out <- list(aupec=AUPEC,sd=sqrt(max(varfA,0)),vec=AUPECvec)
+
   } else {
+
     AUPEC=1/n0*sum(Y*(1-T))-0.5/n1*sum(T*Y)-0.5/n0*sum((1-T)*Y)
     AUPECvec=numeric(n)
     AUPECvec[]=1/n0*sum(Y*(1-T))
-    return(list(aupec=AUPEC,sd=0,vec=AUPECvec))
+
+    out <- list(aupec=AUPEC,sd=0,vec=AUPECvec)
   }
+  
+  class(out) <- c("aupec", class(out))
+
+  return(out)
+
 }
 

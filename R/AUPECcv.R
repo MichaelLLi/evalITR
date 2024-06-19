@@ -120,6 +120,9 @@ AUPECcv <- function (T, tau, Y, ind, centered = TRUE) {
   SF2 = var(aupecfold)
   varexp = SfA1 + SfA0 + covarsum1 + var(covarsum2)
   vartotal = varexp - (nfolds - 1) / nfolds * min(varexp, SF2)
-  return(list(aupec=mean(aupecfold),sd=sqrt(max(vartotal,0))))
+
+  out <- list(aupec=mean(aupecfold),sd=sqrt(max(vartotal,0)))
+  class(out) <- c("aupec_cv", class(out))
+  return(out)
 }
 

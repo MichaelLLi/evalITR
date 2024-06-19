@@ -413,6 +413,50 @@ getAupecOutput = function(
               outputdf = outputdf))
 }
 
+# Re-organize cross-validation output to plot the AUPEC curve -- standalone function
+get_aupec_cv = function(
+  tau, tau_cv, 
+  Ycv, Tcv, indcv
+){
+  aupec_grid = list()
+  Ycv = as.numeric(Ycv)
+  NFOLDS = length(unique(indcv))
+
+  for (j in 1:NFOLDS){
+    aupec_grid[[j]] = AUPEC(Tcv[indcv==j],tau[indcv==j],Ycv[indcv==j])
+  }
+
+  ## use taucv
+  aupec_cv = AUPECcv(T = Tcv, tau = tau_cv, Y = Ycv, ind = indcv)
+
+  aupec_vec = data.frame(matrix(NA, ncol = NFOLDS, nrow = max(table(indcv))))
+
+  # forward fill the last aupec values
+  for (j in 1:NFOLDS) {
+    vec_length <- length(aupec_grid[[j]]$vec)
+    fill_length <- nrow(aupec_vec) - vec_length
+
+    if (fill_length > 0) {
+      last_value <- aupec_grid[[j]]$vec[vec_length]
+      extended_vec <- c(aupec_grid[[j]]$vec, rep(last_value, fill_length))
+    } else {
+      extended_vec <- aupec_grid[[j]]$vec
+    }
+    aupec_vec[,j] = extended_vec
+  }
+
+  # format the output
+  aupec_vec = rowMeans(aupec_vec, na.rm = T)
+  outputdf = data.frame(
+    fraction = seq(1,length(aupec_vec))/length(aupec_vec),
+    aupec = aupec_vec + mean(Ycv))
+
+  out <- list(aupec_cv = aupec_cv,
+              aupec_vec = aupec_vec,
+              outputdf = outputdf)
+  return(out)
+}
+
 # transformation function for taucv matrix
 gettaucv <- function(
     fit,
