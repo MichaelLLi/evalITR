@@ -397,26 +397,60 @@ getAupecOutput = function(
 }
 
 # transformation function for taucv matrix
-gettaucv <- function(
-    fit,
-    ...
-){
-  estimates <- fit$estimates
+# gettaucv <- function(
+#     estimates,
+#     ...
+# ){
+#   # estimates <- fit$estimates
+#   fit_ml <- estimates$fit_ml
+#   n_folds <- estimates$params$n_folds
+#   tau_cv <- list()
+#
+#   # for one model
+#   for (k in seq(n_folds)) {
+#     tau_cv[[k]] <- fit_ml[["causal_forest"]][[k]][["tau_cv"]]
+#   }
+#
+#   # convert to a single matrix
+#   tau_cv <- do.call(cbind, tau_cv)
+#
+#   return(tau_cv)
+#
+# }
+gettaucv <- function(estimates, ...) {
+  # Assuming fit_ml is a named list of models
   fit_ml <- estimates$fit_ml
   n_folds <- estimates$params$n_folds
-  tau_cv <- list()
 
-  # for one model
-  for (k in seq(n_folds)) {
-    tau_cv[[k]] <- fit_ml[["causal_forest"]][[k]][["tau_cv"]]
+  # Prepare a list to store tau_cv for each model and each fold
+  all_models_tau_cv <- list()
+
+  # Loop over all models in fit_ml
+  for (model_name in names(fit_ml)) {
+    model_tau_cv <- list()
+
+    # For one model, loop over all k folds
+    for (k in seq(n_folds)) {
+      # Check if the k-th fold exists for the current model
+      if (is.list(fit_ml[[model_name]]) && k <= length(fit_ml[[model_name]])) {
+        # Check if tau_cv exists for the k-th fold of the current model
+        if ("tau_cv" %in% names(fit_ml[[model_name]][[k]])) {
+          model_tau_cv[[k]] <- fit_ml[[model_name]][[k]][["tau_cv"]]
+        } else {
+          warning(paste("tau_cv not found in fold", k, "of model", model_name))
+        }
+      } else {
+        warning(paste("Fold", k, "not found in model", model_name))
+      }
+    }
+
+    # Convert to a single matrix and store it with the model's name
+    all_models_tau_cv[[model_name]] <- do.call(cbind, model_tau_cv)
   }
 
-  # convert to a single matrix
-  tau_cv <- do.call(cbind, tau_cv)
-
-  return(tau_cv)
-
+  return(all_models_tau_cv)
 }
+
 
 
 

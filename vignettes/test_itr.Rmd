@@ -1,0 +1,84 @@
+---
+title: "Nonparametric statistical tests for treatment heterogeneity and rank consistency across multiple ML algorithms"
+output: rmarkdown::html_vignette
+vignette: >
+  %\VignetteIndexEntry{Nonparametric statistical tests with multiple ML algorithms}
+  %\VignetteEngine{knitr::rmarkdown}
+  %\VignetteEncoding{UTF-8}
+---
+
+```{r, include = FALSE}
+knitr::opts_chunk$set(
+  collapse = TRUE,
+  comment = "#>",
+  fig.path = "../man/figures/README-"
+  )
+
+library(dplyr)
+
+load("../data/star.rda")
+
+# specifying the outcome
+outcomes <- "g3tlangss"
+
+# specifying the treatment
+treatment <- "treatment"
+
+# specifying the data (remove other outcomes)
+star_data <- star %>% dplyr::select(-c(g3treadss,g3tmathss))
+
+# specifying the formula
+user_formula <- as.formula(
+  "g3tlangss ~ treatment + gender + race + birthmonth + 
+  birthyear + SCHLURBN + GRDRANGE + GKENRMNT + GKFRLNCH + 
+  GKBUSED + GKWHITE ")
+```
+
+In practice, machine learning (ML) algorithms may fail to ascertain heterogeneous treatment effects due to small small sample sizes, high dimensionality, and arbitrary parameter-tuning. The `test_itr` function allows users to empirically validate the estimates of GATEs under various ML algorithms with statistical testing. In particular, there are two types of nonparametric statistical tests: (1) test for across group treatment effects heterogeneity and (2) test of rank consistency of GATEs. The following provides a description of each test. The tests are based on the idea that, if an ML algorithm produces a reasonable scoring rule (achieved by the `estimate_itr` function), it is reasonable to expect that (1) the GATEs across groups are heterogeneous; and (2) the rank ordering of the GATEs based on their magnitude should be mononotic.
+
+Following the previous examples, we first estimate GATEs using causal forest (`causal forest`), Bayesian Additive Regression Trees (`bartc`), LASSO (`lasso`), random forest (`rf`) under cross-validation using the `estimate_itr` function. We specify the number of groups to divide the sample into through the `ngates` argument. By setting `ngates = 5` in the example below, we estimate the heterogeneous impact of small class sizes on students’ writing scores across 5 groups of students. 
+
+```{r multiple, warning=FALSE, message=FALSE}
+# library(evalITR)
+devtools::load_all(".")
+
+# specify the trainControl method
+fitControl <- caret::trainControl(
+                           method = "repeatedcv",
+                           number = 2,
+                           repeats = 2)
+# estimate ITR
+set.seed(2023)
+fit_cv <- estimate_itr(
+               treatment = "treatment",
+               form = user_formula,
+               data = star_data,
+               trControl = fitControl,
+               algorithms = c(
+                  "causal_forest", # from caret
+                  "bartc", # from caret
+                  "lasso", # from caret 
+                  "rf"), # from caret 
+               budget = 0.2, # 20% budget constraint
+               n_folds = 5, # 5-fold cross-validation
+               ngates = 5) # 5 groups
+
+# evaluate ITR
+est_cv <- evaluate_itr(fit_cv)
+
+# extract GATEs estimates
+summary(est_cv)$GATE
+```
+The table reports the quintile GATEs ($K = 5$) estimates for each ML algorithm. We find that the Random Forest is able to produce statistically negative GATE for the lowest quantitle group (group 1) under cross-validation. This provides evidence that the Random Forest is able to identify a 20% subgroup whose writing scores are negatively impacted by small class sizes.
+
+We now conduct the statistical tests of treatment effect heterogeneity and rank consistency to validate these GATEs estimates. We use the module object output `test_est_cv` from the `evaluate_itr` function as the input object for the `test_itr` function to conduct 2 tests simultaneously. We can summarize the test statistics and the p-values using the `summary` function. Lastly, we use the `nsims` argument to specify the number of simulations to conduct for each test. The default is 1000 simulations.
+
+```{r warning=FALSE, message=FALSE}
+# conduct nonparametric tests
+test_est_cv <- test_itr(est_cv,
+                        nsim = 5000)
+
+# summarize test statistics and p-values
+summary(test_est_cv)
+```
+The table reports the resulting values of test statistics and the p-values for each test under each algorithm. We find that none of the ML algorithms is able to reject the treatment effect homogeneity hypothesis under cross-validation, which indicates that these algorithms failed to identify statistically significant GATEs estimate for any subgroup. In addition, none of the ML algorithms is able to reject the rank consistency hypothesis under cross-validation. Thus, there is no strong statistical evidence that these algorithms are producing unreliable GATEs.
