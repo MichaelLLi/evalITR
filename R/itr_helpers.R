@@ -55,7 +55,6 @@ create_ml_args = function(data){
 }
 
 
-
 #' Create arguments for causal forest
 #' @importFrom stats model.matrix
 #' @param data A dataset
@@ -346,24 +345,24 @@ create_ml_args_caret = function(data){
 # }
 
 
-# Create arguments for kNN
-create_ml_args_knn = function(create_ml_arguments_outputs){
+# # Create arguments for kNN
+# create_ml_args_knn = function(create_ml_arguments_outputs){
 
-  formula = create_ml_arguments_outputs[["formula"]]
-  Y = create_ml_arguments_outputs[["Y"]]
-  X = create_ml_arguments_outputs[["X"]]
-  T = create_ml_arguments_outputs[["T"]]
+#   formula = create_ml_arguments_outputs[["formula"]]
+#   Y = create_ml_arguments_outputs[["Y"]]
+#   X = create_ml_arguments_outputs[["X"]]
+#   T = create_ml_arguments_outputs[["T"]]
 
-  data = cbind(Y, X, T)
+#   data = cbind(Y, X, T)
 
-  # also needed for testing:
-  X0t = cbind(X, T = 0)
-  X1t = cbind(X, T = 1)
-  data0t = cbind(Y, X0t)
-  data1t = cbind(Y, X1t)
+#   # also needed for testing:
+#   X0t = cbind(X, T = 0)
+#   X1t = cbind(X, T = 1)
+#   data0t = cbind(Y, X0t)
+#   data1t = cbind(Y, X1t)
 
-  return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
-}
+#   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
+# }
 
 # Re-organize cross-validation output to plot the AUPEC curve
 getAupecOutput = function(
