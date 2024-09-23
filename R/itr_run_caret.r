@@ -11,30 +11,35 @@ run_caret <- function(
   budget,
   train_method,
   c_threshold,
+  meta_learner,
   ...
 ) {
 
   # split/cross-validation
   cv <- params$cv
 
+  # run meta-learner
+  meta_learner <- params$meta_learner
+
   # caret train parameters
   train_params <- params$train_params
 
   ## train
-  fit_train <- train_caret(dat_train, train_params, train_method, ...)
+  fit_train <- train_caret(dat_train, train_params, train_method, meta_learner, ...)
 
   ## test
   fit_test <- test_caret(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb,
-    indcv, iter, budget, cv, c_threshold
+    indcv, iter, budget, cv, c_threshold, meta_learner
   )
 
   return(list(test = fit_test, train = fit_train))
 }
 
-
-
-train_caret <- function(dat_train, train_params, train_method, ...) {
+# train with caret
+#' @importFrom stats as.formula
+#' @importFrom dplyr select
+train_caret <- function(dat_train, train_params, train_method, meta_learner, ...) {
 
     ## format training data
     training_data_elements_caret = create_ml_args_caret(dat_train)
@@ -47,21 +52,53 @@ train_caret <- function(dat_train, train_params, train_method, ...) {
     ## add additional parameters from ...
     train_params = c(train_params, list(...))
     
-    ## train
-    fit <- do.call(caret::train, c(list(
-            formula,
-            data = training_data_elements_caret[["data"]],
-            method = train_method), 
-            train_params))
+    ## train with specified meta-learner
+    # slearner
+    if (meta_learner == "slearner") {
 
-  return(fit)
+      fit <- fit_slearner(
+        data = training_data_elements_caret[["data"]],
+        formula = formula,
+        train_method = train_method,
+        train_params = train_params
+      )
+    
+    return(fit)
 
+    }
+
+    # tlearner
+    if (meta_learner == "tlearner") {
+      # treated group
+      fit <- fit_tlearner(
+        data = training_data_elements_caret[["data"]],
+        formula = formula,
+        train_method = train_method,
+        train_params = train_params
+      )
+    
+    return(fit)
+
+    }
+
+    # xlearner
+    if (meta_learner == "xlearner") {
+
+      fit <- fit_xlearner(
+        data = training_data_elements_caret[["data"]],
+        formula = formula,
+        train_method = train_method,
+        train_params = train_params
+      )
+    
+    return(fit)
+    }
 }
 
 #'@importFrom stats predict runif
 test_caret <- function(
   fit_train, dat_test, dat_total, n_df, n_tb, indcv,
-  iter, budget, cv, c_threshold
+  iter, budget, cv, c_threshold, meta_learner
 ) {
 
   ## format data
@@ -69,17 +106,38 @@ test_caret <- function(
   total_data_elements_caret   = create_ml_args_caret(dat_total)
 
   if(cv == TRUE){
-    ## predict
-    Y0t_total = predict(
-      fit_train,
-      as.data.frame(total_data_elements_caret[["data0t"]]),
-      type = "raw")
-    Y1t_total = predict(
-      fit_train,
-      as.data.frame(total_data_elements_caret[["data1t"]]),
-      type = "raw")
 
-    tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
+    # test with specified meta-learner
+
+    # slearner
+    if (meta_learner == "slearner") {
+
+    tau_total = predict_slearner(
+      fit_train, 
+      total_data_elements_caret[["data0t"]], total_data_elements_caret[["data1t"]], 
+      n_df, cv)
+
+    }
+
+    # tlearner  
+    if (meta_learner == "tlearner") {
+
+    tau_total = predict_tlearner(
+      fit_train, 
+      total_data_elements_caret[["data"]], 
+      n_df, cv)
+
+    }
+
+    # xlearner
+    if (meta_learner == "xlearner") {
+
+    tau_total = predict_xlearner(
+      fit_train, 
+      total_data_elements_caret[["data"]], 
+      n_df, cv)
+
+    }
 
     ## compute quantities of interest
     tau_test <-  tau_total[indcv == iter]
@@ -96,17 +154,37 @@ test_caret <- function(
   }
 
   if(cv == FALSE){
-    ## predict
-    Y0t_test = predict(
-      fit_train,
-      as.data.frame(testing_data_elements_caret[["data0t"]]),
-      type = "raw")
-    Y1t_test = predict(
-      fit_train,
-      as.data.frame(testing_data_elements_caret[["data1t"]]),
-      type = "raw")
 
-    tau_test = Y1t_test - Y0t_test
+    # test with specified meta-learner
+    # slearner
+    if (meta_learner == "slearner") {
+
+      tau_test = predict_slearner(
+        fit_train, 
+        testing_data_elements_caret[["data0t"]], testing_data_elements_caret[["data1t"]], 
+        n_df, cv)
+
+    }
+
+    # tlearner
+    if (meta_learner == "tlearner") {
+
+      tau_test = predict_tlearner(
+        fit_train, 
+        testing_data_elements_caret[["data"]], 
+        n_df, cv)
+
+    }
+
+    # xlearner
+    if (meta_learner == "xlearner") {
+
+      tau_test = predict_xlearner(
+        fit_train, 
+        testing_data_elements_caret[["data"]], 
+        n_df, cv)
+
+    }
 
     ## compute quantities of interest
     That     =  as.numeric(tau_test > c_threshold)

@@ -318,51 +318,205 @@ create_ml_args_caret = function(data){
   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
 }
 
+# function to implement X-learner
+run_xlearner = function(data){
+
+  # fit a linear model with X.1 and T interaction
+mod = lm(Y ~ X.1 * as.factor(T) + X.2 * as.factor(T) + X.3 * as.factor(T), data = test_data)
+
+# caculate the fitted values
+fitted_1 = predict(mod, newdata = test_data %>% mutate(T = "1"))
+
+fitted_2 = predict(mod, newdata = test_data %>% mutate(T = "2"))
+
+results = (fitted_1 + fitted_2) / 2
+
+return(results)
+
+}
+
+# function to implement T-learner
+run_tlearner = function(data){
+
+  # fit a linear model with X.1 and T interaction
+mod = lm(Y ~ X.1 * as.factor(T) + X.2 * as.factor(T) + X.3 * as.factor(T), data = test_data)
+
+# caculate the fitted values
+fitted_1 = predict(mod, newdata = test_data %>% mutate(T = "1"))
+
+fitted_2 = predict(mod, newdata = test_data %>% mutate(T = "2"))
+
+results = (fitted_1 + fitted_2) / 2
+
+return(results)
+
+}
+
+# function to fit slearner
+fit_slearner = function(data, formula, train_method, train_params){
+  fit <- do.call(caret::train, c(list(
+            formula,
+            data = data,
+            method = train_method), 
+            train_params))
+
+  return(fit)
+
+}
+
+# function to fit tlearner
+fit_tlearner = function(data, formula, train_method, train_params){
+  # treated group
+      fit_treated <- do.call(caret::train, c(list(
+              formula,
+              data = data %>% dplyr::filter(T == 1),
+              method = train_method), 
+              train_params))
+
+      # control group
+      fit_control <- do.call(caret::train, c(list(
+              formula,
+              data = data %>% dplyr::filter(T == 0),
+              method = train_method), 
+              train_params))
+
+  return(list(fit_treated = fit_treated, fit_control = fit_control))
+
+}
+
+# function to fit xlearner
+fit_xlearner = function(data, formula, train_method, train_params){
+
+  # treated group data
+  data_treated <- data %>% dplyr::filter(T == 1)
+
+  # control group data
+  data_control <- data %>% dplyr::filter(T == 0)
+
+  # treated group
+  fit_treated_base <- do.call(caret::train, c(list(
+          formula,
+          data = data_treated,
+          method = train_method), 
+          train_params))
+
+  # control group
+  fit_control_base <- do.call(caret::train, c(list(
+          formula,
+          data = data_control,
+          method = train_method), 
+          train_params))
+
+  # predict treated group with control model
+  Y_hat_control_for_treated = predict(
+    fit_control_base,
+    as.data.frame(data_treated),
+    type = "raw")
+
+  # predict control group with treated model
+  Y_hat_treated_for_control = predict(
+    fit_treated_base,
+    as.data.frame(data_control),
+    type = "raw")
+
+  # observed outcomes 
+  Y_obs_treated = data_treated %>% dplyr::pull(Y)
+  Y_obs_control = data_control %>% dplyr::pull(Y)
+
+  # calculate residual
+  D1 = Y_obs_treated - Y_hat_control_for_treated
+  D0 = Y_hat_treated_for_control - Y_obs_control
+
+  # formula
+  formula_D1 = as.formula(paste("D1 ~ (", paste0(covariates, collapse = "+"), ")*T"))
+
+  formula_D0 = as.formula(paste("D0 ~ (", paste0(covariates, collapse = "+"), ")*T"))
+
+  # fit models on residuals
+  fit_treated <- do.call(
+    caret::train, c(list(
+    formula_D1,
+    data = as.data.frame(data_treated),
+    method = train_method), 
+    train_params))
+
+  fit_control <- do.call(
+    caret::train, c(list(
+    formula_D0,
+    data = as.data.frame(data_control),
+    method = train_method), 
+    train_params))
+
+return(list(fit_treated = fit_treated, fit_control = fit_control))
+
+}
+
+# function to predict with slearner
+predict_slearner = function(fit, data_0t, data_1t, n_df, cv){
+
+  Y0t_total = predict(
+      fit,
+      as.data.frame(data_0t),
+      type = "raw")
+  Y1t_total = predict(
+    fit,
+    as.data.frame(data_1t),
+    type = "raw")
+
+  if(cv == TRUE){
+    tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
+  }else{
+    tau_total = Y1t_total - Y0t_total
+  }
+
+  return(tau_total)
+}
+
+# function to predict with tlearner
+predict_tlearner = function(fit_train, data , n_df, cv){
+
+  Y0t_total = predict(
+        fit_train$fit_control,
+        as.data.frame(data),
+        type = "raw")
+
+  Y1t_total = predict(
+    fit_train$fit_treated,
+    as.data.frame(data),
+    type = "raw")
+
+  if(cv == TRUE){
+    tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
+  }else{
+    tau_total = Y1t_total - Y0t_total
+  }
+
+  return(tau_total)
+
+}
 
 
+# function to predict with xlearner
+predict_xlearner = function(fit_train, data, n_df, cv){
 
-# # Create arguments for neural net
-#
-# create_ml_args_neuralnet = function(training_data, create_ml_arguments_outputs){
-#
-#
-#   formula = create_ml_arguments_outputs[["formula"]]
-#   Y = create_ml_arguments_outputs[["Y"]]
-#   X = create_ml_arguments_outputs[["X"]]
-#   T = create_ml_arguments_outputs[["T"]]
-#
-#   max = apply(training_data, 2 , max)
-#   min = apply(training_data, 2 , min)
-#   scaled_data = as.data.frame(scale(training_data, center = min, scale = max - min))
-#
-#   # also needed for testing:
-#   X0t = cbind(X, T = 0)
-#   X1t = cbind(X, T = 1)
-#   X0t_expand = model.matrix(~. -1, data = X0t)
-#   X1t_expand = model.matrix(~. -1, data = X1t)
-#
-#   return(list(formula = formula, scaled_data = scaled_data, X0t_expand = X0t_expand, X1t_expand = X1t_expand))
-# }
+  Y0t_total = predict(
+    fit_train$fit_control,
+    as.data.frame(data),
+    type = "raw")
 
+  Y1t_total = predict(
+    fit_train$fit_treated,
+    as.data.frame(data),
+    type = "raw")
+        
+  if(cv == TRUE){
+    tau_total = ifelse(data$T == 1, Y1t_total, Y0t_total) + runif(n_df,-1e-6,1e-6)
+  }else{
+    tau_total = ifelse(data$T == 1, Y1t_total, Y0t_total)
+  }
 
-# # Create arguments for kNN
-# create_ml_args_knn = function(create_ml_arguments_outputs){
-
-#   formula = create_ml_arguments_outputs[["formula"]]
-#   Y = create_ml_arguments_outputs[["Y"]]
-#   X = create_ml_arguments_outputs[["X"]]
-#   T = create_ml_arguments_outputs[["T"]]
-
-#   data = cbind(Y, X, T)
-
-#   # also needed for testing:
-#   X0t = cbind(X, T = 0)
-#   X1t = cbind(X, T = 1)
-#   data0t = cbind(Y, X0t)
-#   data1t = cbind(Y, X1t)
-
-#   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
-# }
+  return(tau_total)
+}
 
 # Re-organize cross-validation output to plot the AUPEC curve
 getAupecOutput = function(

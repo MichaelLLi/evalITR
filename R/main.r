@@ -20,6 +20,7 @@
 #' @param tuneLength caret parameter
 #' @param user_model A user-defined function to create an ITR. The function should take the data as input and return a model to estimate the ITR.
 #' @param SL_library A list of machine learning algorithms to be used in the super learner.
+#' @param meta_learner A string indicating the meta-learner to be used. Default is "SL.randomForest". The default is set to "slearner". Other options include "tlearner" and "xlearner".
 #' @param ... Additional arguments passed to \code{caret::train}
 #' @import dplyr
 #' @importFrom rlang !! sym
@@ -42,6 +43,7 @@ estimate_itr <- function(
     tuneLength = ifelse(trControl$method == "none", 1, 3),
     user_model = NULL,
     SL_library = NULL,
+    meta_learner = "slearner",
     ...
 ) {
 
@@ -85,7 +87,7 @@ estimate_itr <- function(
 
   params <- list(
     n_df = n_df, n_folds = n_folds, n_alg = n_alg, split_ratio = split_ratio, ngates = ngates, cv = cv,
-    train_params = train_params, caret_algorithms = caret_algorithms, rlearner_algorithms = rlearner_algorithms, SL_library = SL_library)
+    train_params = train_params, caret_algorithms = caret_algorithms, rlearner_algorithms = rlearner_algorithms, SL_library = SL_library, meta_learner = meta_learner)
 
   df <- list(algorithms = algorithms, outcome = outcome, data = data, treatment = treatment)
 
@@ -117,6 +119,7 @@ estimate_itr <- function(
     budget     = budget,
     user_model = user_model,
     c_threshold    = c_threshold,
+    meta_learner = meta_learner,
     ...
   )
 
@@ -148,6 +151,7 @@ fit_itr <- function(
     budget,
     user_model,
     c_threshold,
+    meta_learner,
     ...
 ) {
 
@@ -166,6 +170,9 @@ fit_itr <- function(
 
   # super learner library
   SL_library = params$SL_library
+
+  # meta-learner
+  meta_learner = params$meta_learner
 
 ## =================================
 ## sample splitting
@@ -236,6 +243,7 @@ fit_itr <- function(
           iter      = 1,
           train_method = train_method,
           c_threshold = c_threshold,
+          meta_learner = meta_learner,
           ...
         )
 
@@ -523,6 +531,7 @@ fit_itr <- function(
             iter          = j,
             budget        = budget,
             c_threshold   = c_threshold,
+            meta_learner  = meta_learner,
             ...
           )
 
