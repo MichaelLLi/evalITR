@@ -25,7 +25,7 @@ run_caret <- function(
   train_params <- params$train_params
 
   ## train
-  fit_train <- train_caret(dat_train, train_params, train_method, meta_learner, ...)
+  fit_train <- train_caret(dat_train, dat_total, train_params, train_method, meta_learner, ...)
 
   ## test
   fit_test <- test_caret(
@@ -39,7 +39,7 @@ run_caret <- function(
 # train with caret
 #' @importFrom stats as.formula
 #' @importFrom dplyr select
-train_caret <- function(dat_train, train_params, train_method, meta_learner, ...) {
+train_caret <- function(dat_train, dat_total, train_params, train_method, meta_learner, ...) {
 
   ## format training data
   training_data_elements_caret = create_ml_args_caret(dat_train)
@@ -52,7 +52,7 @@ train_caret <- function(dat_train, train_params, train_method, meta_learner, ...
 
   formula_Y = as.formula(paste("Y ~ (", paste0(covariates, collapse = "+"), ")*T"))
 
-  formula_ps = as.formula(paste("T ~ (", paste0(covariates, collapse = "+"), ")"))
+  formula_ps = as.formula(paste("as.factor(T) ~ (", paste0(covariates, collapse = "+"), ")"))
 
   ## add additional parameters from ...
   train_params = c(train_params, list(...))
@@ -61,7 +61,7 @@ train_caret <- function(dat_train, train_params, train_method, meta_learner, ...
   # slearner
   if (meta_learner == "slearner") {
 
-    fit <- fit_slearner(
+    fit <- fit_slearner_caret(
       data = training_data_elements_caret[["data"]],
       formula = formula_Y,
       train_method = train_method,
@@ -72,7 +72,7 @@ train_caret <- function(dat_train, train_params, train_method, meta_learner, ...
   # tlearner
   if (meta_learner == "tlearner") {
     # treated group
-    fit <- fit_tlearner(
+    fit <- fit_tlearner_caret (
       data = training_data_elements_caret[["data"]],
       formula = formula_Y,
       train_method = train_method,
@@ -83,9 +83,10 @@ train_caret <- function(dat_train, train_params, train_method, meta_learner, ...
   # xlearner
   if (meta_learner == "xlearner") {
 
-    fit <- fit_xlearner(
+    fit <- fit_xlearner_caret(
       data = training_data_elements_caret[["data"]],
       formula = formula_Y,
+      formula_ps = formula_ps,
       train_method = train_method,
       train_params = train_params,
       covariates = covariates
@@ -95,7 +96,7 @@ train_caret <- function(dat_train, train_params, train_method, meta_learner, ...
   # rlearner
   if (meta_learner == "rlearner") {
 
-    fit <- fit_rlearner(
+    fit <- fit_rlearner_caret(
       data = training_data_elements_caret[["data"]],
       formula_Y = formula,
       formula_ps = formula,
@@ -108,7 +109,7 @@ train_caret <- function(dat_train, train_params, train_method, meta_learner, ...
   # drlearner
   if (meta_learner == "drlearner") {
 
-    fit <- fit_drlearner(
+    fit <- fit_drlearner_caret(
       total_data = total_data_elements_caret[["data"]],
       train_data = training_data_elements_caret[["data"]],
       formula_Y = formula,
@@ -179,12 +180,16 @@ test_caret <- function(
     # drlearner
     if (meta_learner == "drlearner") {
 
-    tau_total = predict_drlearner(
+    tau_total = predict_drlearner_caret(
       fit_Y_treated = fit_train$fit_Y_treated,
       fit_Y_control = fit_train$fit_Y_control,
       fit_ps = fit_train$fit_ps,
-      total_data_elements_caret[["data"]], 
-      n_df, cv)
+      data = total_data_elements_caret[["data"]], 
+      covariates = covariates, 
+      train_method = train_method, 
+      train_params = train_params, 
+      n_df = n_df, 
+      cv = cv)
 
     }
 
@@ -249,7 +254,9 @@ test_caret <- function(
     if (meta_learner == "drlearner") {
 
       tau_test = predict_drlearner(
-        fit_train, 
+        fit_Y_treated = fit_train$fit_Y_treated,
+        fit_Y_control = fit_train$fit_Y_control,
+        fit_ps = fit_train$fit_ps,
         testing_data_elements_caret[["data"]], 
         n_df, cv)
 

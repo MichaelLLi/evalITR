@@ -9,7 +9,7 @@ estimate_itr(
   form,
   data,
   algorithms,
-  budget,
+  budget = 0.5,
   n_folds = 5,
   split_ratio = 0,
   ngates = 5,
@@ -21,6 +21,7 @@ estimate_itr(
   tuneLength = ifelse(trControl$method == "none", 1, 3),
   user_model = NULL,
   SL_library = NULL,
+  meta_learner = "slearner",
   ...
 )
 }
@@ -56,6 +57,8 @@ estimate_itr(
 \item{user_model}{A user-defined function to create an ITR. The function should take the data as input and return a model to estimate the ITR.}
 
 \item{SL_library}{A list of machine learning algorithms to be used in the super learner.}
+
+\item{meta_learner}{A string indicating the meta-learner to be used. Default is "SL.randomForest". The default is set to "slearner". Other options include "tlearner" and "xlearner".}
 
 \item{...}{Additional arguments passed to \code{caret::train}}
 }

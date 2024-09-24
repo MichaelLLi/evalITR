@@ -62,7 +62,8 @@ fit_cv <- estimate_itr(
                   # "rf" # from caret package
                   ), # from caret package
                budget = 0.2,
-               n_folds = 2)
+               n_folds = 2,
+               meta_learner = "slearner")
 
 # evaluate ITR
 est_cv <- evaluate_itr(fit_cv)

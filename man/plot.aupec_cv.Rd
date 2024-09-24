@@ -7,6 +7,8 @@
 \method{plot}{aupec_cv}(x, tau, tau_cv, Y, T, ind, ...)
 }
 \arguments{
+\item{x}{An object of \code{AUPECcv()} class. This is typically an output of \code{AUPECcv()} function.}
+
 \item{tau}{A vector of the unit-level continuous score for treatment assignment.}
 
 \item{tau_cv}{A matrix where the \code{i}th column is the unit-level continuous score for treatment assignment generated in the \code{i}th fold.}

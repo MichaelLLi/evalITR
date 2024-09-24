@@ -31,7 +31,7 @@ estimate_itr <- function(
     form,
     data,
     algorithms,
-    budget,
+    budget = 0.5,
     n_folds = 5,
     split_ratio = 0,
     ngates = 5,
@@ -323,7 +323,7 @@ fit_itr <- function(
       models[["causal_forest"]] <- est$train
     }
 
-    if("lasso" %in% algorithms){
+    if("lasso_developer" %in% algorithms){
       # run lasso
       est <- run_lasso(
         dat_train = training_data_elements,
@@ -336,8 +336,8 @@ fit_itr <- function(
         c_threshold = c_threshold
       )
       # store the results
-      fit_ml[["lasso"]] <- est$test
-      models[["lasso"]] <- est$train
+      fit_ml[["lasso_developer"]] <- est$test
+      models[["lasso_developer"]] <- est$train
     }
 
     if("SuperLearner" %in% algorithms){
@@ -612,7 +612,7 @@ fit_itr <- function(
         models[["causal_forest"]][[j]] <- est$train
       }
 
-      if("lasso" %in% algorithms){
+      if("lasso_developer" %in% algorithms){
         # run lasso
         est <- run_lasso(
           dat_train = training_data_elements,
@@ -625,8 +625,8 @@ fit_itr <- function(
           c_threshold = c_threshold
         )
         # store the results
-        fit_ml[["lasso"]][[j]] <- est$test
-        models[["lasso"]][[j]] <- est$train
+        fit_ml[["lasso_developer"]][[j]] <- est$test
+        models[["lasso_developer"]][[j]] <- est$train
       }
 
       if("SuperLearner" %in% algorithms){
