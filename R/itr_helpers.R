@@ -318,39 +318,6 @@ create_ml_args_caret = function(data){
   return(list(formula = formula, data = data, data0t = data0t, data1t = data1t))
 }
 
-# function to implement X-learner
-run_xlearner = function(data){
-
-  # fit a linear model with X.1 and T interaction
-mod = lm(Y ~ X.1 * as.factor(T) + X.2 * as.factor(T) + X.3 * as.factor(T), data = test_data)
-
-# caculate the fitted values
-fitted_1 = predict(mod, newdata = test_data %>% mutate(T = "1"))
-
-fitted_2 = predict(mod, newdata = test_data %>% mutate(T = "2"))
-
-results = (fitted_1 + fitted_2) / 2
-
-return(results)
-
-}
-
-# function to implement T-learner
-run_tlearner = function(data){
-
-  # fit a linear model with X.1 and T interaction
-mod = lm(Y ~ X.1 * as.factor(T) + X.2 * as.factor(T) + X.3 * as.factor(T), data = test_data)
-
-# caculate the fitted values
-fitted_1 = predict(mod, newdata = test_data %>% mutate(T = "1"))
-
-fitted_2 = predict(mod, newdata = test_data %>% mutate(T = "2"))
-
-results = (fitted_1 + fitted_2) / 2
-
-return(results)
-
-}
 
 # function to fit slearner
 fit_slearner = function(data, formula, train_method, train_params){
@@ -364,28 +331,70 @@ fit_slearner = function(data, formula, train_method, train_params){
 
 }
 
+
+# function to predict with slearner
+predict_slearner = function(fit, data_0t, data_1t, n_df, cv){
+
+  Y0t_total = predict(fit, as.data.frame(data_0t), type = "raw")
+  Y1t_total = predict(fit, as.data.frame(data_1t), type = "raw")
+
+  if(cv == TRUE){
+    tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
+  }else{
+    tau_total = Y1t_total - Y0t_total
+  }
+
+  return(tau_total)
+}
+
+
 # function to fit tlearner
 fit_tlearner = function(data, formula, train_method, train_params){
   # treated group
-      fit_treated <- do.call(caret::train, c(list(
-              formula,
-              data = data %>% dplyr::filter(T == 1),
-              method = train_method), 
-              train_params))
+  fit_treated <- do.call(caret::train, c(list(
+          formula,
+          data = data %>% dplyr::filter(T == 1),
+          method = train_method), 
+          train_params))
 
-      # control group
-      fit_control <- do.call(caret::train, c(list(
-              formula,
-              data = data %>% dplyr::filter(T == 0),
-              method = train_method), 
-              train_params))
+  # control group
+  fit_control <- do.call(caret::train, c(list(
+          formula,
+          data = data %>% dplyr::filter(T == 0),
+          method = train_method), 
+          train_params))
 
   return(list(fit_treated = fit_treated, fit_control = fit_control))
 
 }
 
+
+# function to predict with tlearner
+predict_tlearner = function(fit_train, data , n_df, cv){
+
+  Y0t_total = predict(
+        fit_train$fit_control,
+        as.data.frame(data),
+        type = "raw")
+
+  Y1t_total = predict(
+    fit_train$fit_treated,
+    as.data.frame(data),
+    type = "raw")
+
+  if(cv == TRUE){
+    tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
+  }else{
+    tau_total = Y1t_total - Y0t_total
+  }
+
+  return(tau_total)
+
+}
+
+
 # function to fit xlearner
-fit_xlearner = function(data, formula, train_method, train_params){
+fit_xlearner = function(data, formula, train_method, train_params, covariates){
 
   # treated group data
   data_treated <- data %>% dplyr::filter(T == 1)
@@ -432,66 +441,26 @@ fit_xlearner = function(data, formula, train_method, train_params){
 
   formula_D0 = as.formula(paste("D0 ~ (", paste0(covariates, collapse = "+"), ")*T"))
 
+  # combine the data with the residuals
+  new_data_treated = cbind(data_treated, D1)
+  new_data_control = cbind(data_control, D0)
+
   # fit models on residuals
   fit_treated <- do.call(
     caret::train, c(list(
     formula_D1,
-    data = as.data.frame(data_treated),
+    data = as.data.frame(new_data_treated),
     method = train_method), 
     train_params))
 
   fit_control <- do.call(
     caret::train, c(list(
     formula_D0,
-    data = as.data.frame(data_control),
+    data = as.data.frame(new_data_control),
     method = train_method), 
     train_params))
 
 return(list(fit_treated = fit_treated, fit_control = fit_control))
-
-}
-
-# function to predict with slearner
-predict_slearner = function(fit, data_0t, data_1t, n_df, cv){
-
-  Y0t_total = predict(
-      fit,
-      as.data.frame(data_0t),
-      type = "raw")
-  Y1t_total = predict(
-    fit,
-    as.data.frame(data_1t),
-    type = "raw")
-
-  if(cv == TRUE){
-    tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
-  }else{
-    tau_total = Y1t_total - Y0t_total
-  }
-
-  return(tau_total)
-}
-
-# function to predict with tlearner
-predict_tlearner = function(fit_train, data , n_df, cv){
-
-  Y0t_total = predict(
-        fit_train$fit_control,
-        as.data.frame(data),
-        type = "raw")
-
-  Y1t_total = predict(
-    fit_train$fit_treated,
-    as.data.frame(data),
-    type = "raw")
-
-  if(cv == TRUE){
-    tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
-  }else{
-    tau_total = Y1t_total - Y0t_total
-  }
-
-  return(tau_total)
 
 }
 
@@ -508,15 +477,153 @@ predict_xlearner = function(fit_train, data, n_df, cv){
     fit_train$fit_treated,
     as.data.frame(data),
     type = "raw")
+
+  # estimate propensity score following Künzel et al.(2019) SI. p.23
+  p_model <- cv.glmnet(
+    X = data %>% dplyr::select(-c(Y, T)),
+    Y = data$T,
+    family = "binomial")
+
+  p_score <- predict(p_model, data %>% dplyr::select(-c(Y, T)), type = "response", s = "lambda.min")
         
   if(cv == TRUE){
-    tau_total = ifelse(data$T == 1, Y1t_total, Y0t_total) + runif(n_df,-1e-6,1e-6)
+    tau_total = p_score * (1 - Y1t_total) + p_score * Y0t_total + runif(n_df,-1e-6,1e-6)
   }else{
-    tau_total = ifelse(data$T == 1, Y1t_total, Y0t_total)
+    tau_total = p_score * (1 - Y1t_total) + p_score * Y0t_total
   }
 
   return(tau_total)
 }
+
+
+
+# function to fit rlearner
+fit_rlearner = function(data, formula_Y, formula_ps, train_method, train_params, covariates){
+
+  # outcome model
+  fit_Y <- do.call(caret::train, c(list(
+          formula_Y,
+          data = data,
+          method = train_method), 
+          train_params))
+  
+  Y_hat = predict(fit_Y, as.data.frame(data), type = "raw")
+
+  # propensity score model
+  fit_ps <- do.call(caret::train, c(list(
+          formula_ps,
+          data = data,
+          method = train_method), 
+          train_params))
+
+  ps_hat = predict(fit_ps, as.data.frame(data), type = "raw")
+
+  # calculate the weights
+  y_tilde = Y_hat - Y_hat
+  ps_tilde = ps_hat - ps_hat
+  pseudo_outcome = y_tilde/ps_tilde
+  weights = ps_tilde^2
+
+  # combine the data with the pseudo-outcome
+  new_data = cbind(data, pseudo_outcome)
+
+  # formula
+  formula_Y_pseudo = as.formula(paste("pseudo_outcome ~ (", paste0(covariates, collapse = "+"), ")*T"))
+
+  # fit the outcome model on the weighted data
+  fit_Y_weighted <- do.call(caret::train, c(list(
+          formula_Y_pseudo,
+          data = data,
+          weights = weights,
+          method = train_method), 
+          train_params))
+
+  return(fit_Y_weighted)
+
+}
+
+# function to predict with rlearner
+predict_rlearner = function(fit_train, data, n_df, cv){
+
+  Y_hat_weighted = predict(fit_train, as.data.frame(data), type = "raw")
+
+  if(cv == TRUE){
+    tau_total = Y_hat_weighted + runif(n_df,-1e-6,1e-6)
+  }else{
+    tau_total = Y_hat_weighted
+  }
+
+  return(tau_total)
+
+}
+
+# function to fit drlearner
+fit_drlearner = function(total_data, train_data, formula_Y, formula_ps, train_method, train_params, covariates){
+
+  # propensity score model
+  fit_ps <- do.call(caret::train, c(list(
+          formula_ps,
+          data = train_data,
+          method = train_method), 
+          train_params))
+
+  # outcome model for treated group
+  fit_Y_treated <- do.call(caret::train, c(list(
+          formula_Y,
+          data = train_data %>% dplyr::filter(T == 1),
+          method = train_method), 
+          train_params))
+
+
+  # outcome model for control group
+  fit_Y_control <- do.call(caret::train, c(list(
+          formula_Y,
+          data = train_data %>% dplyr::filter(T == 0),
+          method = train_method), 
+          train_params))
+
+  return(list(fit_Y_treated = fit_Y_treated, fit_Y_control = fit_Y_control, fit_ps = fit_ps))
+
+}
+
+# function to predict with drlearner
+predict_drlearner = function(fit_Y_treated, fit_Y_control, fit_ps, data, covariates){
+
+  # get predicted values
+  ps_hat = predict(fit_ps, as.data.frame(data), type = "raw")
+
+  mu1_hat = predict(fit_Y_treated, as.data.frame(data), type = "raw")
+  mu0_hat = predict(fit_Y_control, as.data.frame(data), type = "raw")
+
+  # pseudo-outcome regression
+  psi_pseudo <- ((data$T - ps_hat) / (ps_hat * (1 - ps_hat))) * (data$Y - data$T * mu1_hat - (1 - data$T) * mu0_hat) + mu1_hat - mu0_hat
+
+  # formula
+  formula_psi_pseudo = as.formula(paste("psi_pseudo ~ (", paste0(covariates, collapse = "+"), ")*T"))
+
+  # combine the data with the pseudo-outcome
+  new_data = cbind(data, psi_pseudo)
+
+  # fit the outcome model with test data
+  fit_psi_pseudo <- do.call(caret::train, c(list(
+          formula_psi_pseudo,
+          data = new_data,
+          method = train_method), 
+          train_params))
+
+  # get the predicted values
+  tau_hat <- predict(fit_psi_pseudo, as.data.frame(new_data), type = "raw")
+
+  if(cv == TRUE){
+    tau_hat = tau_hat + runif(n_df,-1e-6,1e-6)
+  }else{
+    tau_hat = tau_hat
+  }
+
+  return(tau_hat)
+
+}
+
 
 # Re-organize cross-validation output to plot the AUPEC curve
 getAupecOutput = function(
