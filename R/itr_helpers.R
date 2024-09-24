@@ -19,7 +19,14 @@ split_samples = function(seed, data, train_prop, replace = FALSE){
 create_ml_arguments = function(outcome, treatment, data){
 
   Y = data %>%
-    dplyr::select(all_of(outcome)) %>% unlist() %>% as.numeric()
+    dplyr::select(all_of(outcome)) %>% unlist()
+  
+  # Convert Y to factor if it's categorical (has 2 or fewer unique values)
+  if(length(unique(Y)) <= 2) {
+    Y = as.factor(Y)
+  } else {
+    Y = as.numeric(Y)
+  }
 
   X = data %>%
     dplyr::select(-c(all_of(outcome), all_of(treatment))) %>%
@@ -147,7 +154,7 @@ create_ml_args_superLearner = function(data){
   X0t_expand = X0t_expand[, -1]
   X1t_expand = X1t_expand[, -1]
 
-  # change : in column names to _ to avoid errors in super learner
+  # change : in column names to avoid errors in super learner
   colnames(X_expand) = gsub(":", "_", colnames(X_expand))
   colnames(X0t_expand) = gsub(":", "_", colnames(X0t_expand))
   colnames(X1t_expand) = gsub(":", "_", colnames(X1t_expand))
@@ -320,7 +327,7 @@ create_ml_args_caret = function(data){
 
 
 # function to fit slearner
-fit_slearner = function(data, formula, train_method, train_params){
+fit_slearner_caret = function(data, formula, train_method, train_params){
   fit <- do.call(caret::train, c(list(
             formula,
             data = data,
@@ -349,18 +356,33 @@ predict_slearner = function(fit, data_0t, data_1t, n_df, cv){
 
 
 # function to fit tlearner
-fit_tlearner = function(data, formula, train_method, train_params){
+fit_tlearner_caret = function(data, formula, train_method, train_params){
+
+  treated_data = data %>% dplyr::filter(T == 1)
+  control_data = data %>% dplyr::filter(T == 0)
+
+  # for lasso, add a small amount of noise to the columns with zero variance
+  if (train_method == "lasso") {
+    # get the column names with zero variance
+    zero_var_cols = caret::nearZeroVar(treated_data)
+    # add a small amount of noise
+    treated_data[, zero_var_cols] = treated_data[, zero_var_cols] + runif(nrow(treated_data), -1e-6, 1e-6)
+    zero_var_cols = caret::nearZeroVar(control_data)
+    # add a small amount of noise
+    control_data[, zero_var_cols] = control_data[, zero_var_cols] + runif(nrow(control_data), -1e-6, 1e-6)
+  }
+
   # treated group
   fit_treated <- do.call(caret::train, c(list(
           formula,
-          data = data %>% dplyr::filter(T == 1),
+          data = treated_data,
           method = train_method), 
           train_params))
 
   # control group
   fit_control <- do.call(caret::train, c(list(
           formula,
-          data = data %>% dplyr::filter(T == 0),
+          data = control_data,
           method = train_method), 
           train_params))
 
@@ -393,14 +415,23 @@ predict_tlearner = function(fit_train, data , n_df, cv){
 }
 
 
-# function to fit xlearner
-fit_xlearner = function(data, formula, train_method, train_params, covariates){
+# function to fit xlearner for caret
+fit_xlearner_caret = function(data, formula, train_method, train_params, covariates, formula_ps){
 
   # treated group data
   data_treated <- data %>% dplyr::filter(T == 1)
 
   # control group data
   data_control <- data %>% dplyr::filter(T == 0)
+
+  # for lasso, add a small amount of noise to the columns with zero variance
+  if (train_method == "lasso") {
+    # get the column names with zero variance
+    zero_var_cols = caret::nearZeroVar(data_treated)
+    # add a small amount of noise
+    data_treated[, zero_var_cols] = data_treated[, zero_var_cols] + runif(nrow(data_treated), -1e-6, 1e-6)
+    data_control[, zero_var_cols] = data_control[, zero_var_cols] + runif(nrow(data_control), -1e-6, 1e-6)
+  }
 
   # treated group
   fit_treated_base <- do.call(caret::train, c(list(
@@ -460,13 +491,43 @@ fit_xlearner = function(data, formula, train_method, train_params, covariates){
     method = train_method), 
     train_params))
 
-return(list(fit_treated = fit_treated, fit_control = fit_control))
+  # replace train_params$metric with "Accuracy"
+  train_params$metric = "Accuracy"
+  train_params$maximize = TRUE
+
+  # get model info
+  model_info <- caret::getModelInfo(model = train_method, regex = FALSE)[[1]]
+
+  # check if the model allows for classification
+  if (length(model_info$type) == 1) {
+    
+    # run propensity score model with lasso
+    fit_ps <- cv.glmnet(
+      data %>% dplyr::select(all_of(covariates)) %>% as.matrix(),
+      data %>% dplyr::pull(T),
+      family = "binomial",
+      alpha = 1)  
+        
+  }
+
+  # if the model allows for classification, run the propensity score model with the original method
+  if (length(model_info$type) > 1) {
+
+    # propensity score model
+    fit_ps <- do.call(caret::train, c(list(
+          formula_ps,
+          data = data,
+          method = train_method), 
+          train_params))
+  }
+
+return(list(fit_treated = fit_treated, fit_control = fit_control, fit_ps = fit_ps, model_info = model_info))
 
 }
 
 
 # function to predict with xlearner
-predict_xlearner = function(fit_train, data, n_df, cv){
+predict_xlearner = function(fit_train, data, n_df, cv, train_method){
 
   Y0t_total = predict(
     fit_train$fit_control,
@@ -479,13 +540,20 @@ predict_xlearner = function(fit_train, data, n_df, cv){
     type = "raw")
 
   # estimate propensity score following Künzel et al.(2019) SI. p.23
-  p_model <- cv.glmnet(
-    X = data %>% dplyr::select(-c(Y, T)),
-    Y = data$T,
-    family = "binomial")
+  model_info <- fit_train$model_info
 
-  p_score <- predict(p_model, data %>% dplyr::select(-c(Y, T)), type = "response", s = "lambda.min")
-        
+  if (length(model_info$type) == 1) {
+    p_score = predict(fit_train$fit_ps, data %>% dplyr::select(all_of(covariates)) %>% as.matrix(), type = "response")
+  }
+
+  if (length(model_info$type) > 1) {
+    p_score_all = predict(fit_train$fit_ps, as.data.frame(data), type = "prob")
+    
+    # get the probabilities for treatment
+    p_score = p_score_all[,"1"]
+  }
+
+
   if(cv == TRUE){
     tau_total = p_score * (1 - Y1t_total) + p_score * Y0t_total + runif(n_df,-1e-6,1e-6)
   }else{
@@ -498,7 +566,7 @@ predict_xlearner = function(fit_train, data, n_df, cv){
 
 
 # function to fit rlearner
-fit_rlearner = function(data, formula_Y, formula_ps, train_method, train_params, covariates){
+fit_rlearner_caret = function(data, formula_Y, formula_ps, train_method, train_params, covariates){
 
   # outcome model
   fit_Y <- do.call(caret::train, c(list(
@@ -509,6 +577,10 @@ fit_rlearner = function(data, formula_Y, formula_ps, train_method, train_params,
   
   Y_hat = predict(fit_Y, as.data.frame(data), type = "raw")
 
+  # replace train_params$metric with "Accuracy"
+  train_params$metric = "Accuracy"
+  train_params$maximize = TRUE
+
   # propensity score model
   fit_ps <- do.call(caret::train, c(list(
           formula_ps,
@@ -516,7 +588,10 @@ fit_rlearner = function(data, formula_Y, formula_ps, train_method, train_params,
           method = train_method), 
           train_params))
 
-  ps_hat = predict(fit_ps, as.data.frame(data), type = "raw")
+  ps_hat = predict(fit_ps, as.data.frame(data), type = "prob")
+
+  # get the probabilities for treatment
+  ps_hat = ps_hat[,"1"]
 
   # calculate the weights
   y_tilde = Y_hat - Y_hat
@@ -558,7 +633,11 @@ predict_rlearner = function(fit_train, data, n_df, cv){
 }
 
 # function to fit drlearner
-fit_drlearner = function(total_data, train_data, formula_Y, formula_ps, train_method, train_params, covariates){
+fit_drlearner_caret = function(total_data, train_data, formula_Y, formula_ps, train_method, train_params, covariates){
+
+  # replace train_params$metric with "Accuracy"
+  train_params$metric = "Accuracy"
+  train_params$maximize = TRUE
 
   # propensity score model
   fit_ps <- do.call(caret::train, c(list(
@@ -587,10 +666,10 @@ fit_drlearner = function(total_data, train_data, formula_Y, formula_ps, train_me
 }
 
 # function to predict with drlearner
-predict_drlearner = function(fit_Y_treated, fit_Y_control, fit_ps, data, covariates){
+predict_drlearner_caret = function(fit_Y_treated, fit_Y_control, fit_ps, data, covariates, train_method, train_params, n_df, cv){
 
   # get predicted values
-  ps_hat = predict(fit_ps, as.data.frame(data), type = "raw")
+  ps_hat = predict(fit_ps, as.data.frame(data), type = "prob")
 
   mu1_hat = predict(fit_Y_treated, as.data.frame(data), type = "raw")
   mu0_hat = predict(fit_Y_control, as.data.frame(data), type = "raw")
@@ -605,14 +684,14 @@ predict_drlearner = function(fit_Y_treated, fit_Y_control, fit_ps, data, covaria
   new_data = cbind(data, psi_pseudo)
 
   # fit the outcome model with test data
-  fit_psi_pseudo <- do.call(caret::train, c(list(
+  fit_Y_pseudo <- do.call(caret::train, c(list(
           formula_psi_pseudo,
           data = new_data,
           method = train_method), 
           train_params))
 
   # get the predicted values
-  tau_hat <- predict(fit_psi_pseudo, as.data.frame(new_data), type = "raw")
+  tau_hat <- predict(fit_Y_pseudo, as.data.frame(new_data), type = "raw")
 
   if(cv == TRUE){
     tau_hat = tau_hat + runif(n_df,-1e-6,1e-6)
