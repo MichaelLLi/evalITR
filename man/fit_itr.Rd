@@ -11,7 +11,7 @@ fit_itr(
   folds,
   budget,
   user_model,
-  c_threshold,
+  threshold,
   meta_learner,
   ...
 )

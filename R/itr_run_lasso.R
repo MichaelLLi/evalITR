@@ -9,7 +9,7 @@ run_lasso <- function(
   indcv,
   iter,
   budget,
-  c_threshold
+  threshold
 ) {
 
   # split/cross-validation
@@ -21,7 +21,7 @@ run_lasso <- function(
   ## test
   fit_test <- test_lasso(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb,
-    indcv, iter, budget, cv, c_threshold
+    indcv, iter, budget, cv, threshold
   )
 
 
@@ -78,7 +78,7 @@ train_lasso <- function(dat_train) {
 
 #'@importFrom stats predict runif
 test_lasso <- function(
-  fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, budget, cv, c_threshold
+  fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, budget, cv, threshold
 ) {
 
   ## format data
@@ -100,7 +100,7 @@ test_lasso <- function(
 
     ## compute quantities of interest
     tau_test <-  tau_total[indcv == iter]
-    That     <-  as.numeric(tau_total > c_threshold)
+    That     <-  as.numeric(tau_total > threshold)
     That_p   <- as.numeric(tau_total >= sort(tau_test, decreasing = TRUE)[floor(budget*length(tau_test))+1])
 
 
@@ -127,7 +127,7 @@ test_lasso <- function(
     tau_test=Y1t1_test-Y0t1_test
 
     ## compute quantities of interest
-    That     =  as.numeric(tau_test > c_threshold)
+    That     =  as.numeric(tau_test > threshold)
     That_p   = numeric(length(That))
     That_p[sort(tau_test,decreasing =TRUE,index.return=TRUE)$ix[1:(floor(budget*length(tau_test))+1)]] = 1
 

@@ -11,7 +11,7 @@ run_cart <- function(
   indcv,
   iter,
   budget,
-  c_threshold
+  threshold
 ) {
 
   # split/cross-validation
@@ -23,7 +23,7 @@ run_cart <- function(
   ## test
   fit_test <- test_cart(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb,
-    indcv, iter, budget, cv, c_threshold
+    indcv, iter, budget, cv, threshold
   )
 
 
@@ -58,7 +58,7 @@ train_cart <- function(dat_train) {
 
 #'@importFrom stats predict runif
 test_cart <- function(
-  fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, budget, cv, c_threshold
+  fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, budget, cv, threshold
 ) {
 
   ## format data
@@ -92,7 +92,7 @@ test_cart <- function(
 
       ## compute quantities of interest
       tau_test <-  tau_total[indcv == iter]
-      That     <-  as.numeric(tau_total > c_threshold)
+      That     <-  as.numeric(tau_total > threshold)
       That_p   <- as.numeric(tau_total >= sort(tau_test, decreasing = TRUE)[floor(budget*length(tau_test))+1])
 
 
@@ -128,7 +128,7 @@ test_cart <- function(
       tau_test = Y1t_test - Y0t_test + runif(length(Y0t_test),-1e-6,1e-6)
 
       ## compute quantities of interest
-      That     =  as.numeric(tau_test > c_threshold)
+      That     =  as.numeric(tau_test > threshold)
       That_p   = numeric(length(That))
       That_p[sort(tau_test,decreasing =TRUE,index.return=TRUE)$ix[1:(floor(budget*length(tau_test))+1)]] = 1
 

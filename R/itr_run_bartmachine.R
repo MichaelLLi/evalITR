@@ -7,7 +7,7 @@ run_bartmachine <- function(
   indcv,
   iter,
   budget,
-  c_threshold
+  threshold
 ) {
 
   ## train
@@ -50,7 +50,7 @@ train_bart <- function(dat_train) {
 
 #'@importFrom stats predict runif
 test_bart <- function(
-  fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, budget, c_threshold
+  fit_train, dat_test, dat_total, n_df, n_tb, indcv, iter, budget, threshold
 ) {
 
   ## format data
@@ -66,7 +66,7 @@ test_bart <- function(
 
   ## compute quantities of interest
   tau_test <-  tau_total[indcv == iter]
-  That     <-  as.numeric(tau_total > c_threshold)
+  That     <-  as.numeric(tau_total > threshold)
   That_p   <- as.numeric(tau_total >= sort(tau_test, decreasing = TRUE)[floor(budget*length(tau_test))+1])
 
 
