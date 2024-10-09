@@ -47,6 +47,31 @@ estimate_itr <- function(
     ...
 ) {
 
+  # input checks if SL_library is valid
+  if (!is.null(SL_library)) {
+    sl_algorithms <- c("SL.bartMachine", "SL.bayesglm", "SL.biglasso", "SL.caret", "SL.caret.rpart", "SL.cforest", "SL.earth", "SL.gam", "SL.gbm", "SL.glm", "SL.glm.interaction", "SL.glmnet", "SL.ipredbagg", "SL.kernelKnn", "SL.knn", "SL.ksvm", "SL.lda", "SL.leekasso", "SL.lm", "SL.loess", "SL.logreg", "SL.mean", "SL.nnet", "SL.nnls", "SL.polymars", "SL.qda", "SL.randomForest", "SL.ranger", "SL.ridge", "SL.rpart", "SL.rpartPrune", "SL.speedglm", "SL.speedlm", "SL.step", "SL.step.forward", "SL.step.interaction", "SL.stepAIC", "SL.svm", "SL.template", "SL.xgboost")
+    
+    if (!all(SL_library %in% sl_algorithms)) {
+      stop("Invalid SuperLearner library provided.")
+    }
+  }
+
+  # input checks if meta_learner is valid
+  if (!meta_learner %in% c("slearner", "tlearner", "xlearner", "rlearner", "drlearner")) {
+    stop("Invalid meta-learner provided.")
+  }
+
+  # input checks if data is a data frame
+  if (!is.data.frame(data)) {
+    stop("Data must be a data frame.")
+  }
+
+  # check if treatment is a string
+  if (!is.character(treatment)) {
+    stop("Treatment must be a string.")
+  }
+
+
   # specify the outcome and covariates
   convert_data <- convert_formula(as.formula(form), data, treatment)
 
