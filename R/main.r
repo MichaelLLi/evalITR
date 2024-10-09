@@ -52,13 +52,13 @@ estimate_itr <- function(
     sl_algorithms <- c("SL.bartMachine", "SL.bayesglm", "SL.biglasso", "SL.caret", "SL.caret.rpart", "SL.cforest", "SL.earth", "SL.gam", "SL.gbm", "SL.glm", "SL.glm.interaction", "SL.glmnet", "SL.ipredbagg", "SL.kernelKnn", "SL.knn", "SL.ksvm", "SL.lda", "SL.leekasso", "SL.lm", "SL.loess", "SL.logreg", "SL.mean", "SL.nnet", "SL.nnls", "SL.polymars", "SL.qda", "SL.randomForest", "SL.ranger", "SL.ridge", "SL.rpart", "SL.rpartPrune", "SL.speedglm", "SL.speedlm", "SL.step", "SL.step.forward", "SL.step.interaction", "SL.stepAIC", "SL.svm", "SL.template", "SL.xgboost")
     
     if (!all(SL_library %in% sl_algorithms)) {
-      stop("Invalid SuperLearner library provided.")
+      stop("Invalid SuperLearner library provided. See SuperLearner::listWrappers() for options.")
     }
   }
 
   # input checks if meta_learner is valid
   if (!meta_learner %in% c("slearner", "tlearner", "xlearner", "rlearner", "drlearner")) {
-    stop("Invalid meta-learner provided.")
+    stop("Invalid meta-learner provided. Available options: slearner, tlearner, xlearner, rlearner, drlearner.")
   }
 
   # input checks if data is a data frame
