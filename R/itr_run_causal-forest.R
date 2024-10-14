@@ -40,7 +40,8 @@ train_causal_forest <- function(dat_train) {
     training_data_elements_cf[["X_expand"]],
     training_data_elements_cf[["Y"]],
     training_data_elements_cf[["T"]],
-    num.trees = 2000
+    num.trees = 2000,
+    tune.parameters = c("sample.fraction", "mtry", "min.node.size", "alpha", "imbalance.penalty")
   )
   return(fit)
 }
