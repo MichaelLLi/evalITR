@@ -92,8 +92,8 @@ if(length(estimate_algs) != 0){
       mutate(
         statistic = gate / sd,
         p.value = 2 * pnorm(abs(gate / sd), lower.tail = FALSE),
-        upper = gate - qnorm(0.95) * sd,
-        lower = gate + qnorm(0.95) * sd
+        upper = gate + qnorm(0.975) * sd,
+        lower = gate - qnorm(0.975) * sd
       ) %>%
       rename(
         estimate = gate,
