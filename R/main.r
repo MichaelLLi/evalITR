@@ -307,21 +307,21 @@ fit_itr <- function(
       models[["causal_forest"]] <- est$train
     }
 
-    if("lasso" %in% algorithms){
-      # run lasso
-      est <- run_lasso(
-        dat_train = training_data_elements,
-        dat_test  = testing_data_elements,
-        dat_total = total_data_elements,
-        params    = params,
-        indcv     = 1,
-        iter      = 1,
-        budget    = budget
-      )
-      # store the results
-      fit_ml[["lasso"]] <- est$test
-      models[["lasso"]] <- est$train
-    }
+    # if("lasso" %in% algorithms){
+    #   # run lasso
+    #   est <- run_lasso(
+    #     dat_train = training_data_elements,
+    #     dat_test  = testing_data_elements,
+    #     dat_total = total_data_elements,
+    #     params    = params,
+    #     indcv     = 1,
+    #     iter      = 1,
+    #     budget    = budget
+    #   )
+    #   # store the results
+    #   fit_ml[["lasso"]] <- est$test
+    #   models[["lasso"]] <- est$train
+    # }
 
     if("SuperLearner" %in% algorithms){
       # run SuperLearner
@@ -586,21 +586,21 @@ fit_itr <- function(
         models[["causal_forest"]][[j]] <- est$train
       }
 
-      if("lasso" %in% algorithms){
-        # run lasso
-        est <- run_lasso(
-          dat_train = training_data_elements,
-          dat_test  = testing_data_elements,
-          dat_total = total_data_elements,
-          params    = params,
-          indcv     = indcv,
-          iter      = j,
-          budget    = budget
-        )
-        # store the results
-        fit_ml[["lasso"]][[j]] <- est$test
-        models[["lasso"]][[j]] <- est$train
-      }
+      # if("lasso" %in% algorithms){
+      #   # run lasso
+      #   est <- run_lasso(
+      #     dat_train = training_data_elements,
+      #     dat_test  = testing_data_elements,
+      #     dat_total = total_data_elements,
+      #     params    = params,
+      #     indcv     = indcv,
+      #     iter      = j,
+      #     budget    = budget
+      #   )
+      #   # store the results
+      #   fit_ml[["lasso"]][[j]] <- est$test
+      #   models[["lasso"]][[j]] <- est$train
+      # }
 
       if("SuperLearner" %in% algorithms){
         # run SuperLearner
