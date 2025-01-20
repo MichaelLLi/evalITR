@@ -898,14 +898,14 @@ test_itr <- function(
 
       consistcv[[i]] <- consistcv.test(
         T   = Tcv,
-        tau = gettaucv(fit)[[i]],
+        tau = gettaucv(fit, alg=i),
         Y   = Ycv,
         ind = indcv,
         ngates = ngates)
 
       hetcv[[i]] <- hetcv.test(
         T   = Tcv,
-        tau = gettaucv(fit)[[i]],
+        tau = gettaucv(fit, alg=i),
         Y   = Ycv,
         ind = indcv,
         ngates = ngates)
