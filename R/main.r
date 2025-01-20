@@ -190,6 +190,11 @@ fit_itr <- function(
     indcv <- rep(0, length(Ycv))
 
     params$n_tb <- max(table(indcv))
+    
+    # Create a vector of indices to determine train vs. test samples
+    indcv <- rep(NA, nrow(data))  # Initialize with NA
+    indcv[split] <- 0            # Mark training set rows as 0
+    indcv[-split] <- 1           # Mark test set rows as 1
 
     ## ---------------------------------
     ## run ML
