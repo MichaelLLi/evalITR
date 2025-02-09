@@ -19,14 +19,14 @@ split_samples = function(seed, data, train_prop, replace = FALSE){
 create_ml_arguments = function(outcome, treatment, data){
 
   Y = data %>%
-    dplyr::select(all_of(outcome)) %>% unlist() %>% as.numeric()
+    dplyr::select(all_of(outcome)) %>% unlist()
 
   X = data %>%
     dplyr::select(-c(all_of(outcome), all_of(treatment))) %>%
     as.data.frame()
 
   T = data %>%
-    dplyr::select(all_of(treatment)) %>% unlist() %>% as.numeric()
+    dplyr::select(all_of(treatment)) %>% unlist()
 
   formula = as.formula(paste(outcome, "~", paste(c(treatment, names(X)), collapse = "+")))
 
@@ -371,7 +371,7 @@ getAupecOutput = function(
   NFOLDS, Ycv, Tcv, indcv
 ){
   aupec_grid = list()
-  Ycv = as.numeric(Ycv)
+  # Ycv = as.numeric(Ycv)
 
   for (j in 1:NFOLDS){
     tau = tauML[,j][!is.na(tauML[,j])]
