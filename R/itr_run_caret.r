@@ -72,11 +72,11 @@ test_caret <- function(
     Y0t_total = predict(
       fit_train,
       as.data.frame(total_data_elements_caret[["data0t"]]),
-      type = "raw")
+      type = "prob")[,2]
     Y1t_total = predict(
       fit_train,
       as.data.frame(total_data_elements_caret[["data1t"]]),
-      type = "raw")
+      type = "prob")[,2]
 
     tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
 
