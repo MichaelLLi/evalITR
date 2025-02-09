@@ -479,6 +479,8 @@ convert_formula <- function(user_formula, data, treatment){
   combined_data <- cbind(new_data, interaction_df)
 
   print(is.factor(data$outcome))
+  print(data$outcome)
+  print(outcome)
 
   return(list(data = combined_data, covariates = covariates_vec, outcome = outcome))
 }
