@@ -457,6 +457,7 @@ convert_formula <- function(user_formula, data, treatment){
 
   # Extract outcome before `model.matrix()`
   outcome <- all.vars(user_formula)[1]
+  print(outcome)
   new_data <- data %>% dplyr::select(all_of(outcome))
 
   # Convert to factor explicitly (if it's supposed to be categorical)
