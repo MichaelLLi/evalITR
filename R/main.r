@@ -51,7 +51,7 @@ estimate_itr <- function(
   data <- convert_data$data
 
   # caret parameters
-  metric = ifelse(is.factor(data[outcome]), "Accuracy", "RMSE")
+  metric = ifelse(is.factor(data[[outcome]]), "Accuracy", "RMSE")
   maximize = ifelse(metric %in% c("RMSE", "logLoss", "MAE", "logLoss"), FALSE, TRUE)
 
   caret_algorithms <- names(caret::getModelInfo())
