@@ -22,7 +22,7 @@ run_caret <- function(
   ## train
   fit_train <- train_caret(dat_train, train_params, train_method, ...)
 
-  cat('Test caret is run')
+  # cat('Test caret is run')
   ## test
   fit_test <- test_caret(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb,
@@ -79,8 +79,8 @@ test_caret <- function(
       as.data.frame(total_data_elements_caret[["data1t"]]),
       type = "prob")[,2]
 
-    print(Y0t_total)
-    print(Y1t_total)
+    # print(Y0t_total)
+    # print(Y1t_total)
 
     tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
 

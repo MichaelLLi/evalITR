@@ -504,7 +504,7 @@ fit_itr <- function(
           # set the train_method to the algorithm
           train_method = algorithms[i]
 
-          # return(list(t=training_data_elements, u=testing_data_elements, p=params, f=train_method))
+          #return(list(t=training_data_elements, u=testing_data_elements, p=params, f=train_method))
 
           # run the algorithm
           caret_est <- run_caret(
@@ -763,12 +763,19 @@ evaluate_itr <- function(
   # estimate ITR from ML algorithms
   if(!is.null(fit)){
 
+
+
     # estimate ITR from the fitted model
     estimates  <- fit$estimates
     cv         <- estimates$params$cv
     df         <- fit$df
     algorithms <- fit$df$algorithms
-    outcome    <- fit$df$outcome
+
+    # if (is.factor(fit$df$outcome)) {
+    #   outcome <- as.numeric(as.character(fit$df$outcome))
+    # } else {
+    #   outcome <- fit$df$outcome  # Keep it unchanged if already numeric
+    # }
 
     # compute qoi
     qoi <- vector("list", length = length(outcome))

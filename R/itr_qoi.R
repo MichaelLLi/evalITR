@@ -9,6 +9,9 @@ compute_qoi <- function(fit_obj, algorithms) {
   fit_ml <- fit_obj$fit_ml
   params <- fit_obj$params
   Ycv    <- fit_obj$Ycv
+  if (is.factor(Ycv)) {
+    Ycv <- as.numeric(as.character(Ycv))
+  } 
   Tcv    <- fit_obj$Tcv
   indcv  <- fit_obj$indcv
   budget <- fit_obj$budget
