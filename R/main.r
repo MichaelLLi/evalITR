@@ -225,7 +225,8 @@ fit_itr <- function(
 
         # set the train_method to the algorithm
         train_method = algorithms[i]
-
+        
+        return(list(t=training_data_elements, u=testing_data_elements))
         # run the algorithm
         caret_est <- run_caret(
           dat_train = training_data_elements,
