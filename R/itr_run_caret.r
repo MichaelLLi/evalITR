@@ -78,7 +78,8 @@ test_caret <- function(
       as.data.frame(total_data_elements_caret[["data1t"]]),
       type = "prob")[,2]
 
-    return(l0=Y0t_total, l1=Y1t_total)
+    print(Y0t_total)
+    print(Y1t_total)
 
     tau_total = Y1t_total - Y0t_total + runif(n_df,-1e-6,1e-6)
 
