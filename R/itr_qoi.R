@@ -12,8 +12,8 @@ compute_qoi <- function(fit_obj, algorithms) {
   if (is.factor(Ycv)) {
     Ycv <- as.numeric(as.character(Ycv))
   } 
-  print(is.factor(Ycv))
-  print(Ycv)
+  # print(is.factor(Ycv))
+  # print(Ycv)
   Tcv    <- fit_obj$Tcv
   indcv  <- fit_obj$indcv
   budget <- fit_obj$budget

@@ -457,7 +457,7 @@ convert_formula <- function(user_formula, data, treatment){
 
   # Extract outcome before `model.matrix()`
   outcome <- all.vars(user_formula)[1]
-  print(outcome)
+  # print(outcome)
   new_data <- data %>% dplyr::select(all_of(outcome))
 
   # Convert to factor explicitly (if it's supposed to be categorical)
@@ -478,9 +478,9 @@ convert_formula <- function(user_formula, data, treatment){
   # Combine outcome (preserved as factor) with covariates
   combined_data <- cbind(new_data, interaction_df)
 
-  print(is.factor(data[[outcome]]))
-  print(data[[outcome]])
-  print(outcome)
+  # print(is.factor(data[[outcome]]))
+  # print(data[[outcome]])
+  # print(outcome)
 
   return(list(data = combined_data, covariates = covariates_vec, outcome = outcome))
 }
