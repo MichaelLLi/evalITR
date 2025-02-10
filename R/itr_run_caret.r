@@ -22,6 +22,7 @@ run_caret <- function(
   ## train
   fit_train <- train_caret(dat_train, train_params, train_method, ...)
 
+  cat('Test caret is run')
   ## test
   fit_test <- test_caret(
     fit_train, dat_test, dat_total, params$n_df, params$n_tb,
