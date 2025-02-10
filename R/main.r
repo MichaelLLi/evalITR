@@ -843,6 +843,9 @@ test_itr <- function(
   fit_ml     <- estimates$fit_ml
   Tcv        <- estimates$Tcv
   Ycv        <- estimates$Ycv
+  if (is.factor(Ycv)) {
+    Ycv <- as.numeric(as.character(Ycv))
+  } 
   indcv      <- estimates$indcv
   n_folds    <- estimates$params$n_folds
   ngates     <- estimates$params$ngates
