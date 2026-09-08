@@ -1,12 +1,11 @@
-## Test environments
-* local Windows 10 install, R 4.0.5
-* local Windows 10 install, R 3.6.5
-* win-builder (devel and release)
-* Mac OS X 10.11 (on Rhub), R-release
-* Ubuntu 16.04 (on travis-ci), R-release
+## Test environment
+
+Windows 10 x64, R 4.6.1 and R-devel (2026-09-04 r90492).
 
 ## R CMD check results
-There were no ERRORs or WARNINGs.
 
+0 errors, 0 warnings, 0 notes.
 
-## Downstream dependencies
+## Reverse dependencies
+
+Released evalHTE 0.1.1 passed its functional checks with this version of evalITR.

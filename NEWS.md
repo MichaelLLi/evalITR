@@ -1,3 +1,9 @@
+# evalITR 1.1.0
+
+* Corrected GATE covariance estimation, including estimated group cutoffs and cross-validation.
+* Corrected heterogeneity and rank-consistency tests.
+* Fixed prediction extraction and `nsim` forwarding in `test_itr()`.
+
 # evalITR 1.0.0
 
 - Revamped package structure

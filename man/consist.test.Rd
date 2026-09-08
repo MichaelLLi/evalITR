@@ -4,35 +4,35 @@
 \alias{consist.test}
 \title{The Consistency Test for Grouped Average Treatment Effects (GATEs) in Randomized Experiments}
 \usage{
-consist.test(T, tau, Y, ngates = 5, nsim = 10000)
+consist.test(T, tau, Y, ngates = 5, nsim = 10000, centered = TRUE)
 }
 \arguments{
-\item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
+\item{T}{Binary treatment indicator (0 or 1).}
 
-\item{tau}{A vector of the unit-level continuous score. Conditional Average Treatment Effect is one possible measure.}
+\item{tau}{Continuous score vector.}
 
-\item{Y}{A vector of the outcome variable of interest for each sample.}
+\item{Y}{Outcome vector.}
 
-\item{ngates}{The number of groups to separate the data into. The groups are determined by \code{tau}. Default is 5.}
+\item{ngates}{Number of groups (at least 2).}
 
-\item{nsim}{Number of Monte Carlo simulations used to simulate the null distributions. Default is 10000.}
+\item{nsim}{Number of Monte Carlo draws (at least 2).}
+
+\item{centered}{Whether to center outcomes before estimation.}
 }
 \value{
-A list that contains the following items: \item{stat}{The estimated
-statistic for the test of consistency} \item{pval}{The p-value of the null
-hypothesis (that the treatment effects are consistent)}
+A list with test statistic \code{stat} and p-value \code{pval}.
 }
 \description{
-This function calculates statistics related to the test of treatment effect consistency across groups.
+Tests whether treatment effects are nondecreasing across score groups.
 }
 \details{
-The details of the methods for this design are given in Imai and Li (2022).
+See \code{\link{GATE}} for inference details.
 }
 \examples{
 T = c(1,0,1,0,1,0,1,0)
 tau = c(0,0.1,0.2,0.3,0.4,0.5,0.6,0.7)
 Y = c(4,5,0,2,4,1,-4,3)
-consisttestlist <- consist.test(T,tau,Y,ngates=5)
+consisttestlist <- consist.test(T,tau,Y,ngates=2)
 consisttestlist$stat
 consisttestlist$pval
 }

@@ -9,3 +9,8 @@
 ^pkgdown$
 ^\.github$
 ^CRAN-SUBMISSION$
+^tools$
+^\.claude$
+^casestudy_generated\.csv$
+^hetero_test_fixed\.R$
+^try\.hetcv\.test\.R$

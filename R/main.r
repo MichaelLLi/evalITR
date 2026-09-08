@@ -814,12 +814,14 @@ evaluate_itr <- function(
 #' Conduct hypothesis tests
 #' @param fit Fitted model. Usually an output from \code{estimate_itr}
 #' @param nsim Number of Monte Carlo simulations used to simulate the null distributions. Default is 1000.
+#' @param centered Whether to center outcomes before testing.
 #' @param ... Further arguments passed to the function.
 #' @return An object of \code{test_itr} class
 #' @export
 test_itr <- function(
     fit,
     nsim = 1000,
+    centered = TRUE,
     ...
 ) {
 
@@ -862,13 +864,15 @@ test_itr <- function(
         T   = Tcv,
         tau = fit_ml[[i]]$tau,
         Y   = Ycv,
-        ngates = ngates)
+        ngates = ngates, nsim = nsim,
+        centered = centered)
 
       het[[i]] <- het.test(
         T   = Tcv,
         tau = fit_ml[[i]]$tau,
         Y   = Ycv,
-        ngates = ngates)
+        ngates = ngates,
+        centered = centered)
     }
 
 
@@ -893,17 +897,19 @@ test_itr <- function(
 
       consistcv[[i]] <- consistcv.test(
         T   = Tcv,
-        tau = gettaucv(fit)[[i]],
+        tau = gettaucv(fit, i),
         Y   = Ycv,
         ind = indcv,
-        ngates = ngates)
+        ngates = ngates, nsim = nsim,
+        centered = centered)
 
       hetcv[[i]] <- hetcv.test(
         T   = Tcv,
-        tau = gettaucv(fit)[[i]],
+        tau = gettaucv(fit, i),
         Y   = Ycv,
         ind = indcv,
-        ngates = ngates)
+        ngates = ngates,
+        centered = centered)
 
     }
 

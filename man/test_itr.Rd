@@ -4,12 +4,14 @@
 \alias{test_itr}
 \title{Conduct hypothesis tests}
 \usage{
-test_itr(fit, nsim = 1000, ...)
+test_itr(fit, nsim = 1000, centered = TRUE, ...)
 }
 \arguments{
 \item{fit}{Fitted model. Usually an output from \code{estimate_itr}}
 
 \item{nsim}{Number of Monte Carlo simulations used to simulate the null distributions. Default is 1000.}
+
+\item{centered}{Whether to center outcomes before testing.}
 
 \item{...}{Further arguments passed to the function.}
 }

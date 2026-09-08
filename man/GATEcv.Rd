@@ -4,26 +4,33 @@
 \alias{GATEcv}
 \title{Estimation of the Grouped Average Treatment Effects (GATEs) in Randomized Experiments Under Cross Validation}
 \usage{
-GATEcv(T, tau, Y, ind, ngates = 5)
+GATEcv(T, tau, Y, ind, ngates = 5, centered = FALSE)
 }
 \arguments{
-\item{T}{A vector of the unit-level binary treatment receipt variable for each sample.}
+\item{T}{Binary treatment indicator (0 or 1).}
 
-\item{tau}{A matrix where the \code{i}th column is the unit-level continuous score for treatment assignment generated in the \code{i}th fold. Conditional Average Treatment Effect is one possible measure.}
+\item{tau}{A matrix of scores with one column per fold. Column \code{i}
+contains predictions for all observations from a model trained without fold \code{i}.}
 
-\item{Y}{A vector of the outcome variable of interest for each sample.}
+\item{Y}{Outcome vector.}
 
-\item{ind}{A vector of integers (between 1 and number of folds inclusive) indicating which testing set does each sample belong to.}
+\item{ind}{Integer validation-fold labels starting at 1.}
 
-\item{ngates}{The number of groups to separate the data into. The groups are determined by \code{tau}. Default is 5.}
+\item{ngates}{Number of groups (at least 2).}
+
+\item{centered}{Whether to center outcomes before estimation.}
 }
 \value{
-A list that contains the following items: \item{gate}{The estimated
-vector of GATEs under cross-validation of length \code{ngates} arranged in order of increasing \code{tau}.} \item{sd}{The estimated vector of standard deviation
-of GATEs under cross-validation.}
+A list with group estimates \code{gate} and standard errors \code{sd},
+ordered by increasing score.
 }
 \description{
-This function estimates the Grouped Average Treatment Effects (GATEs) under cross-validation where the groups are determined by a continuous score. The details of the methods for this design are given in Imai and Li (2022).
+Estimates grouped average treatment effects from cross-validated scores.
+}
+\details{
+Inference assumes a fixed number of folds and stable scoring rules.
+Each fold needs at least two observations per treatment arm.
+See \code{\link{GATE}} for grouping and covariance details.
 }
 \examples{
 T = c(1,0,1,0,1,0,1,0)

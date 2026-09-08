@@ -1,6 +1,7 @@
 library(evalITR)
 library(dplyr)
 test_that("Sample Splitting Works", {
+  skip_if_not_installed("elasticnet")
   load("star.rda")
   # specifying the outcome
   outcomes <- "g3tlangss"
